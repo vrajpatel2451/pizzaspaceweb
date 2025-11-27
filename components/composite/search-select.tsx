@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -69,6 +69,7 @@ const SearchSelect = React.forwardRef<HTMLButtonElement, SearchSelectProps>(
               role="combobox"
               aria-expanded={open}
               aria-haspopup="listbox"
+              aria-controls="search-listbox"
               disabled={disabled}
               className={cn(
                 "flex h-10 w-full items-center justify-between rounded-lg border bg-background px-4 py-2 text-sm",

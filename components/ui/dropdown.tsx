@@ -102,13 +102,13 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   };
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     if (onOpenChange) {
       onOpenChange(false);
     } else {
       setUncontrolledIsOpen(false);
     }
-  };
+  }, [onOpenChange]);
 
   // Close on click outside
   React.useEffect(() => {
@@ -125,7 +125,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   // Close on ESC key
   React.useEffect(() => {
@@ -137,7 +137,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   // Calculate position
   const [position, setPosition] = React.useState({ top: 0, left: 0 });

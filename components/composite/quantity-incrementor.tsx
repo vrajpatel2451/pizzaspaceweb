@@ -112,9 +112,6 @@ const QuantityIncrementor = React.forwardRef<
             sizes.input
           )}
           aria-label="Quantity"
-          aria-valuenow={value}
-          aria-valuemin={min}
-          aria-valuemax={max}
         />
         <button
           type="button"

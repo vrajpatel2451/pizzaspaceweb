@@ -899,7 +899,7 @@ export default function ComponentsShowcase() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="small" id="m-small" />
-                      <Label htmlFor="m-small">Small (8")</Label>
+                      <Label htmlFor="m-small">Small (8&quot;)</Label>
                     </div>
                     <span className="text-sm font-semibold">
                       {formatPrice(10)}
@@ -908,7 +908,7 @@ export default function ComponentsShowcase() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="medium" id="m-medium" />
-                      <Label htmlFor="m-medium">Medium (12")</Label>
+                      <Label htmlFor="m-medium">Medium (12&quot;)</Label>
                     </div>
                     <span className="text-sm font-semibold">
                       {formatPrice(15)}
@@ -917,7 +917,7 @@ export default function ComponentsShowcase() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="large" id="m-large" />
-                      <Label htmlFor="m-large">Large (16")</Label>
+                      <Label htmlFor="m-large">Large (16&quot;)</Label>
                     </div>
                     <span className="text-sm font-semibold">
                       {formatPrice(20)}

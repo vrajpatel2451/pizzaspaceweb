@@ -94,7 +94,7 @@ const CreatableSelect = React.forwardRef<
         onChange?.(newOption.value);
         setQuery("");
         setOpen(false);
-      } catch (err) {
+      } catch {
         // Silently fail - handle error in parent component if needed
       } finally {
         setCreating(false);
@@ -114,6 +114,7 @@ const CreatableSelect = React.forwardRef<
               role="combobox"
               aria-expanded={open}
               aria-haspopup="listbox"
+              aria-controls="creatable-listbox"
               disabled={disabled}
               className={cn(
                 "flex h-10 w-full items-center justify-between rounded-lg border bg-background px-4 py-2 text-sm",

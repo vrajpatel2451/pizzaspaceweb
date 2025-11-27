@@ -87,7 +87,7 @@ const AsyncSearchSelect = React.forwardRef<
           try {
             const results = await loadOptions(searchQuery);
             setOptions(results);
-          } catch (err) {
+          } catch {
             setOptions([]);
           } finally {
             setLoading(false);
@@ -120,6 +120,7 @@ const AsyncSearchSelect = React.forwardRef<
               role="combobox"
               aria-expanded={open}
               aria-haspopup="listbox"
+              aria-controls="async-search-listbox"
               disabled={disabled}
               className={cn(
                 "flex h-10 w-full items-center justify-between rounded-lg border bg-background px-4 py-2 text-sm",
