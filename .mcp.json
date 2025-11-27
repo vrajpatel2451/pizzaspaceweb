@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "next-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@executeautomation/playwright-mcp-server"
+      ]
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "ref": {
+      "type": "http",
+      "url": "https://api.ref.tools/mcp?apiKey=ref-a1eb843a0629e378521d"
+    }
+  }
+}
