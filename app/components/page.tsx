@@ -14,6 +14,12 @@ import {
   Settings,
   LogOut,
   Bell,
+  Trash2,
+  Edit,
+  Copy,
+  MoreVertical,
+  CheckCircle2,
+  Save,
 } from "lucide-react";
 
 import {
@@ -45,12 +51,12 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+  // Sheet,
+  // SheetContent,
+  // SheetDescription,
+  // SheetHeader,
+  // SheetTitle,
+  // SheetTrigger,
   Skeleton,
   Separator,
   Select,
@@ -58,6 +64,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Modal,
+  Drawer,
+  Dropdown,
+  DropdownItem,
+  DropdownSeparator,
 } from "@/components/ui";
 
 import {
@@ -66,7 +77,7 @@ import {
   SearchSelect,
 } from "@/components/composite";
 
-import { PriceWrapper, DateWrapper } from "@/components/formatters";
+import { formatPrice, formatDate } from "@/lib/formatters";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
@@ -77,6 +88,16 @@ export default function ComponentsShowcase() {
   const [rating, setRating] = React.useState(3.5);
   const [searchValue, setSearchValue] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+
+  // Modal states
+  const [isModalSmOpen, setIsModalSmOpen] = React.useState(false);
+  const [isModalMdOpen, setIsModalMdOpen] = React.useState(false);
+  const [isModalActionsOpen, setIsModalActionsOpen] = React.useState(false);
+
+  // Drawer states
+  const [isDrawerRightOpen, setIsDrawerRightOpen] = React.useState(false);
+  const [isDrawerLeftOpen, setIsDrawerLeftOpen] = React.useState(false);
+  const [isDrawerBottomOpen, setIsDrawerBottomOpen] = React.useState(false);
 
   const selectOptions = [
     { value: "margherita", label: "Margherita" },
@@ -116,7 +137,8 @@ export default function ComponentsShowcase() {
         <div className="mb-12">
           <h1 className="text-h1 mb-4">Pizzaspace Component Library</h1>
           <p className="text-body-lg text-muted-foreground">
-            A comprehensive collection of UI components for the Pizzaspace food ordering platform.
+            A comprehensive collection of UI components for the Pizzaspace food
+            ordering platform.
           </p>
         </div>
 
@@ -167,10 +189,14 @@ export default function ComponentsShowcase() {
                 <p className="text-h5">Heading 5 - Montserrat Semibold</p>
                 <p className="text-h6">Heading 6 - Montserrat Semibold</p>
                 <Separator />
-                <p className="text-body-lg">Body Large - Regular text for emphasis</p>
+                <p className="text-body-lg">
+                  Body Large - Regular text for emphasis
+                </p>
                 <p className="text-body">Body - Default paragraph text</p>
                 <p className="text-body-sm">Body Small - Secondary text</p>
-                <p className="text-caption text-muted-foreground">Caption - Small helper text</p>
+                <p className="text-caption text-muted-foreground">
+                  Caption - Small helper text
+                </p>
                 <p className="text-label">Label - Form labels</p>
                 <p className="text-overline">OVERLINE - CATEGORY TEXT</p>
               </div>
@@ -400,15 +426,15 @@ export default function ComponentsShowcase() {
               <RadioGroup defaultValue="medium">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="small" id="small" />
-                  <Label htmlFor="small">Small - <PriceWrapper value={10} size="sm" /></Label>
+                  <Label htmlFor="small">Small - {formatPrice(10)}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="medium" id="medium" />
-                  <Label htmlFor="medium">Medium - <PriceWrapper value={15} size="sm" /></Label>
+                  <Label htmlFor="medium">Medium - {formatPrice(15)}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="large" id="large" />
-                  <Label htmlFor="large">Large - <PriceWrapper value={20} size="sm" /></Label>
+                  <Label htmlFor="large">Large - {formatPrice(20)}</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -425,7 +451,10 @@ export default function ComponentsShowcase() {
                   <Switch id="marketing" defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="disabled-switch" className="text-muted-foreground">
+                  <Label
+                    htmlFor="disabled-switch"
+                    className="text-muted-foreground"
+                  >
                     Disabled
                   </Label>
                   <Switch id="disabled-switch" disabled />
@@ -443,7 +472,7 @@ export default function ComponentsShowcase() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-h5 mb-4">Variants</h3>
+              <h3 className="text-h5 mb-4">Standard Variants</h3>
               <div className="flex flex-wrap gap-3">
                 <Badge>Default</Badge>
                 <Badge variant="secondary">Secondary</Badge>
@@ -454,6 +483,18 @@ export default function ComponentsShowcase() {
                 <Badge variant="outline">Outline</Badge>
                 <Badge variant="outline-primary">Outline Primary</Badge>
                 <Badge variant="muted">Muted</Badge>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-h5 mb-4">Food-Specific Variants</h3>
+              <div className="flex flex-wrap gap-3">
+                <Badge variant="new">New</Badge>
+                <Badge variant="popular">Popular</Badge>
+                <Badge variant="spicy">Spicy</Badge>
+                <Badge variant="veg">Vegetarian</Badge>
+                <Badge variant="nonveg">Non-Veg</Badge>
+                <Badge variant="offer">20% Off</Badge>
               </div>
             </div>
 
@@ -472,9 +513,79 @@ export default function ComponentsShowcase() {
                 <Badge removable onRemove={() => toast("Badge removed!")}>
                   Click to remove
                 </Badge>
-                <Badge variant="secondary" removable onRemove={() => toast("Badge removed!")}>
+                <Badge
+                  variant="secondary"
+                  removable
+                  onRemove={() => toast("Badge removed!")}
+                >
                   Secondary
                 </Badge>
+                <Badge
+                  variant="offer"
+                  removable
+                  onRemove={() => toast("Offer removed!")}
+                >
+                  Special Offer
+                </Badge>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-h5 mb-4">Real-World Usage</h3>
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold">Margherita Pizza</h4>
+                    <div className="flex gap-2">
+                      <Badge variant="veg" size="sm">
+                        Veg
+                      </Badge>
+                      <Badge variant="popular" size="sm">
+                        Popular
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Classic pizza with tomatoes and mozzarella
+                  </p>
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold">Spicy Chicken Wings</h4>
+                    <div className="flex gap-2">
+                      <Badge variant="nonveg" size="sm">
+                        Non-Veg
+                      </Badge>
+                      <Badge variant="spicy" size="sm">
+                        Spicy
+                      </Badge>
+                      <Badge variant="new" size="sm">
+                        New
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Crispy wings with hot sauce
+                  </p>
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold">BBQ Loaded Fries</h4>
+                    <div className="flex gap-2">
+                      <Badge variant="offer" size="sm">
+                        15% Off
+                      </Badge>
+                      <Badge variant="popular" size="sm">
+                        Bestseller
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Fries topped with BBQ sauce and cheese
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -499,19 +610,29 @@ export default function ComponentsShowcase() {
               <p className="text-muted-foreground">Showing all menu items...</p>
             </TabsContent>
             <TabsContent value="pizza" className="mt-4">
-              <p className="text-muted-foreground">Pizza selection: Margherita, Pepperoni, Hawaiian...</p>
+              <p className="text-muted-foreground">
+                Pizza selection: Margherita, Pepperoni, Hawaiian...
+              </p>
             </TabsContent>
             <TabsContent value="starters" className="mt-4">
-              <p className="text-muted-foreground">Starters: Garlic Bread, Bruschetta, Wings...</p>
+              <p className="text-muted-foreground">
+                Starters: Garlic Bread, Bruschetta, Wings...
+              </p>
             </TabsContent>
             <TabsContent value="fries" className="mt-4">
-              <p className="text-muted-foreground">Fries: Classic, Loaded, Sweet Potato...</p>
+              <p className="text-muted-foreground">
+                Fries: Classic, Loaded, Sweet Potato...
+              </p>
             </TabsContent>
             <TabsContent value="desserts" className="mt-4">
-              <p className="text-muted-foreground">Desserts: Tiramisu, Gelato, Cheesecake...</p>
+              <p className="text-muted-foreground">
+                Desserts: Tiramisu, Gelato, Cheesecake...
+              </p>
             </TabsContent>
             <TabsContent value="beverages" className="mt-4">
-              <p className="text-muted-foreground">Beverages: Sodas, Juices, Cocktails...</p>
+              <p className="text-muted-foreground">
+                Beverages: Sodas, Juices, Cocktails...
+              </p>
             </TabsContent>
           </Tabs>
         </section>
@@ -526,22 +647,24 @@ export default function ComponentsShowcase() {
             <AccordionItem value="item-1">
               <AccordionTrigger>How do I place an order?</AccordionTrigger>
               <AccordionContent>
-                Simply browse our menu, add items to your cart, and proceed to checkout.
-                You can pay online or choose cash on delivery.
+                Simply browse our menu, add items to your cart, and proceed to
+                checkout. You can pay online or choose cash on delivery.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger>What are your delivery hours?</AccordionTrigger>
               <AccordionContent>
-                We deliver from 11:00 AM to 11:00 PM, seven days a week.
-                Orders placed after 10:30 PM may be delayed.
+                We deliver from 11:00 AM to 11:00 PM, seven days a week. Orders
+                placed after 10:30 PM may be delayed.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger>Do you offer vegetarian options?</AccordionTrigger>
+              <AccordionTrigger>
+                Do you offer vegetarian options?
+              </AccordionTrigger>
               <AccordionContent>
-                Yes! We have a wide variety of vegetarian pizzas and sides.
-                Look for the green leaf icon on our menu.
+                Yes! We have a wide variety of vegetarian pizzas and sides. Look
+                for the green leaf icon on our menu.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -561,9 +684,7 @@ export default function ComponentsShowcase() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Customize Order</DialogTitle>
-                  <DialogDescription>
-                    Make it perfect for you
-                  </DialogDescription>
+                  <DialogDescription>Make it perfect for you</DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-4">
                   <div className="flex items-center gap-4">
@@ -572,7 +693,9 @@ export default function ComponentsShowcase() {
                     </div>
                     <div>
                       <h4 className="font-semibold">Margherita Pizza</h4>
-                      <PriceWrapper value={12} variant="primary" />
+                      <span className="font-semibold text-primary">
+                        {formatPrice(12)}
+                      </span>
                     </div>
                   </div>
                   <Separator />
@@ -582,21 +705,27 @@ export default function ComponentsShowcase() {
                         <RadioGroupItem value="small" id="d-small" />
                         <Label htmlFor="d-small">Small</Label>
                       </div>
-                      <PriceWrapper value={10} size="sm" />
+                      <span className="text-sm font-semibold">
+                        {formatPrice(10)}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="medium" id="d-medium" />
                         <Label htmlFor="d-medium">Medium</Label>
                       </div>
-                      <PriceWrapper value={15} size="sm" />
+                      <span className="text-sm font-semibold">
+                        {formatPrice(15)}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="large" id="d-large" />
                         <Label htmlFor="d-large">Large</Label>
                       </div>
-                      <PriceWrapper value={20} size="sm" />
+                      <span className="text-sm font-semibold">
+                        {formatPrice(20)}
+                      </span>
                     </div>
                   </RadioGroup>
                   <Separator />
@@ -613,7 +742,8 @@ export default function ComponentsShowcase() {
                 <DialogFooter>
                   <Button className="w-full">
                     <ShoppingCart className="size-4 mr-2" />
-                    Add to Cart - <PriceWrapper value={15 * quantity} className="ml-1" />
+                    Add to Cart -{" "}
+                    <span className="ml-1">{formatPrice(15 * quantity)}</span>
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -644,7 +774,7 @@ export default function ComponentsShowcase() {
               </PopoverContent>
             </Popover>
 
-            <Sheet>
+            {/* <Sheet>
               <SheetTrigger asChild>
                 <Button variant="secondary">Open Sheet</Button>
               </SheetTrigger>
@@ -666,17 +796,19 @@ export default function ComponentsShowcase() {
                         <p className="text-sm text-muted-foreground">Medium</p>
                       </div>
                     </div>
-                    <PriceWrapper value={15} />
+                    <span className="font-semibold">{formatPrice(15)}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">Total</span>
-                    <PriceWrapper value={15} size="lg" variant="primary" />
+                    <span className="text-xl font-semibold text-primary">
+                      {formatPrice(15)}
+                    </span>
                   </div>
                   <Button className="w-full">Proceed to Checkout</Button>
                 </div>
               </SheetContent>
-            </Sheet>
+            </Sheet> */}
 
             <Button
               variant="ghost"
@@ -684,6 +816,490 @@ export default function ComponentsShowcase() {
             >
               Show Toast
             </Button>
+          </div>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Modal Component */}
+        <section className="mb-16">
+          <h2 className="text-h2 mb-6">Modal Component</h2>
+          <p className="text-body-sm text-muted-foreground mb-4">
+            Controlled modal component using createPortal with built-in header,
+            footer, and actions
+          </p>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-h5 mb-4">Sizes</h3>
+              <div className="flex flex-wrap gap-4">
+                <Button onClick={() => setIsModalSmOpen(true)}>
+                  Small Modal
+                </Button>
+                <Button
+                  onClick={() => setIsModalMdOpen(true)}
+                  variant="secondary"
+                >
+                  Medium Modal
+                </Button>
+                <Button
+                  onClick={() => setIsModalActionsOpen(true)}
+                  variant="outline"
+                >
+                  Modal with Actions
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Small Modal */}
+          <Modal
+            isOpen={isModalSmOpen}
+            onClose={() => setIsModalSmOpen(false)}
+            title="Small Modal"
+            subtitle="This is a compact modal for quick actions"
+            size="sm"
+          >
+            <div className="space-y-4">
+              <p className="text-sm">
+                This is a small modal with minimal content.
+              </p>
+              <Input label="Name" placeholder="Enter your name" />
+            </div>
+          </Modal>
+
+          {/* Medium Modal */}
+          <Modal
+            isOpen={isModalMdOpen}
+            onClose={() => setIsModalMdOpen(false)}
+            title="Pizza Details"
+            subtitle="View and customize your selection"
+            size="md"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center">
+                  <span className="text-4xl">🍕</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-lg">Margherita Pizza</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Classic Italian pizza with tomatoes, mozzarella, and fresh
+                    basil
+                  </p>
+                  <span className="font-semibold text-primary mt-2 inline-block">
+                    {formatPrice(12)}
+                  </span>
+                </div>
+              </div>
+              <Separator />
+              <div className="space-y-3">
+                <Label>Choose Size</Label>
+                <RadioGroup defaultValue="medium">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="small" id="m-small" />
+                      <Label htmlFor="m-small">Small (8")</Label>
+                    </div>
+                    <span className="text-sm font-semibold">
+                      {formatPrice(10)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="medium" id="m-medium" />
+                      <Label htmlFor="m-medium">Medium (12")</Label>
+                    </div>
+                    <span className="text-sm font-semibold">
+                      {formatPrice(15)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="large" id="m-large" />
+                      <Label htmlFor="m-large">Large (16")</Label>
+                    </div>
+                    <span className="text-sm font-semibold">
+                      {formatPrice(20)}
+                    </span>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+          </Modal>
+
+          {/* Modal with Actions */}
+          <Modal
+            isOpen={isModalActionsOpen}
+            onClose={() => setIsModalActionsOpen(false)}
+            title="Confirm Order"
+            subtitle="Review your order before placing"
+            size="md"
+            actions={{
+              tertiary: {
+                label: "Cancel",
+                onClick: () => setIsModalActionsOpen(false),
+                variant: "ghost",
+              },
+              secondary: {
+                label: "Save Draft",
+                onClick: () => {
+                  toast.success("Draft saved!");
+                  setIsModalActionsOpen(false);
+                },
+                variant: "outline",
+                startIcon: <Save className="size-4" />,
+              },
+              primary: {
+                label: "Place Order",
+                onClick: () => {
+                  toast.success("Order placed successfully!");
+                  setIsModalActionsOpen(false);
+                },
+                startIcon: <CheckCircle2 className="size-4" />,
+              },
+            }}
+          >
+            <div className="space-y-4">
+              <div className="bg-muted rounded-lg p-4">
+                <h4 className="font-semibold mb-2">Order Summary</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Margherita Pizza (Medium)</span>
+                    <span>{formatPrice(15)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Extra Cheese</span>
+                    <span>{formatPrice(2)}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span className="text-primary">{formatPrice(17)}</span>
+                  </div>
+                </div>
+              </div>
+              <TextArea
+                label="Special Instructions"
+                placeholder="Any special requests?"
+                rows={3}
+              />
+            </div>
+          </Modal>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Drawer Component */}
+        <section className="mb-16">
+          <h2 className="text-h2 mb-6">Drawer Component</h2>
+          <p className="text-body-sm text-muted-foreground mb-4">
+            Slide-in panel component from different sides of the screen
+          </p>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-h5 mb-4">Positions</h3>
+              <div className="flex flex-wrap gap-4">
+                <Button onClick={() => setIsDrawerRightOpen(true)}>
+                  Right Drawer
+                </Button>
+                <Button
+                  onClick={() => setIsDrawerLeftOpen(true)}
+                  variant="secondary"
+                >
+                  Left Drawer
+                </Button>
+                <Button
+                  onClick={() => setIsDrawerBottomOpen(true)}
+                  variant="outline"
+                >
+                  Bottom Drawer
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Drawer */}
+          <Drawer
+            isOpen={isDrawerRightOpen}
+            onClose={() => setIsDrawerRightOpen(false)}
+            title="Filters"
+            subtitle="Refine your search results"
+            side="right"
+            size="md"
+            actions={{
+              secondary: {
+                label: "Reset",
+                onClick: () => toast.info("Filters reset"),
+                variant: "ghost",
+              },
+              primary: {
+                label: "Apply Filters",
+                onClick: () => {
+                  toast.success("Filters applied!");
+                  setIsDrawerRightOpen(false);
+                },
+              },
+            }}
+          >
+            <div className="space-y-6">
+              <div>
+                <Label className="mb-3 block">Price Range</Label>
+                <RadioGroup defaultValue="all">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="price-all" />
+                    <Label htmlFor="price-all">All Prices</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="budget" id="price-budget" />
+                    <Label htmlFor="price-budget">
+                      Under {formatPrice(10)}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="mid" id="price-mid" />
+                    <Label htmlFor="price-mid">
+                      {formatPrice(10)} - {formatPrice(20)}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="premium" id="price-premium" />
+                    <Label htmlFor="price-premium">
+                      Above {formatPrice(20)}
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <Separator />
+              <div>
+                <Label className="mb-3 block">Dietary Preferences</Label>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="filter-veg" />
+                    <Label htmlFor="filter-veg">Vegetarian</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="filter-vegan" />
+                    <Label htmlFor="filter-vegan">Vegan</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="filter-gluten" />
+                    <Label htmlFor="filter-gluten">Gluten-Free</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Drawer>
+
+          {/* Left Drawer */}
+          <Drawer
+            isOpen={isDrawerLeftOpen}
+            onClose={() => setIsDrawerLeftOpen(false)}
+            title="Navigation Menu"
+            subtitle="Browse all categories"
+            side="left"
+            size="sm"
+          >
+            <div className="space-y-2">
+              <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors">
+                <span className="text-2xl">🍕</span>
+                <span className="font-medium">Pizza</span>
+              </button>
+              <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors">
+                <span className="text-2xl">🍟</span>
+                <span className="font-medium">Fries</span>
+              </button>
+              <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors">
+                <span className="text-2xl">🥗</span>
+                <span className="font-medium">Salads</span>
+              </button>
+              <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors">
+                <span className="text-2xl">🍰</span>
+                <span className="font-medium">Desserts</span>
+              </button>
+              <button className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-muted transition-colors">
+                <span className="text-2xl">🥤</span>
+                <span className="font-medium">Beverages</span>
+              </button>
+            </div>
+          </Drawer>
+
+          {/* Bottom Drawer */}
+          <Drawer
+            isOpen={isDrawerBottomOpen}
+            onClose={() => setIsDrawerBottomOpen(false)}
+            title="Quick Order"
+            subtitle="Add your favorite pizza to cart"
+            side="bottom"
+            size="md"
+            actions={{
+              primary: {
+                label: "Add to Cart",
+                onClick: () => {
+                  toast.success("Added to cart!");
+                  setIsDrawerBottomOpen(false);
+                },
+                startIcon: <ShoppingCart className="size-4" />,
+              },
+            }}
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                  <span className="text-3xl">🍕</span>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold">Pepperoni Pizza</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Classic pepperoni with extra cheese
+                  </p>
+                  <span className="font-semibold text-primary mt-1 inline-block">
+                    {formatPrice(14)}
+                  </span>
+                </div>
+                <QuantityIncrementor
+                  value={quantity}
+                  onChange={setQuantity}
+                  min={1}
+                  max={10}
+                />
+              </div>
+            </div>
+          </Drawer>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Dropdown Component */}
+        <section className="mb-16">
+          <h2 className="text-h2 mb-6">Dropdown Component</h2>
+          <p className="text-body-sm text-muted-foreground mb-4">
+            Popover-style dropdown menu with items, icons, and separators
+          </p>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-h5 mb-4">Examples</h3>
+              <div className="flex flex-wrap gap-4">
+                <Dropdown
+                  trigger={
+                    <Button variant="outline">
+                      <User className="size-4" />
+                      User Menu
+                    </Button>
+                  }
+                >
+                  <DropdownItem startIcon={<User className="size-4" />}>
+                    Profile
+                  </DropdownItem>
+                  <DropdownItem startIcon={<Settings className="size-4" />}>
+                    Settings
+                  </DropdownItem>
+                  <DropdownSeparator />
+                  <DropdownItem
+                    startIcon={<LogOut className="size-4" />}
+                    destructive
+                    onClick={() => toast.error("Logged out")}
+                  >
+                    Logout
+                  </DropdownItem>
+                </Dropdown>
+
+                <Dropdown
+                  trigger={
+                    <IconButton aria-label="More options" variant="ghost">
+                      <MoreVertical className="size-5" />
+                    </IconButton>
+                  }
+                  align="end"
+                >
+                  <DropdownItem
+                    startIcon={<Edit className="size-4" />}
+                    onClick={() => toast.info("Edit clicked")}
+                  >
+                    Edit
+                  </DropdownItem>
+                  <DropdownItem
+                    startIcon={<Copy className="size-4" />}
+                    onClick={() => toast.success("Copied!")}
+                  >
+                    Duplicate
+                  </DropdownItem>
+                  <DropdownSeparator />
+                  <DropdownItem
+                    startIcon={<Trash2 className="size-4" />}
+                    destructive
+                    onClick={() => toast.error("Deleted")}
+                  >
+                    Delete
+                  </DropdownItem>
+                </Dropdown>
+
+                <Dropdown
+                  trigger={<Button variant="secondary">Order Actions</Button>}
+                  side="top"
+                >
+                  <DropdownItem startIcon={<Save className="size-4" />}>
+                    Save for later
+                  </DropdownItem>
+                  <DropdownItem startIcon={<Heart className="size-4" />}>
+                    Add to favorites
+                  </DropdownItem>
+                  <DropdownItem startIcon={<ShoppingCart className="size-4" />}>
+                    Reorder
+                  </DropdownItem>
+                </Dropdown>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-h5 mb-4">In Context</h3>
+              <div className="max-w-md border rounded-lg p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                      🍕
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Margherita Pizza</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {formatPrice(15)}
+                      </p>
+                    </div>
+                  </div>
+                  <Dropdown
+                    trigger={
+                      <IconButton
+                        aria-label="Order options"
+                        variant="ghost"
+                        size="sm"
+                      >
+                        <MoreVertical className="size-4" />
+                      </IconButton>
+                    }
+                    align="end"
+                  >
+                    <DropdownItem startIcon={<Edit className="size-4" />}>
+                      Customize
+                    </DropdownItem>
+                    <DropdownItem startIcon={<Heart className="size-4" />}>
+                      Add to favorites
+                    </DropdownItem>
+                    <DropdownSeparator />
+                    <DropdownItem
+                      startIcon={<Trash2 className="size-4" />}
+                      destructive
+                    >
+                      Remove from cart
+                    </DropdownItem>
+                  </Dropdown>
+                </div>
+                <Badge variant="popular" size="sm">
+                  Popular
+                </Badge>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -761,49 +1377,84 @@ export default function ComponentsShowcase() {
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-h5 mb-4">Price Wrapper</h3>
+              <h3 className="text-h5 mb-4">Price Formatting</h3>
               <div className="space-y-3 bg-card p-6 rounded-lg border">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Small:</span>
-                  <PriceWrapper value={9.99} size="sm" />
-                </div>
-                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Default:</span>
-                  <PriceWrapper value={12.50} />
+                  <span className="font-semibold text-base">
+                    {formatPrice(9.99)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Large (Primary):</span>
-                  <PriceWrapper value={24.99} size="lg" variant="primary" />
+                  <span className="text-muted-foreground">Without Symbol:</span>
+                  <span className="font-semibold text-base">
+                    {formatPrice(12.5, { showSymbol: false })}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">XL:</span>
-                  <PriceWrapper value={99.99} size="xl" />
+                  <span className="text-muted-foreground">No Decimals:</span>
+                  <span className="font-semibold text-base">
+                    {formatPrice(24.99, { decimals: 0 })}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Large Amount:</span>
+                  <span className="font-semibold text-base">
+                    {formatPrice(1299.99)}
+                  </span>
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {`formatPrice(9.99)`}
+                    <br />
+                    {`formatPrice(12.50, { showSymbol: false })`}
+                    <br />
+                    {`formatPrice(24.99, { decimals: 0 })`}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="text-h5 mb-4">Date Wrapper</h3>
+              <h3 className="text-h5 mb-4">Date Formatting</h3>
               <div className="space-y-3 bg-card p-6 rounded-lg border">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Short:</span>
-                  <DateWrapper value={new Date()} format="short" />
+                  <span>{formatDate(new Date(), { format: "short" })}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Medium:</span>
-                  <DateWrapper value={new Date()} format="medium" />
+                  <span>{formatDate(new Date(), { format: "medium" })}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Long:</span>
-                  <DateWrapper value={new Date()} format="long" />
+                  <span>{formatDate(new Date(), { format: "long" })}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Relative:</span>
-                  <DateWrapper value={new Date(new Date().getTime() - 3600000)} format="relative" />
+                  <span>
+                    {formatDate(new Date(new Date().getTime() - 3600000), {
+                      format: "relative",
+                    })}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">With Time:</span>
-                  <DateWrapper value={new Date()} format="medium" showTime />
+                  <span>
+                    {formatDate(new Date(), {
+                      format: "medium",
+                      includeTime: true,
+                    })}
+                  </span>
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {`formatDate(date, { format: "short" })`}
+                    <br />
+                    {`formatDate(date, { format: "relative" })`}
+                    <br />
+                    {`formatDate(date, { includeTime: true })`}
+                  </p>
                 </div>
               </div>
             </div>
@@ -844,7 +1495,8 @@ export default function ComponentsShowcase() {
         {/* Footer */}
         <footer className="py-8 text-center text-muted-foreground">
           <p className="text-body-sm">
-            Pizzaspace Component Library - Built with Next.js 16, React 19, Tailwind CSS 4, and shadcn/ui
+            Pizzaspace Component Library - Built with Next.js 16, React 19,
+            Tailwind CSS 4, and shadcn/ui
           </p>
         </footer>
       </main>

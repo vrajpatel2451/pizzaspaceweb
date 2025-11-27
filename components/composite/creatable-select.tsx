@@ -95,7 +95,7 @@ const CreatableSelect = React.forwardRef<
         setQuery("");
         setOpen(false);
       } catch (err) {
-        console.error("Failed to create option:", err);
+        // Silently fail - handle error in parent component if needed
       } finally {
         setCreating(false);
       }
@@ -120,6 +120,7 @@ const CreatableSelect = React.forwardRef<
                 "transition-all duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
                 "disabled:cursor-not-allowed disabled:opacity-50",
+                "cursor-pointer",
                 error
                   ? "border-destructive focus:ring-destructive/20 focus:border-destructive"
                   : "border-input",

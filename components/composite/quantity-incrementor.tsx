@@ -92,6 +92,7 @@ const QuantityIncrementor = React.forwardRef<
             "flex items-center justify-center rounded-l-lg border-r border-input transition-colors",
             "hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset",
             "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent",
+            "cursor-pointer",
             sizes.button
           )}
           aria-label="Decrease quantity"
@@ -124,6 +125,7 @@ const QuantityIncrementor = React.forwardRef<
             "bg-primary text-primary-foreground hover:bg-primary/90",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset",
             "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary",
+            "cursor-pointer",
             sizes.button
           )}
           aria-label="Increase quantity"

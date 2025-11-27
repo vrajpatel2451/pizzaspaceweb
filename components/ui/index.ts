@@ -1,5 +1,9 @@
 export { Button, buttonVariants, type ButtonProps } from "./button";
-export { IconButton, iconButtonVariants, type IconButtonProps } from "./icon-button";
+export {
+  IconButton,
+  iconButtonVariants,
+  type IconButtonProps,
+} from "./icon-button";
 export { Input, inputVariants, type InputProps } from "./input";
 export { TextArea, textareaVariants, type TextAreaProps } from "./textarea";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
@@ -35,16 +39,30 @@ export {
   DialogTrigger,
 } from "./dialog";
 export { Popover, PopoverContent, PopoverTrigger } from "./popover";
-export {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./sheet";
+// export {
+//   Sheet,
+//   SheetClose,
+//   SheetContent,
+//   SheetDescription,
+//   SheetFooter,
+//   SheetHeader,
+//   SheetTitle,
+//   SheetTrigger,
+// } from "./sheet";
 export { Skeleton } from "./skeleton";
 export { Separator } from "./separator";
 export { Toaster } from "./sonner";
+export {
+  Modal,
+  type ModalProps,
+  type ModalActions,
+  type ModalAction,
+} from "./modal";
+export { Drawer, type DrawerProps } from "./drawer";
+export {
+  Dropdown,
+  DropdownItem,
+  DropdownSeparator,
+  type DropdownProps,
+  type DropdownItemProps,
+} from "./dropdown";

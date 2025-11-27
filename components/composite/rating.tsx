@@ -77,7 +77,7 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
           {interactive && !disabled ? (
             <button
               type="button"
-              className="relative focus:outline-none focus:ring-2 focus:ring-primary rounded"
+              className="relative focus:outline-none focus:ring-2 focus:ring-primary rounded cursor-pointer"
               onMouseMove={(e) => handleMouseMove(e, index)}
               onMouseLeave={handleMouseLeave}
               onClick={(e) => {
