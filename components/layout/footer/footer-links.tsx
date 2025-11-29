@@ -3,29 +3,70 @@ import Link from "next/link";
 interface FooterLink {
   label: string;
   href: string;
+  badge?: string;
 }
 
-interface FooterLinksProps {
+interface FooterLinksColumnProps {
   title: string;
   links: FooterLink[];
 }
 
-export function FooterLinks({ title, links }: FooterLinksProps) {
+export function FooterLinksColumn({ title, links }: FooterLinksColumnProps) {
   return (
     <div>
-      <h3 className="text-white font-bold text-lg mb-4">{title}</h3>
-      <ul className="space-y-2">
+      <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-5">
+        {title}
+      </h3>
+      <ul className="space-y-3">
         {links.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
-              className="text-gray-400 hover:text-white transition-colors text-sm"
+              className="
+                group inline-flex items-center gap-2
+                text-gray-400 hover:text-white
+                text-sm transition-colors duration-200
+              "
             >
-              {link.label}
+              <span className="relative">
+                {link.label}
+                <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-primary-500 group-hover:w-full transition-all duration-300" />
+              </span>
+              {link.badge && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-500 text-white animate-pulse">
+                  {link.badge}
+                </span>
+              )}
             </Link>
           </li>
         ))}
       </ul>
     </div>
+  );
+}
+
+export const quickLinks: FooterLink[] = [
+  { label: "Our Menu", href: "/menu" },
+  { label: "Locations", href: "/stores" },
+  { label: "About Us", href: "/about" },
+  { label: "Careers", href: "/careers", badge: "Hiring" },
+  { label: "Blog", href: "/blog" },
+];
+
+export const helpLinks: FooterLink[] = [
+  { label: "Contact Us", href: "/contact" },
+  { label: "FAQs", href: "/faqs" },
+  { label: "Delivery Info", href: "/delivery-terms" },
+  { label: "Track Order", href: "/track-order" },
+  { label: "Allergen Info", href: "/allergens" },
+];
+
+// Combined component for simpler usage
+export function FooterLinks() {
+  return (
+    <>
+      <FooterLinksColumn title="Quick Links" links={quickLinks} />
+      <FooterLinksColumn title="Help & Support" links={helpLinks} />
+    </>
   );
 }

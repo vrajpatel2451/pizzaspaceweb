@@ -1,75 +1,50 @@
-import Link from "next/link";
-import { FooterLinks } from "./footer-links";
-import { FooterSocial } from "./footer-social";
-import { FooterCopyright } from "./footer-copyright";
-
-const quickLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Stores", href: "/stores" },
-  { label: "Menu", href: "/menu" },
-  { label: "Contact Us", href: "/contact" },
-];
-
-const legalLinks = [
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Return Policy", href: "/returns" },
-  { label: "Delivery Terms", href: "/delivery-terms" },
-  { label: "Terms & Conditions", href: "/terms" },
-];
+import { NewsletterSection } from "./newsletter-section";
+import { FooterBrand } from "./footer-brand";
+import { FooterLinksColumn, quickLinks, helpLinks } from "./footer-links";
+import { FooterContact } from "./footer-contact";
+import { FooterBottom } from "./footer-bottom";
 
 export function Footer() {
   return (
-    <footer className="bg-slate-800 text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {/* Column 1: Logo & Contact */}
-          <div>
-            <Link href="/" className="inline-block mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">PS</span>
-                </div>
-                <span className="text-white font-bold text-xl">Pizza Space</span>
-              </div>
-            </Link>
-            <div className="space-y-2 text-sm">
-              <p className="text-gray-400">
-                <span className="text-white font-semibold">Address:</span>
-                <br />
-                123 Pizza Street,
-                <br />
-                Food City, FC 12345
-              </p>
-              <p className="text-gray-400">
-                <span className="text-white font-semibold">Phone:</span>
-                <br />
-                <a href="tel:+12345678900" className="hover:text-white transition-colors">
-                  +1 234 567 8900
-                </a>
-              </p>
-              <p className="text-gray-400">
-                <span className="text-white font-semibold">Email:</span>
-                <br />
-                <a href="mailto:info@pizzaspace.com" className="hover:text-white transition-colors">
-                  info@pizzaspace.com
-                </a>
-              </p>
+    <footer className="relative">
+      {/* Newsletter Section */}
+      <NewsletterSection />
+
+      {/* Main Footer */}
+      <div className="bg-navy-900">
+        {/* Decorative top border - orange gradient accent */}
+        <div className="h-1 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400" />
+
+        <div className="container mx-auto px-4 py-12 lg:py-16">
+          {/* Main Grid - 4 Column Layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            {/* Column 1: Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <FooterBrand />
+            </div>
+
+            {/* Column 2: Quick Links */}
+            <div>
+              <FooterLinksColumn title="Quick Links" links={quickLinks} />
+            </div>
+
+            {/* Column 3: Help & Support */}
+            <div>
+              <FooterLinksColumn title="Help & Support" links={helpLinks} />
+            </div>
+
+            {/* Column 4: Contact */}
+            <div>
+              <FooterContact />
             </div>
           </div>
 
-          {/* Column 2: Quick Links */}
-          <FooterLinks title="Quick Links" links={quickLinks} />
-
-          {/* Column 3: Legal */}
-          <FooterLinks title="Legal" links={legalLinks} />
-
-          {/* Column 4: Follow Us */}
-          <FooterSocial />
+          {/* Bottom Bar */}
+          <FooterBottom />
         </div>
 
-        {/* Copyright Bar */}
-        <FooterCopyright />
+        {/* Decorative bottom gradient line */}
+        <div className="h-px bg-gradient-to-r from-transparent via-navy-700 to-transparent" />
       </div>
     </footer>
   );

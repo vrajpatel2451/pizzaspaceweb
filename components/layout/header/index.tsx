@@ -1,7 +1,5 @@
-import { Logo } from "./logo";
-import { HeaderNav } from "./header-nav";
-import { HeaderIcons } from "./header-icons";
-import { MobileMenu } from "./mobile-menu";
+import { TopInfoBar } from "./top-info-bar";
+import { HeaderClient } from "./header-client";
 
 export function Header() {
   return (
@@ -9,34 +7,26 @@ export function Header() {
       {/* Skip to main content link for keyboard users */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-lg focus:font-medium"
       >
         Skip to main content
       </a>
-      <header
-        className="sticky top-0 z-50 w-full bg-slate-800 shadow-md"
-        role="banner"
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Logo />
-          </div>
 
-          {/* Desktop Navigation - Hidden on mobile */}
-          <div className="flex-1 flex justify-center">
-            <HeaderNav />
-          </div>
+      {/* Top Info Bar - Opening hours, contact, social links */}
+      <TopInfoBar />
 
-          {/* Right Side: Icons + Mobile Menu */}
-          <div className="flex items-center gap-2">
-            <HeaderIcons />
-            <MobileMenu />
-          </div>
-        </div>
-      </div>
-      </header>
+      {/* Main Header - Logo, Navigation, Actions */}
+      <HeaderClient />
     </>
   );
 }
+
+// Re-export components for direct import if needed
+export { Logo } from "./logo";
+export { TopInfoBar } from "./top-info-bar";
+export { HeaderClient } from "./header-client";
+export { SearchCommand, SearchBar } from "./search-command";
+export { ThemeToggle, ThemeTogglePill } from "./theme-toggle";
+export { UserDropdown } from "./user-dropdown";
+export { CartBadge } from "./cart-badge";
+export { MobileNavDrawer } from "./mobile-nav-drawer";

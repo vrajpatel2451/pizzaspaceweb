@@ -1,82 +1,135 @@
 "use client";
 
-import { useCallback, useEffect, useState, useRef } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
-import { Pause, Play } from 'lucide-react';
-import { TestimonialCard } from './testimonial-card';
-import { CarouselDots } from './carousel-dots';
+import { useCallback, useEffect, useState, useRef } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import { motion, AnimatePresence } from "framer-motion";
+import { TestimonialCard, type Testimonial } from "./testimonial-card";
+import { CarouselControls } from "./carousel-controls";
 
-const testimonials = [
+const testimonials: Testimonial[] = [
   {
     id: 1,
-    quote: "Fresh ingredients, perfect cooking, and excellent customer service. What more could you ask for?",
-    name: "Lisa Brown",
-    location: "Midtown",
-    rating: 5
+    quote:
+      "The best pizza I've ever had! Fresh ingredients, perfect crust, and the delivery was incredibly fast. My whole family is obsessed with their Margherita pizza. We order at least twice a week now!",
+    name: "Sarah Johnson",
+    title: "Food Blogger",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    date: "2 weeks ago",
+    isVerified: true,
   },
   {
     id: 2,
-    quote: "Best pizza in town! The crust is always perfect and crispy. My family orders here every weekend.",
-    name: "John Smith",
-    location: "Downtown",
-    rating: 5
+    quote:
+      "Outstanding quality and service! The Pepperoni Supreme is absolutely divine. I've tried pizza from every place in town, and Pizza Space is hands down the winner. The cheese pull is unreal!",
+    name: "Michael Chen",
+    title: "Local Business Owner",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    date: "1 month ago",
+    isVerified: true,
   },
   {
     id: 3,
-    quote: "Quick delivery and amazing taste. The Margherita is to die for! Highly recommend.",
-    name: "Sarah Johnson",
-    location: "Westside",
-    rating: 5
+    quote:
+      "Every bite takes me back to Italy! The authentic flavors and homemade sauce remind me of my grandmother's cooking. This is not just pizza, it's an experience. Absolutely phenomenal!",
+    name: "Emily Rodriguez",
+    title: "Culinary Enthusiast",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    date: "3 weeks ago",
+    isVerified: true,
   },
   {
     id: 4,
-    quote: "Authentic Italian flavors that remind me of my grandmother's cooking. Simply the best!",
-    name: "Michael Chen",
-    location: "Eastside",
-    rating: 5
+    quote:
+      "We hosted a party with Pizza Space catering and everyone was blown away! The variety, freshness, and presentation were top-notch. Our guests are still talking about it weeks later.",
+    name: "David Thompson",
+    title: "Event Planner",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    date: "1 week ago",
+    isVerified: true,
   },
   {
     id: 5,
-    quote: "We've tried every pizza place in the city, and Pizza Space is hands down the winner.",
-    name: "Emily Davis",
-    location: "Northside",
-    rating: 5
-  }
+    quote:
+      "As a picky eater, finding good pizza is tough. Pizza Space exceeded all my expectations! The crust is perfectly crispy, toppings are generous, and their gluten-free options are actually delicious.",
+    name: "Lisa Martinez",
+    title: "Health Coach",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    rating: 5,
+    date: "5 days ago",
+    isVerified: true,
+  },
 ];
 
 export function TestimonialsCarousel() {
   const autoplayRef = useRef(
-    Autoplay({ delay: 6000, stopOnInteraction: false })
+    Autoplay({
+      delay: 5000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+    })
   );
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-    autoplayRef.current
-  ]);
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: true,
+      align: "center",
+      skipSnaps: false,
+      dragFree: false,
+    },
+    [autoplayRef.current]
+  );
+
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
   }, [emblaApi]);
 
   useEffect(() => {
     if (!emblaApi) return;
 
     onSelect();
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
 
     return () => {
-      emblaApi.off('select', onSelect);
-      emblaApi.off('reInit', onSelect);
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
     };
   }, [emblaApi, onSelect]);
 
-  const scrollTo = useCallback((index: number) => {
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (!emblaApi) return;
+      emblaApi.scrollTo(index);
+    },
+    [emblaApi]
+  );
+
+  const scrollPrev = useCallback(() => {
     if (!emblaApi) return;
-    emblaApi.scrollTo(index);
+    emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (!emblaApi) return;
+    emblaApi.scrollNext();
   }, [emblaApi]);
 
   const toggleAutoplay = useCallback(() => {
@@ -94,7 +147,7 @@ export function TestimonialsCarousel() {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto relative">
+    <div className="relative">
       {/* Screen reader announcement */}
       <div
         className="sr-only"
@@ -105,19 +158,7 @@ export function TestimonialsCarousel() {
         Testimonial {selectedIndex + 1} of {testimonials.length}
       </div>
 
-      {/* Pause/Play Button */}
-      <button
-        onClick={toggleAutoplay}
-        className="absolute top-0 right-0 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-900 shadow-lg transition-all hover:scale-110 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-        aria-label={isPlaying ? "Pause testimonials" : "Play testimonials"}
-      >
-        {isPlaying ? (
-          <Pause className="h-5 w-5" aria-hidden="true" />
-        ) : (
-          <Play className="h-5 w-5" aria-hidden="true" />
-        )}
-      </button>
-
+      {/* Carousel Container */}
       <div
         className="overflow-hidden"
         ref={emblaRef}
@@ -125,24 +166,41 @@ export function TestimonialsCarousel() {
         aria-label="Customer testimonials"
       >
         <div className="flex">
-          {testimonials.map((testimonial, index) => (
-            <div
-              key={testimonial.id}
-              className="flex-[0_0_100%] min-w-0"
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${index + 1} of ${testimonials.length}`}
-              aria-hidden={index !== selectedIndex}
-            >
-              <TestimonialCard testimonial={testimonial} />
-            </div>
-          ))}
+          <AnimatePresence mode="wait">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.id}
+                className="flex-[0_0_100%] min-w-0 md:flex-[0_0_80%] lg:flex-[0_0_60%] px-2 md:px-4"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${index + 1} of ${testimonials.length}`}
+                aria-hidden={index !== selectedIndex}
+              >
+                <TestimonialCard
+                  testimonial={testimonial}
+                  isActive={index === selectedIndex}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
-      <CarouselDots
-        count={testimonials.length}
-        selectedIndex={selectedIndex}
-        onSelect={scrollTo}
+
+      {/* Gradient Overlays for Depth Effect */}
+      <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-amber-50 dark:from-slate-900 to-transparent pointer-events-none z-10" />
+      <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-amber-50 dark:from-slate-900 to-transparent pointer-events-none z-10" />
+
+      {/* Controls */}
+      <CarouselControls
+        onPrev={scrollPrev}
+        onNext={scrollNext}
+        canScrollPrev={canScrollPrev}
+        canScrollNext={canScrollNext}
+        isPlaying={isPlaying}
+        onTogglePlay={toggleAutoplay}
+        currentIndex={selectedIndex}
+        totalSlides={testimonials.length}
+        onDotClick={scrollTo}
       />
     </div>
   );

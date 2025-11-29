@@ -2,10 +2,12 @@ import { Suspense } from "react";
 import { getStores } from "@/lib/api";
 import { getMockStores } from "@/lib/mocks/stores";
 import { StoresGrid } from "./stores-grid";
+import { ReservationForm } from "./reservation-form";
 import { StoresSkeleton } from "./stores-skeleton";
+import { StoreResponse } from "@/types";
 
 async function StoresContent() {
-  let stores;
+  let stores: StoreResponse[];
 
   try {
     const response = await getStores({ isActive: true, limit: 6 });
@@ -17,12 +19,30 @@ async function StoresContent() {
     stores = mockResponse.data.data;
   }
 
-  return <StoresGrid stores={stores} />;
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      {/* Left Side: Store Cards */}
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Our Locations</h3>
+          <p className="text-gray-600 text-sm">
+            Visit us at any of our convenient locations
+          </p>
+        </div>
+        <StoresGrid stores={stores} maxStores={3} />
+      </div>
+
+      {/* Right Side: Reservation Form */}
+      <div className="lg:sticky lg:top-24 h-fit">
+        <ReservationForm stores={stores} />
+      </div>
+    </div>
+  );
 }
 
 export function StoresSection() {
   return (
-    <section className="bg-slate-50 py-16 relative" aria-labelledby="stores-heading">
+    <section className="bg-slate-50 py-16 lg:py-20 relative" aria-labelledby="stores-heading">
       {/* Subtle grid pattern background */}
       <div
         className="absolute inset-0 opacity-5"
@@ -36,19 +56,21 @@ export function StoresSection() {
       />
 
       <div className="container mx-auto px-4 relative">
-        <div className="text-center mb-12">
-          <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+        {/* Section Header */}
+        <div className="text-center mb-12 lg:mb-16">
+          <span className="inline-block bg-orange-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm">
             Our Locations
           </span>
-          <h2 id="stores-heading" className="text-3xl font-bold mt-4 text-gray-900">
-            Find Your Nearest Store
+          <h2 id="stores-heading" className="text-3xl lg:text-4xl font-bold mt-4 text-gray-900">
+            Visit Us In Person
           </h2>
-          <p className="text-gray-600 mt-2 max-w-xl mx-auto">
-            Visit us at any of our convenient locations or order online for
-            delivery.
+          <p className="text-gray-600 mt-3 max-w-2xl mx-auto text-base lg:text-lg">
+            Experience the authentic taste of our handcrafted pizzas in a warm, inviting atmosphere.
+            Dine with us or make a reservation for a special occasion.
           </p>
         </div>
 
+        {/* Content Grid */}
         <Suspense fallback={<StoresSkeleton />}>
           <StoresContent />
         </Suspense>

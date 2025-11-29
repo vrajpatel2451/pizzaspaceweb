@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
 // Above-the-fold sections (loaded immediately)
-import { HeroSlider } from "@/components/home/hero-slider";
+import { HeroSection } from "@/components/home/hero-section";
 import { MakeOrderSection } from "@/components/home/make-order-section";
 import { CategoriesSection } from "@/components/home/categories-section";
 
@@ -33,8 +33,8 @@ const ContactSection = dynamic(() => import("@/components/home/contact-section")
 export default function Home() {
   return (
     <>
-      {/* Section 1: Hero Slider - Critical above-the-fold content */}
-      <HeroSlider />
+      {/* Section 1: Hero Section - Critical above-the-fold content */}
+      <HeroSection />
 
       {/* Section 2: Make Your Order CTA - Above the fold */}
       <MakeOrderSection />
