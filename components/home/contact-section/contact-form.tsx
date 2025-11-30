@@ -291,7 +291,6 @@ export function ContactForm() {
           type="submit"
           className="w-full"
           size="lg"
-          loading={formStatus === 'submitting'}
           disabled={formStatus === 'submitting'}
         >
           {formStatus === 'submitting' ? (

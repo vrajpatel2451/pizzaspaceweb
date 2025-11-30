@@ -3,6 +3,10 @@ export type { APIResponse, PaginationMeta, PaginatedResponse } from "./api";
 
 // Category Types
 export type { CategoryQueryParams, CategoryResponse } from "./category";
+export type {
+  SubCategoryQueryParams,
+  SubCategoryResponse,
+} from "./subcategory";
 
 // Product Types
 export type {

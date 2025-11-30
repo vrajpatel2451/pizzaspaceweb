@@ -3,13 +3,13 @@ import apiClient from "./client";
 import {
   APIResponse,
   PaginatedResponse,
-  CategoryResponse,
-  CategoryQueryParams,
+  SubCategoryQueryParams,
+  SubCategoryResponse,
 } from "@/types";
 
-export async function getCategories(
-  params?: CategoryQueryParams
-): Promise<APIResponse<PaginatedResponse<CategoryResponse>>> {
+export async function getSubCategories(
+  params?: SubCategoryQueryParams
+): Promise<APIResponse<PaginatedResponse<SubCategoryResponse>>> {
   const queryParams = new URLSearchParams();
 
   if (params?.page) queryParams.append("page", params.page.toString());
@@ -18,16 +18,17 @@ export async function getCategories(
   if (params?.storeId) queryParams.append("storeId", params.storeId);
   if (params?.all !== undefined)
     queryParams.append("all", params.all.toString());
+  if (params?.categoryId) queryParams.append("categoryId", params.categoryId);
 
   const queryString = queryParams.toString();
-  const url = `/category${queryString ? `?${queryString}` : ""}`;
+  const url = `/sub-category${queryString ? `?${queryString}` : ""}`;
 
   try {
     const response: AxiosResponse<
-      APIResponse<PaginatedResponse<CategoryResponse>>
-    > = await apiClient.get<APIResponse<PaginatedResponse<CategoryResponse>>>(
-      url
-    );
+      APIResponse<PaginatedResponse<SubCategoryResponse>>
+    > = await apiClient.get<
+      APIResponse<PaginatedResponse<SubCategoryResponse>>
+    >(url);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch categories:", error);

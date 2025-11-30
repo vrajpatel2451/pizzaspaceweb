@@ -4,19 +4,21 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button, type ButtonProps } from "./button";
+import { Button } from "./button";
 import { IconButton } from "./icon-button";
+import type { VariantProps } from "class-variance-authority";
+import { buttonVariants } from "./button";
 
 export interface DrawerAction {
   label: string;
   onClick: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: ButtonProps["variant"];
+  variant?: VariantProps<typeof buttonVariants>["variant"];
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   className?: string;
-  size?: ButtonProps["size"];
+  size?: VariantProps<typeof buttonVariants>["size"];
 }
 
 export interface DrawerActions {
@@ -237,7 +239,6 @@ const Drawer: React.FC<DrawerProps> = ({
                     size={actions.tertiary.size}
                     variant={actions.tertiary.variant || "ghost"}
                     className={actions.tertiary.className}
-                    loading={actions.tertiary.loading}
                   >
                     {actions.tertiary.startIcon}
                     {actions.tertiary.label}
@@ -251,7 +252,6 @@ const Drawer: React.FC<DrawerProps> = ({
                     size={actions.secondary.size}
                     variant={actions.secondary.variant || "outline"}
                     className={actions.secondary.className}
-                    loading={actions.secondary.loading}
                   >
                     {actions.secondary.startIcon}
                     {actions.secondary.label}
@@ -265,7 +265,6 @@ const Drawer: React.FC<DrawerProps> = ({
                     size={actions.primary.size}
                     variant={actions.primary.variant || "default"}
                     className={actions.primary.className}
-                    loading={actions.primary.loading}
                   >
                     {actions.primary.startIcon}
                     {actions.primary.label}

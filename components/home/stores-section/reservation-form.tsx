@@ -228,8 +228,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
-                      variant="input"
-                      size="input"
+                      variant="outline"
                       className={cn(
                         "w-full justify-start text-left",
                         !field.value && "text-muted-foreground",

@@ -11,6 +11,8 @@ import { CustomImage } from "@/components/ui/custom-image";
 interface ProductCardProps {
   product: ProductResponse;
   index?: number;
+  priority?: boolean;
+  sizes?: string;
 }
 
 type BadgeType = "new" | "popular" | "spicy" | null;
@@ -109,7 +111,12 @@ function StarRating({ rating = 4.5 }: { rating?: number }) {
   );
 }
 
-export function ProductCard({ product, index = 0 }: ProductCardProps) {
+export function ProductCard({
+  product,
+  index = 0,
+  priority = false,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+}: ProductCardProps) {
   const imageUrl = product.photoList[0] || "/placeholder.jpg";
   const badgeType = getBadgeType(product);
 
@@ -146,8 +153,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             alt={`${product.name}${badgeType ? ` - ${badgeType}` : ""}`}
             fill
             className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            loading="lazy"
+            sizes={sizes}
+            priority={priority}
+            loading={priority ? undefined : "lazy"}
           />
         </motion.div>
 

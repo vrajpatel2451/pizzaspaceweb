@@ -229,7 +229,6 @@ export default function ComponentsShowcase() {
                 <Button size="sm">Small</Button>
                 <Button size="default">Default</Button>
                 <Button size="lg">Large</Button>
-                <Button size="xl">Extra Large</Button>
               </div>
             </div>
 
@@ -238,7 +237,6 @@ export default function ComponentsShowcase() {
               <div className="flex flex-wrap gap-4">
                 <Button>Default</Button>
                 <Button disabled>Disabled</Button>
-                <Button loading>Loading</Button>
               </div>
             </div>
 
