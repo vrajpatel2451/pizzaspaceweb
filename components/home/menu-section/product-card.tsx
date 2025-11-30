@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Star, Flame, Sparkles, TrendingUp } from "lucide-react";
 import { ProductResponse } from "@/types";

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, Variants } from "framer-motion";
-import { Users, UtensilsCrossed, MapPin, Clock } from "lucide-react";
+import { Users, UtensilsCrossed, MapPin } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface StatItem {

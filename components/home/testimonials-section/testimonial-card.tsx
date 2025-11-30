@@ -3,7 +3,6 @@
 import { CustomImage } from "@/components/ui/custom-image";
 import { motion } from "framer-motion";
 import { Quote, Star, BadgeCheck } from "lucide-react";
-import Image from "next/image";
 
 export interface Testimonial {
   id: number;

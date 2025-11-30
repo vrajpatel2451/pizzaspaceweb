@@ -218,7 +218,7 @@ File: `/Users/vrajpatel/Documents/personal/pizzaspace_web/components/seo/json-ld
 
 ### Image Alt Text Audit
 - [x] **All Images Have Alt Text**
-  - Next.js Image component used throughout
+  - CustomImage component used throughout (wrapper around next/image)
   - Dynamic alt text from product/category names
   - Descriptive alt text for static images
   - Examples verified in:

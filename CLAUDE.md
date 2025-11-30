@@ -24,3 +24,8 @@ This is a Next.js 16 application using the App Router with React 19.
 
 **Fonts:**
 - Geist Sans and Geist Mono loaded via `next/font/google`
+
+**Images:**
+- Use `CustomImage` from `@/components/ui/custom-image` for all images
+- This is a wrapper around Next.js Image with error handling and fallback support
+- Do NOT use `next/image` directly - always use CustomImage

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 
 // Force dynamic rendering since we're fetching API data
 export const dynamicParams = true;

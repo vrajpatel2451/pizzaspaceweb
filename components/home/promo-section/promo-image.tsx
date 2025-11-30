@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import { CustomImage } from "@/components/ui/custom-image";
 
 export function PromoImage() {

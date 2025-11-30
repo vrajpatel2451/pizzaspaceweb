@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { CustomImage } from "@/components/ui/custom-image";
 import {
   User,
   ShoppingBag,
@@ -158,9 +159,11 @@ export function UserDropdown({
           aria-label="User menu"
         >
           {user?.avatar ? (
-            <img
+            <CustomImage
               src={user.avatar}
               alt={user.name}
+              width={32}
+              height={32}
               className="size-8 rounded-full object-cover ring-2 ring-primary/20"
             />
           ) : (
@@ -182,9 +185,11 @@ export function UserDropdown({
         <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10">
           <div className="flex items-center gap-3">
             {user?.avatar ? (
-              <img
+              <CustomImage
                 src={user.avatar}
-                alt={user.name}
+                alt={user.name || "User"}
+                width={48}
+                height={48}
                 className="size-12 rounded-full object-cover ring-2 ring-primary/20"
               />
             ) : (

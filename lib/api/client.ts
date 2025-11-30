@@ -1,5 +1,4 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
-import { APIResponse } from "@/types/api";
+import axios, { AxiosInstance } from "axios";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.pizzaspace.co.uk/api/v1";

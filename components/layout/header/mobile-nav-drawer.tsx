@@ -18,7 +18,6 @@ import {
   Heart,
   Gift,
   Settings,
-  LogOut,
   ChevronRight,
   Clock,
   Flame,

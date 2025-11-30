@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 import { Award, ChefHat } from "lucide-react";
 import { CustomImage } from "@/components/ui/custom-image";

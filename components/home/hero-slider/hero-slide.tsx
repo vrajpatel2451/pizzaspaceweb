@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import type { HeroSlide as HeroSlideType } from "./types";
 import { CustomImage } from "@/components/ui/custom-image";

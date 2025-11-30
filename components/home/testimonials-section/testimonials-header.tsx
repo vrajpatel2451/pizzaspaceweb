@@ -3,7 +3,6 @@
 import { CustomImage } from "@/components/ui/custom-image";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
-import Image from "next/image";
 
 const customerAvatars = [
   {

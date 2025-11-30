@@ -633,7 +633,7 @@ Requirements:
      - Premium Quality (medal icon) - "Only the finest ingredients used"
 5. Responsive: Stack columns on mobile, full-width image
 
-Build as Server Component. Use Next.js Image for optimization.
+Build as Server Component. Use CustomImage for image optimization.
 ```
 
 #### 6.3 Mission & Vision Section (Section 8)
@@ -946,7 +946,7 @@ Fix all issues found. Document any known limitations.
 5. Core Web Vitals targets
 
 **Optimizations**:
-- [ ] All images use next/image with proper sizing
+- [ ] All images use CustomImage with proper sizing
 - [ ] Hero images are priority loaded
 - [ ] Below-fold images are lazy loaded
 - [ ] API responses are cached where appropriate
@@ -966,7 +966,7 @@ Fix all issues found. Document any known limitations.
 Perform performance optimization on Pizza Space home page:
 
 1. Image optimization:
-   - Verify all images use next/image
+   - Verify all images use CustomImage
    - Set priority on hero/above-fold images
    - Add proper width/height or fill
    - Use blur placeholder for large images
@@ -1328,7 +1328,7 @@ test('page passes accessibility audit', async ({ page }) => {
 - [ ] LCP < 2.5 seconds
 - [ ] FID < 100ms
 - [ ] CLS < 0.1
-- [ ] Images optimized with next/image
+- [ ] Images optimized with CustomImage
 - [ ] No layout shift during load
 
 #### Code Quality

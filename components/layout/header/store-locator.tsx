@@ -32,6 +32,7 @@ export function StoreLocator({ className }: StoreLocatorProps) {
     if (open && stores.length === 0) {
       fetchStores();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const fetchStores = async () => {

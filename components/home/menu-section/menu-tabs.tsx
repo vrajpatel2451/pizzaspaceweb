@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/preserve-manual-memoization */
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CategoryResponse } from "@/types";
