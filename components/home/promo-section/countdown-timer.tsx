@@ -14,41 +14,35 @@ interface CountdownTimerProps {
 }
 
 export function CountdownTimer({ targetDate }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
   const [mounted, setMounted] = useState(false);
 
+  const calculateTimeLeft = (): TimeLeft => {
+    const difference = targetDate.getTime() - new Date().getTime();
+
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    };
+  };
+
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
+
   useEffect(() => {
+    // Mark as mounted and set up timer
     setMounted(true);
 
-    const calculateTimeLeft = (): TimeLeft => {
-      const difference = targetDate.getTime() - new Date().getTime();
-
-      if (difference <= 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-      }
-
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    };
-
-    // Set initial time
-    setTimeLeft(calculateTimeLeft());
-
-    // Update every second
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetDate]);
 
   // Prevent hydration mismatch by not rendering until mounted

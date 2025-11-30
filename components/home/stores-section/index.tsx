@@ -10,7 +10,7 @@ async function StoresContent() {
 
   try {
     const response = await getStores({ isActive: true, limit: 6 });
-    stores = response.data.data;
+    stores = response?.data?.data || [];
   } catch (error) {
     console.error("Failed to fetch stores:", error);
     // Return empty array - will show empty state

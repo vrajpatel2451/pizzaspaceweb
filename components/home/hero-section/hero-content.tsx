@@ -4,7 +4,6 @@ import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { HeroSearch } from "./hero-search";
-import { HeroStats } from "./hero-stats";
 import { CategoryResponse } from "@/types/category";
 
 // Animation variants for staggered entrance
@@ -119,10 +118,10 @@ export function HeroContent({ trendingCategories }: HeroContentProps) {
       {/* CTA Button */}
       <motion.div
         variants={itemVariants}
-        className="mt-6 sm:mt-8"
+        className="mt-8 sm:mt-10"
       >
         <Link href="/menu">
-          <Button size="lg" className="group shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30">
+          <Button size="lg" className="group shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300">
             Order Now
             <svg
               className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -141,8 +140,6 @@ export function HeroContent({ trendingCategories }: HeroContentProps) {
         </Link>
       </motion.div>
 
-      {/* Stats */}
-      <HeroStats />
     </motion.div>
   );
 }

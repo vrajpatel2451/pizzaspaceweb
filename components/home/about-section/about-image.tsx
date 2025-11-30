@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 import { Award, ChefHat } from "lucide-react";
+import { CustomImage } from "@/components/ui/custom-image";
 
 const imageVariants: Variants = {
   hidden: { opacity: 0, x: -50, scale: 0.95 },
@@ -84,7 +85,7 @@ export function AboutImage() {
           {/* Image wrapper with gradient overlay */}
           <div className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] w-full max-w-lg mx-auto lg:mx-0 bg-gradient-to-br from-navy-800 to-navy-900 dark:from-navy-700 dark:to-navy-800">
             {/* Pizza/Kitchen Image - Replace with actual image */}
-            <Image
+            <CustomImage
               src="/images/pizza-logo.png"
               alt="Our master chef crafting authentic Italian pizza"
               fill
@@ -153,7 +154,12 @@ export function AboutImage() {
         >
           <motion.div
             animate={{ y: [0, -4, 0], rotate: [0, -2, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5,
+            }}
           >
             <div className="bg-primary text-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl shadow-primary/25">
               <div className="flex items-center gap-2">
@@ -181,7 +187,12 @@ export function AboutImage() {
         >
           <motion.div
             animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            transition={{
+              duration: 3.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
           >
             <div className="bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl shadow-black/10 dark:shadow-black/30 border border-gray-100 dark:border-navy-700">
               <div className="flex items-center gap-2">

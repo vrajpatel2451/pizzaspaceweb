@@ -7,7 +7,10 @@ interface StoresGridProps {
 }
 
 export function StoresGrid({ stores, maxStores = 3 }: StoresGridProps) {
-  if (!stores || stores.length === 0) {
+  // Ensure stores is always an array
+  const safeStores = Array.isArray(stores) ? stores : [];
+
+  if (safeStores.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500 dark:text-gray-400 text-lg">No stores available at the moment.</p>
@@ -19,7 +22,7 @@ export function StoresGrid({ stores, maxStores = 3 }: StoresGridProps) {
   }
 
   // Limit the number of stores displayed
-  const displayedStores = stores.slice(0, maxStores);
+  const displayedStores = safeStores.slice(0, maxStores);
 
   return (
     <div className="grid grid-cols-1 gap-6">

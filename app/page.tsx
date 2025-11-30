@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 // Force dynamic rendering since we're fetching API data
 export const dynamicParams = true;
@@ -15,21 +16,49 @@ import { MenuSkeleton } from "@/components/home/menu-section/menu-skeleton";
 import { StoresSkeleton } from "@/components/home/stores-section/stores-skeleton";
 
 // Below-the-fold sections (lazy loaded for better initial performance)
-const MenuSection = dynamic(() => import("@/components/home/menu-section").then(mod => ({ default: mod.MenuSection })), {
-  loading: () => <MenuSkeleton />,
-});
+const MenuSection = dynamic(
+  () =>
+    import("@/components/home/menu-section").then((mod) => ({
+      default: mod.MenuSection,
+    })),
+  {
+    loading: () => <MenuSkeleton />,
+  }
+);
 
-const StoresSection = dynamic(() => import("@/components/home/stores-section").then(mod => ({ default: mod.StoresSection })), {
-  loading: () => <StoresSkeleton />,
-});
+const StoresSection = dynamic(
+  () =>
+    import("@/components/home/stores-section").then((mod) => ({
+      default: mod.StoresSection,
+    })),
+  {
+    loading: () => <StoresSkeleton />,
+  }
+);
 
-const AboutSection = dynamic(() => import("@/components/home/about-section").then(mod => ({ default: mod.AboutSection })));
+const AboutSection = dynamic(() =>
+  import("@/components/home/about-section").then((mod) => ({
+    default: mod.AboutSection,
+  }))
+);
 
-const MissionVisionSection = dynamic(() => import("@/components/home/mission-vision-section").then(mod => ({ default: mod.MissionVisionSection })));
+const MissionVisionSection = dynamic(() =>
+  import("@/components/home/mission-vision-section").then((mod) => ({
+    default: mod.MissionVisionSection,
+  }))
+);
 
-const TestimonialsSection = dynamic(() => import("@/components/home/testimonials-section").then(mod => ({ default: mod.TestimonialsSection })));
+const TestimonialsSection = dynamic(() =>
+  import("@/components/home/testimonials-section").then((mod) => ({
+    default: mod.TestimonialsSection,
+  }))
+);
 
-const ContactSection = dynamic(() => import("@/components/home/contact-section").then(mod => ({ default: mod.ContactSection })));
+const ContactSection = dynamic(() =>
+  import("@/components/home/contact-section").then((mod) => ({
+    default: mod.ContactSection,
+  }))
+);
 
 export default function Home() {
   return (

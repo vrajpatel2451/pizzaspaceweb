@@ -30,6 +30,7 @@ import { getProducts } from "@/lib/api/products";
 import { formatPrice } from "@/lib/formatters";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { CategoryResponse, ProductResponse } from "@/types";
+import { CustomImage } from "@/components/ui/custom-image";
 
 interface SearchCommandProps {
   className?: string;
@@ -47,10 +48,14 @@ export function SearchCommand({ className }: SearchCommandProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [categories, setCategories] = React.useState<CategoryResponse[]>([]);
-  const [trendingCategories, setTrendingCategories] = React.useState<CategoryResponse[]>([]);
+  const [trendingCategories, setTrendingCategories] = React.useState<
+    CategoryResponse[]
+  >([]);
   const [products, setProducts] = React.useState<ProductResponse[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = React.useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<
+    string | null
+  >(null);
   const router = useRouter();
 
   // Debounce search query
@@ -72,10 +77,7 @@ export function SearchCommand({ className }: SearchCommandProps) {
   // Fetch categories when popup opens
   React.useEffect(() => {
     if (open && categories.length === 0) {
-      Promise.all([
-        getCategories({ limit: 5 }),
-        getCategories({ limit: 3 })
-      ])
+      Promise.all([getCategories({ limit: 5 }), getCategories({ limit: 3 })])
         .then(([allCategoriesResponse, trendingResponse]) => {
           if (allCategoriesResponse.data?.data) {
             setCategories(allCategoriesResponse.data.data);
@@ -101,7 +103,7 @@ export function SearchCommand({ className }: SearchCommandProps) {
     getProducts({
       search: debouncedSearchQuery,
       categoryId: selectedCategoryId || undefined,
-      limit: 10
+      limit: 10,
     })
       .then((response) => {
         if (response.data?.data) {
@@ -226,10 +228,7 @@ export function SearchCommand({ className }: SearchCommandProps) {
         description="Search for menu items, find stores, or navigate quickly"
         showCloseButton={false}
       >
-        <Command
-          className="rounded-lg"
-          shouldFilter={false}
-        >
+        <Command className="rounded-lg" shouldFilter={false}>
           <CommandInput
             placeholder="Search pizzas, sides, drinks..."
             value={searchQuery}
@@ -240,7 +239,9 @@ export function SearchCommand({ className }: SearchCommandProps) {
               <div className="flex flex-col items-center gap-2 py-6">
                 <Pizza className="size-10 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">
-                  {searchQuery ? `No results found for "${searchQuery}"` : "Start typing to search..."}
+                  {searchQuery
+                    ? `No results found for "${searchQuery}"`
+                    : "Start typing to search..."}
                 </p>
                 <p className="text-xs text-muted-foreground/70">
                   Try searching for pizza, salad, or drinks
@@ -347,7 +348,7 @@ export function SearchCommand({ className }: SearchCommandProps) {
                     {/* Product Image */}
                     <div className="relative size-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                       {product.photoList[0] ? (
-                        <Image
+                        <CustomImage
                           src={product.photoList[0]}
                           alt={product.name}
                           fill
@@ -364,14 +365,20 @@ export function SearchCommand({ className }: SearchCommandProps) {
                     {/* Product Info */}
                     <div className="flex flex-1 flex-col gap-0.5 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium truncate">{product.name}</span>
+                        <span className="font-medium truncate">
+                          {product.name}
+                        </span>
                         {product.type && (
-                          <span className={cn(
-                            "text-xs px-1.5 py-0.5 rounded flex-shrink-0",
-                            product.type === "veg" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                            product.type === "vegan" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                            "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          )}>
+                          <span
+                            className={cn(
+                              "text-xs px-1.5 py-0.5 rounded flex-shrink-0",
+                              product.type === "veg"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : product.type === "vegan"
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            )}
+                          >
                             {product.type}
                           </span>
                         )}

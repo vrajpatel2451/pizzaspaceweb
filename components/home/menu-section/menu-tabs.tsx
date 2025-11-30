@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CategoryResponse } from "@/types";
 import { cn } from "@/lib/utils";
@@ -24,12 +24,15 @@ export function MenuTabs({
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeTabRect, setActiveTabRect] = useState<DOMRect | null>(null);
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   // Create tabs array with "all" first
+  // Ensure categories is always an array before mapping
+  const safeCategories = Array.isArray(categories) ? categories : [];
   const tabs: TabItem[] = [
     { id: "all", name: "All" },
-    ...categories.map((cat) => ({ id: cat._id, name: cat.name })),
+    ...safeCategories.map((cat) => ({ id: cat._id, name: cat.name })),
   ];
 
   // Handle keyboard navigation
@@ -62,8 +65,8 @@ export function MenuTabs({
     tabRefs.current.get(newTab.id)?.focus();
   };
 
-  // Update active tab indicator position
-  useEffect(() => {
+  // Function to update tab position
+  const updateTabPosition = useCallback(() => {
     const activeButton = tabRefs.current.get(activeCategory);
     const container = containerRef.current;
 
@@ -71,23 +74,35 @@ export function MenuTabs({
       setActiveTabRect(activeButton.getBoundingClientRect());
       setContainerRect(container.getBoundingClientRect());
     }
-  }, [activeCategory, categories]);
+  }, [activeCategory]);
+
+  // Mark as mounted after hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Use useLayoutEffect to calculate position before paint (prevents flash)
+  useLayoutEffect(() => {
+    if (isMounted) {
+      // Small delay to ensure refs are populated after initial render
+      const timer = requestAnimationFrame(() => {
+        updateTabPosition();
+      });
+      return () => cancelAnimationFrame(timer);
+    }
+  }, [isMounted, activeCategory, categories, updateTabPosition]);
 
   // Recalculate on resize
   useEffect(() => {
-    const handleResize = () => {
-      const activeButton = tabRefs.current.get(activeCategory);
-      const container = containerRef.current;
+    if (!isMounted) return;
 
-      if (activeButton && container) {
-        setActiveTabRect(activeButton.getBoundingClientRect());
-        setContainerRect(container.getBoundingClientRect());
-      }
+    const handleResize = () => {
+      updateTabPosition();
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [activeCategory]);
+  }, [isMounted, updateTabPosition]);
 
   const setTabRef = (id: string) => (el: HTMLButtonElement | null) => {
     if (el) {
@@ -108,16 +123,23 @@ export function MenuTabs({
       >
         {/* Animated background indicator */}
         <AnimatePresence>
-          {activeTabRect && containerRect && (
+          {isMounted && activeTabRect && containerRect && (
             <motion.div
               layoutId="activeTab"
               className="absolute bg-orange-500 rounded-full shadow-lg shadow-orange-500/25 dark:shadow-orange-500/15 hidden sm:block pointer-events-none"
-              initial={false}
+              initial={{
+                left: activeTabRect.left - containerRect.left,
+                top: activeTabRect.top - containerRect.top,
+                width: activeTabRect.width,
+                height: activeTabRect.height,
+                opacity: 1,
+              }}
               animate={{
                 left: activeTabRect.left - containerRect.left,
                 top: activeTabRect.top - containerRect.top,
                 width: activeTabRect.width,
                 height: activeTabRect.height,
+                opacity: 1,
               }}
               transition={{
                 type: "spring",

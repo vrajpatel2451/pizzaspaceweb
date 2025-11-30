@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+// Get image domain from environment variable (strip protocol for hostname)
+const imageDomain =
+  process.env.NEXT_PUBLIC_IMAGE_HOST || "api.pizzaspace.co.uk";
+const imageHostname = imageDomain.replace(/^https?:\/\//, "");
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -11,7 +16,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.pizzaspace.co.uk",
+        hostname: imageHostname,
         port: "",
         pathname: "/**",
       },

@@ -7,6 +7,7 @@ import { ProductResponse } from "@/types";
 import { QuickAddButton } from "./quick-add-button";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/formatters";
+import { CustomImage } from "@/components/ui/custom-image";
 
 interface ProductCardProps {
   product: ProductResponse;
@@ -20,7 +21,12 @@ function getBadgeType(product: ProductResponse): BadgeType {
   const tags = product.tags?.map((t) => t.toLowerCase()) || [];
 
   if (tags.includes("new") || tags.includes("latest")) return "new";
-  if (tags.includes("popular") || tags.includes("bestseller") || tags.includes("best seller")) return "popular";
+  if (
+    tags.includes("popular") ||
+    tags.includes("bestseller") ||
+    tags.includes("best seller")
+  )
+    return "popular";
   if (product.spiceLevel?.includes("2_chilli")) return "spicy";
 
   return null;
@@ -72,8 +78,14 @@ function StarRating({ rating = 4.5 }: { rating?: number }) {
   const hasHalfStar = rating % 1 >= 0.5;
 
   return (
-    <div className="flex items-center gap-1" role="img" aria-label={`Rated ${rating.toFixed(1)} out of 5 stars`}>
-      <span className="sr-only">Rating: {rating.toFixed(1)} out of 5 stars</span>
+    <div
+      className="flex items-center gap-1"
+      role="img"
+      aria-label={`Rated ${rating.toFixed(1)} out of 5 stars`}
+    >
+      <span className="sr-only">
+        Rating: {rating.toFixed(1)} out of 5 stars
+      </span>
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
@@ -88,7 +100,10 @@ function StarRating({ rating = 4.5 }: { rating?: number }) {
           aria-hidden="true"
         />
       ))}
-      <span className="text-xs text-slate-500 dark:text-slate-400 ml-1" aria-hidden="true">
+      <span
+        className="text-xs text-slate-500 dark:text-slate-400 ml-1"
+        aria-hidden="true"
+      >
         ({rating.toFixed(1)})
       </span>
     </div>
@@ -127,9 +142,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           whileHover={{ scale: 1.08 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <Image
+          <CustomImage
             src={imageUrl}
-            alt={`${product.name}${badgeType ? ` - ${badgeType}` : ''}`}
+            alt={`${product.name}${badgeType ? ` - ${badgeType}` : ""}`}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

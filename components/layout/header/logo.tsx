@@ -64,7 +64,7 @@ export function Logo({
           "transition-all duration-300",
           "shadow-md group-hover:shadow-lg",
           isLight
-            ? "bg-white/20 backdrop-blur-sm group-hover:bg-white/30 dark:bg-white/20 dark:group-hover:bg-white/30"
+            ? "bg-white/90 dark:bg-white/20 backdrop-blur-sm group-hover:bg-white dark:group-hover:bg-white/30"
             : "bg-primary group-hover:bg-primary/90"
         )}
       >
@@ -72,7 +72,7 @@ export function Logo({
           <Pizza
             className={cn(
               "size-5",
-              isLight ? "text-white dark:text-white" : "text-primary-foreground"
+              isLight ? "text-primary dark:text-white" : "text-primary-foreground"
             )}
           />
         </motion.div>
@@ -96,7 +96,7 @@ export function Logo({
             className={cn(
               "text-lg sm:text-xl font-bold leading-tight transition-colors duration-300",
               isLight
-                ? "text-white group-hover:text-white/90 dark:text-white dark:group-hover:text-white/90"
+                ? "text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-white/90"
                 : "text-primary group-hover:text-primary/90"
             )}
           >
@@ -105,7 +105,7 @@ export function Logo({
           <span
             className={cn(
               "hidden sm:block text-[10px] font-medium tracking-wider uppercase",
-              isLight ? "text-white/60 dark:text-white/60" : "text-muted-foreground"
+              isLight ? "text-slate-600 dark:text-white/60" : "text-muted-foreground"
             )}
           >
             Authentic Italian

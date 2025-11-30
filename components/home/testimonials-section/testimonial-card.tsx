@@ -1,5 +1,6 @@
 "use client";
 
+import { CustomImage } from "@/components/ui/custom-image";
 import { motion } from "framer-motion";
 import { Quote, Star, BadgeCheck } from "lucide-react";
 import Image from "next/image";
@@ -20,7 +21,10 @@ interface TestimonialCardProps {
   isActive?: boolean;
 }
 
-export function TestimonialCard({ testimonial, isActive = false }: TestimonialCardProps) {
+export function TestimonialCard({
+  testimonial,
+  isActive = false,
+}: TestimonialCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -35,7 +39,7 @@ export function TestimonialCard({ testimonial, isActive = false }: TestimonialCa
         border border-slate-100 dark:border-slate-700
         mx-2 sm:mx-4 h-full
         transition-all duration-300
-        ${isActive ? 'ring-2 ring-orange-500/20' : ''}
+        ${isActive ? "ring-2 ring-orange-500/20" : ""}
       `}
     >
       {/* Decorative Quote Background */}
@@ -89,7 +93,7 @@ export function TestimonialCard({ testimonial, isActive = false }: TestimonialCa
           {/* Avatar */}
           <div className="relative">
             <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden ring-4 ring-orange-100 dark:ring-orange-950/50">
-              <Image
+              <CustomImage
                 src={testimonial.avatar}
                 alt={testimonial.name}
                 width={64}

@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import apiClient from "./client";
 import {
   APIResponse,
@@ -22,9 +23,28 @@ export async function getCategories(
   const queryString = queryParams.toString();
   const url = `/category${queryString ? `?${queryString}` : ""}`;
 
-  const response = await apiClient.get<
-    APIResponse<PaginatedResponse<CategoryResponse>>
-  >(url);
-
-  return response.data;
+  try {
+    const response: AxiosResponse<
+      APIResponse<PaginatedResponse<CategoryResponse>>
+    > = await apiClient.get<APIResponse<PaginatedResponse<CategoryResponse>>>(
+      url
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return {
+      statusCode: 500,
+      data: {
+        data: [],
+        meta: {
+          currentPage: 1,
+          totalPages: 0,
+          totalItems: 0,
+          itemsPerPage: 10,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      },
+    };
+  }
 }

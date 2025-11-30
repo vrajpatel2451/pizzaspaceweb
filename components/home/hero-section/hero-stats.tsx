@@ -141,7 +141,7 @@ export function HeroStats() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.6 }}
-      className="mt-6 sm:mt-8 lg:mt-12"
+      className="mt-8 sm:mt-10 lg:mt-14"
     >
       {/* Desktop: Inline layout */}
       <div className="hidden sm:flex flex-wrap gap-3">

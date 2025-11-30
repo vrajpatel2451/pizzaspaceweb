@@ -9,6 +9,9 @@ interface CategoriesContentProps {
 }
 
 export function CategoriesContent({ categories }: CategoriesContentProps) {
+  // Ensure categories is always an array
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   // Animation variants
   const gridVariants = {
     hidden: { opacity: 0 },
@@ -24,13 +27,13 @@ export function CategoriesContent({ categories }: CategoriesContentProps) {
     <div className="space-y-8 md:space-y-10">
       {/* Category Cards Grid - 2 columns on mobile, responsive scaling */}
       <motion.div
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6"
         variants={gridVariants}
         initial="hidden"
         animate="visible"
       >
-        {categories.length > 0 ? (
-          categories.map((category, index) => (
+        {safeCategories.length > 0 ? (
+          safeCategories.map((category, index) => (
             <CategoryCard
               key={category._id}
               category={category}

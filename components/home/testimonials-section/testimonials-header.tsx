@@ -1,5 +1,6 @@
 "use client";
 
+import { CustomImage } from "@/components/ui/custom-image";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import Image from "next/image";
@@ -67,7 +68,8 @@ export function TestimonialsHeader() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-slate-600 dark:text-slate-400 mt-4 max-w-2xl mx-auto text-base md:text-lg"
       >
-        Join thousands of satisfied customers who have made Pizza Space their go-to destination for authentic, delicious pizza.
+        Join thousands of satisfied customers who have made Pizza Space their
+        go-to destination for authentic, delicious pizza.
       </motion.p>
 
       {/* Rating and Avatars Row */}
@@ -94,8 +96,12 @@ export function TestimonialsHeader() {
           </div>
           <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
           <div className="text-left">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">4.8</span>
-            <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">/ 5</span>
+            <span className="text-2xl font-bold text-slate-900 dark:text-white">
+              4.8
+            </span>
+            <span className="text-slate-500 dark:text-slate-400 text-sm ml-1">
+              / 5
+            </span>
           </div>
         </div>
 
@@ -115,7 +121,7 @@ export function TestimonialsHeader() {
                 className="relative"
               >
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-3 border-white dark:border-slate-800 overflow-hidden shadow-md hover:scale-110 hover:z-10 transition-transform duration-200">
-                  <Image
+                  <CustomImage
                     src={avatar.src}
                     alt={avatar.alt}
                     width={48}
@@ -133,12 +139,18 @@ export function TestimonialsHeader() {
               transition={{ duration: 0.3, delay: 0.65 }}
               className="w-10 h-10 md:w-12 md:h-12 rounded-full border-3 border-white dark:border-slate-800 bg-orange-500 flex items-center justify-center shadow-md"
             >
-              <span className="text-white text-xs md:text-sm font-semibold">+2K</span>
+              <span className="text-white text-xs md:text-sm font-semibold">
+                +2K
+              </span>
             </motion.div>
           </div>
           <div className="text-left">
-            <p className="text-slate-900 dark:text-white font-semibold text-sm md:text-base">2.5K+ Reviews</p>
-            <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm">Happy Customers</p>
+            <p className="text-slate-900 dark:text-white font-semibold text-sm md:text-base">
+              2.5K+ Reviews
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm">
+              Happy Customers
+            </p>
           </div>
         </div>
       </motion.div>

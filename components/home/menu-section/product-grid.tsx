@@ -45,7 +45,9 @@ export function ProductGrid({
   initialMeta,
   categoryId,
 }: ProductGridProps) {
-  const [products, setProducts] = useState(initialProducts);
+  // Ensure initialProducts is always an array
+  const safeInitialProducts = Array.isArray(initialProducts) ? initialProducts : [];
+  const [products, setProducts] = useState(safeInitialProducts);
   const [meta, setMeta] = useState(initialMeta);
   const [loading, setLoading] = useState(false);
 

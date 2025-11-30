@@ -5,16 +5,14 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { CategoryResponse } from "@/types";
+import { CustomImage } from "@/components/ui/custom-image";
 
 interface CategoryCardProps {
   category: CategoryResponse;
   index?: number;
 }
 
-export function CategoryCard({
-  category,
-  index = 0,
-}: CategoryCardProps) {
+export function CategoryCard({ category, index = 0 }: CategoryCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -28,7 +26,7 @@ export function CategoryCard({
         {/* Card Container */}
         <div className="relative aspect-[4/3] md:aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-slate-800">
           {/* Background Image */}
-          <Image
+          <CustomImage
             src={category.imageUrl}
             alt={category.name}
             fill

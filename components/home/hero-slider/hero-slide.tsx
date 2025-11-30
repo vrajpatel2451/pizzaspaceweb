@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import type { HeroSlide as HeroSlideType } from "./types";
+import { CustomImage } from "@/components/ui/custom-image";
 
 interface HeroSlideProps {
   slide: HeroSlideType;
@@ -14,7 +15,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
     <div className="relative h-full min-h-[400px] w-full flex-[0_0_100%]">
       {/* Background Image */}
       <div className="absolute inset-0">
-        <Image
+        <CustomImage
           src={slide.image}
           alt={slide.title}
           fill

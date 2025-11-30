@@ -1,5 +1,6 @@
-import React from 'react';
-import Image from 'next/image';
+import React from "react";
+import Image from "next/image";
+import { CustomImage } from "@/components/ui/custom-image";
 
 export function PromoImage() {
   return (
@@ -7,7 +8,7 @@ export function PromoImage() {
       {/* Main Pizza Image */}
       <div className="relative z-10">
         <div className="relative aspect-square overflow-hidden rounded-full">
-          <Image
+          <CustomImage
             src="/images/pizza-promo.png"
             alt="Delicious pizza promotion"
             width={600}
@@ -26,7 +27,7 @@ export function PromoImage() {
 
         <div
           className="absolute -left-8 bottom-1/4 animate-bounce"
-          style={{ animationDelay: '0.5s' }}
+          style={{ animationDelay: "0.5s" }}
         >
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg">
             <span className="text-2xl">🍕</span>
@@ -35,7 +36,7 @@ export function PromoImage() {
 
         <div
           className="absolute right-1/4 -top-8 animate-bounce"
-          style={{ animationDelay: '0.25s' }}
+          style={{ animationDelay: "0.25s" }}
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-500 shadow-lg">
             <span className="text-xl">🔥</span>

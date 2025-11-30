@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import apiClient from "./client";
 import {
   APIResponse,
@@ -27,9 +28,28 @@ export async function getProducts(
   const queryString = queryParams.toString();
   const url = `/product${queryString ? `?${queryString}` : ""}`;
 
-  const response = await apiClient.get<
-    APIResponse<PaginatedResponse<ProductResponse>>
-  >(url);
-
-  return response.data;
+  try {
+    const response: AxiosResponse<
+      APIResponse<PaginatedResponse<ProductResponse>>
+    > = await apiClient.get<APIResponse<PaginatedResponse<ProductResponse>>>(
+      url
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return {
+      statusCode: 500,
+      data: {
+        data: [],
+        meta: {
+          currentPage: 1,
+          totalPages: 0,
+          totalItems: 0,
+          itemsPerPage: 10,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      },
+    };
+  }
 }

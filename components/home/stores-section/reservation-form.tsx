@@ -78,6 +78,8 @@ const timeSlots = [
 ];
 
 export function ReservationForm({ stores }: ReservationFormProps) {
+  // Ensure stores is always an array
+  const safeStores = Array.isArray(stores) ? stores : [];
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -107,7 +109,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const selectedStore = stores.find((s) => s._id === data.storeId);
+      const selectedStore = safeStores.find((s) => s._id === data.storeId);
 
       // Show success message
       setShowSuccess(true);
@@ -193,7 +195,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                   <SelectValue placeholder="Select a location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {stores.map((store) => (
+                  {safeStores.map((store) => (
                     <SelectItem key={store._id} value={store._id}>
                       {store.name} - {store.area}
                     </SelectItem>
@@ -225,10 +227,11 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
-                      variant="outline"
+                      variant="input"
+                      size="input"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !field.value && "text-slate-500",
+                        "w-full justify-start text-left",
+                        !field.value && "text-muted-foreground",
                         errors.date && "border-red-500 focus:ring-red-500"
                       )}
                       aria-invalid={errors.date ? "true" : "false"}
