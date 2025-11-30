@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,6 +15,7 @@ import {
   Phone,
   MessageSquare,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -82,6 +83,8 @@ export function ReservationForm({ stores }: ReservationFormProps) {
   const safeStores = Array.isArray(stores) ? stores : [];
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const firstErrorRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -101,6 +104,13 @@ export function ReservationForm({ stores }: ReservationFormProps) {
       agreeToTerms: false,
     },
   });
+
+  // Focus on first error when validation fails
+  useEffect(() => {
+    if (Object.keys(errors).length > 0 && firstErrorRef.current) {
+      firstErrorRef.current.focus();
+    }
+  }, [errors]);
 
   const onSubmit = async (data: ReservationFormData) => {
     setIsSubmitting(true);
@@ -140,21 +150,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
   if (showSuccess) {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-2xl p-8 flex items-center justify-center min-h-[600px]">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4" role="status" aria-live="polite">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto">
-            <svg
-              className="w-8 h-8 text-green-500 dark:text-green-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+            <CheckCircle2 className="w-8 h-8 text-green-500 dark:text-green-400" aria-hidden="true" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Reservation Confirmed!</h3>
           <p className="text-gray-600 dark:text-gray-300">We look forward to serving you.</p>
@@ -170,13 +168,14 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         <p className="text-gray-600 dark:text-gray-300 mt-1">Book your table in advance</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         {/* Location Select */}
         <div className="space-y-2">
           <Label htmlFor="storeId" className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
             Location
-            <span className="text-red-500 dark:text-red-400">*</span>
+            <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
+            <span className="sr-only">(required)</span>
           </Label>
           <Controller
             name="storeId"
@@ -191,6 +190,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                   )}
                   aria-invalid={errors.storeId ? "true" : "false"}
                   aria-describedby={errors.storeId ? "storeId-error" : undefined}
+                  aria-required="true"
                 >
                   <SelectValue placeholder="Select a location" />
                 </SelectTrigger>
@@ -216,9 +216,10 @@ export function ReservationForm({ stores }: ReservationFormProps) {
           {/* Date Picker */}
           <div className="space-y-2">
             <Label htmlFor="date" className="flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+              <CalendarIcon className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
               Date
-              <span className="text-red-500 dark:text-red-400">*</span>
+              <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
+              <span className="sr-only">(required)</span>
             </Label>
             <Controller
               name="date"
@@ -236,8 +237,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                       )}
                       aria-invalid={errors.date ? "true" : "false"}
                       aria-describedby={errors.date ? "date-error" : undefined}
+                      aria-required="true"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
                       {field.value ? format(field.value, "PPP", { locale: enGB }) : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
@@ -264,9 +266,10 @@ export function ReservationForm({ stores }: ReservationFormProps) {
           {/* Time Select */}
           <div className="space-y-2">
             <Label htmlFor="time" className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+              <Clock className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
               Time
-              <span className="text-red-500 dark:text-red-400">*</span>
+              <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
+              <span className="sr-only">(required)</span>
             </Label>
             <Controller
               name="time"
@@ -281,6 +284,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                     )}
                     aria-invalid={errors.time ? "true" : "false"}
                     aria-describedby={errors.time ? "time-error" : undefined}
+                    aria-required="true"
                   >
                     <SelectValue placeholder="Select time" />
                   </SelectTrigger>
@@ -305,9 +309,10 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Number of Guests */}
         <div className="space-y-2">
           <Label htmlFor="guests" className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            <Users className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
             Number of Guests
-            <span className="text-red-500 dark:text-red-400">*</span>
+            <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
+            <span className="sr-only">(required)</span>
           </Label>
           <Controller
             name="guests"
@@ -360,9 +365,10 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Name */}
         <div className="space-y-2">
           <Label htmlFor="name" className="flex items-center gap-2">
-            <User className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            <User className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
             Your Name
-            <span className="text-red-500 dark:text-red-400">*</span>
+            <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
+            <span className="sr-only">(required)</span>
           </Label>
           <Input
             id="name"
@@ -371,6 +377,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
             className={cn(errors.name && "border-red-500 focus:ring-red-500")}
             aria-invalid={errors.name ? "true" : "false"}
             aria-describedby={errors.name ? "name-error" : undefined}
+            aria-required="true"
             {...register("name")}
           />
           {errors.name && (
@@ -383,9 +390,10 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Phone */}
         <div className="space-y-2">
           <Label htmlFor="phone" className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            <Phone className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
             Phone Number
-            <span className="text-red-500 dark:text-red-400">*</span>
+            <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
+            <span className="sr-only">(required)</span>
           </Label>
           <Input
             id="phone"
@@ -395,6 +403,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
             className={cn(errors.phone && "border-red-500 focus:ring-red-500")}
             aria-invalid={errors.phone ? "true" : "false"}
             aria-describedby={errors.phone ? "phone-error" : undefined}
+            aria-required="true"
             {...register("phone")}
           />
           {errors.phone && (
@@ -407,7 +416,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Special Requests */}
         <div className="space-y-2">
           <Label htmlFor="specialRequests" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+            <MessageSquare className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
             Special Requests
             <span className="text-gray-400 dark:text-gray-500 text-sm font-normal">(Optional)</span>
           </Label>
@@ -448,7 +457,8 @@ export function ReservationForm({ stores }: ReservationFormProps) {
               <a href="/terms" className="text-orange-500 dark:text-orange-400 hover:underline">
                 terms and conditions
               </a>
-              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
+              <span className="text-red-500 dark:text-red-400 ml-1" aria-hidden="true">*</span>
+              <span className="sr-only">(required)</span>
             </Label>
             {errors.agreeToTerms && (
               <p id="terms-error" role="alert" className="text-sm text-red-500">
@@ -463,10 +473,12 @@ export function ReservationForm({ stores }: ReservationFormProps) {
           type="submit"
           disabled={isSubmitting}
           className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white py-6 text-lg font-semibold"
+          aria-live="polite"
+          aria-busy={isSubmitting}
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
               Booking Table...
             </>
           ) : (

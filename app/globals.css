@@ -501,3 +501,551 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ============================================
+   SPEC3 PAGES - EXTENDED DESIGN TOKENS
+   About, Contact, Store Pages
+   ============================================ */
+
+/* Avatar Sizing System */
+:root {
+  --avatar-xs: 32px;
+  --avatar-sm: 40px;
+  --avatar-md: 56px;
+  --avatar-lg: 80px;
+  --avatar-xl: 120px;
+
+  /* Social Icon Sizing */
+  --social-icon-sm: 16px;
+  --social-icon-md: 20px;
+  --social-icon-lg: 24px;
+
+  /* Timeline Styling */
+  --timeline-line-width: 2px;
+  --timeline-dot-size: 12px;
+  --timeline-dot-ring: 4px;
+  --timeline-spacing: 48px;
+
+  /* Map Marker Colors */
+  --map-marker-primary: #F97316;
+  --map-marker-hover: #EA580C;
+  --map-marker-shadow: rgba(249, 115, 22, 0.3);
+
+  /* Badge/Chip Styling */
+  --chip-height: 32px;
+  --chip-padding-x: 12px;
+  --chip-gap: 8px;
+
+  /* Compact Hero Heights */
+  --hero-compact-height: 240px;
+  --hero-compact-height-md: 320px;
+  --hero-compact-height-lg: 400px;
+
+  /* Card Hover Transform */
+  --card-hover-lift: -4px;
+  --card-hover-scale: 1.02;
+}
+
+.dark {
+  --map-marker-primary: #FB923C;
+  --map-marker-hover: #F97316;
+  --map-marker-shadow: rgba(251, 146, 60, 0.4);
+}
+
+/* ============================================
+   COMPONENT PATTERNS - TEAM CARDS
+   ============================================ */
+
+/* Team Card Base */
+.team-card {
+  position: relative;
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-6);
+  transition: all var(--transition-base) var(--ease-out);
+  overflow: hidden;
+}
+
+.team-card:hover {
+  transform: translateY(var(--card-hover-lift));
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-primary);
+}
+
+/* Team Avatar */
+.team-avatar {
+  position: relative;
+  width: var(--avatar-lg);
+  height: var(--avatar-lg);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 3px solid var(--color-background);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base) var(--ease-out);
+}
+
+.team-card:hover .team-avatar {
+  transform: scale(1.05);
+  border-color: var(--color-primary);
+}
+
+/* Social Links Container */
+.social-links {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--spacing-4);
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground-secondary);
+  transition: all var(--transition-fast) var(--ease-out);
+}
+
+.social-link:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   COMPONENT PATTERNS - TIMELINE
+   ============================================ */
+
+/* Timeline Container */
+.timeline-container {
+  position: relative;
+  padding-left: var(--spacing-8);
+}
+
+/* Timeline Vertical Line */
+.timeline-line {
+  position: absolute;
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: var(--timeline-line-width);
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary),
+    var(--color-primary-hover)
+  );
+}
+
+/* Timeline Item */
+.timeline-item {
+  position: relative;
+  padding-bottom: var(--timeline-spacing);
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+/* Timeline Dot */
+.timeline-dot {
+  position: absolute;
+  left: calc(var(--spacing-8) * -1 + 6px - var(--timeline-dot-size) / 2);
+  top: 4px;
+  width: var(--timeline-dot-size);
+  height: var(--timeline-dot-size);
+  background: var(--color-primary);
+  border: var(--timeline-dot-ring) solid var(--color-background);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+  z-index: 10;
+  transition: all var(--transition-base) var(--ease-out);
+}
+
+.timeline-item:hover .timeline-dot {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 4px var(--color-primary-light), var(--shadow-lg);
+}
+
+/* Timeline Year Label */
+.timeline-year {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-1) var(--spacing-3);
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--spacing-2);
+}
+
+/* Timeline Content */
+.timeline-content {
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  transition: all var(--transition-base) var(--ease-out);
+}
+
+.timeline-item:hover .timeline-content {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   COMPONENT PATTERNS - MAP OVERLAY
+   ============================================ */
+
+/* Map Container */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+  .map-container {
+    height: 500px;
+  }
+}
+
+/* Map Overlay Controls */
+.map-overlay {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  z-index: 100;
+}
+
+.map-control-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--color-background-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-foreground);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast) var(--ease-out);
+  cursor: pointer;
+}
+
+.map-control-button:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-lg);
+}
+
+.map-control-button:active {
+  transform: scale(0.95);
+}
+
+/* Map Info Window */
+.map-info-window {
+  min-width: 240px;
+  max-width: 320px;
+  background: var(--color-background-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-xl);
+}
+
+.map-info-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-foreground);
+  margin-bottom: var(--spacing-2);
+}
+
+.map-info-address {
+  font-size: var(--text-sm);
+  color: var(--color-foreground-muted);
+  margin-bottom: var(--spacing-3);
+}
+
+.map-info-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  transition: all var(--transition-fast) var(--ease-out);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  justify-content: center;
+}
+
+.map-info-button:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ============================================
+   COMPONENT PATTERNS - FILTER CHIPS
+   ============================================ */
+
+/* Filter Chips Container */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--chip-gap);
+  align-items: center;
+}
+
+/* Filter Chip */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  height: var(--chip-height);
+  padding: 0 var(--chip-padding-x);
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-foreground-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast) var(--ease-out);
+  user-select: none;
+}
+
+.filter-chip:hover {
+  background: var(--color-background-tertiary);
+  border-color: var(--color-border-hover);
+}
+
+.filter-chip.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  font-weight: var(--font-semibold);
+}
+
+.filter-chip.active:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Filter Chip Icon */
+.filter-chip-icon {
+  width: var(--social-icon-sm);
+  height: var(--social-icon-sm);
+}
+
+/* Filter Chip Remove Button */
+.filter-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: var(--spacing-1);
+  border-radius: var(--radius-full);
+  background: transparent;
+  transition: all var(--transition-fast) var(--ease-out);
+}
+
+.filter-chip.active .filter-chip-remove:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   COMPONENT PATTERNS - COMPACT HERO
+   ============================================ */
+
+/* Compact Hero Section */
+.hero-compact {
+  position: relative;
+  width: 100%;
+  height: var(--hero-compact-height);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-hover) 100%
+  );
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .hero-compact {
+    height: var(--hero-compact-height-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-compact {
+    height: var(--hero-compact-height-lg);
+  }
+}
+
+/* Compact Hero Background Pattern */
+.hero-compact::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Compact Hero Content */
+.hero-compact-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 var(--spacing-4);
+}
+
+.hero-compact-title {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--spacing-3);
+  line-height: var(--leading-tight);
+}
+
+@media (min-width: 768px) {
+  .hero-compact-title {
+    font-size: var(--text-5xl);
+  }
+}
+
+.hero-compact-subtitle {
+  font-size: var(--text-lg);
+  font-weight: var(--font-normal);
+  opacity: 0.9;
+  line-height: var(--leading-relaxed);
+}
+
+/* ============================================
+   SECTION VARIATIONS
+   ============================================ */
+
+/* Full-Width Section */
+.section-full-width {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+/* Section with Gradient Background */
+.section-gradient {
+  background: linear-gradient(
+    to bottom,
+    var(--color-background) 0%,
+    var(--color-background-secondary) 100%
+  );
+}
+
+/* Alternating Section Colors */
+.section-alternating:nth-child(even) {
+  background: var(--color-background-secondary);
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+   ============================================ */
+
+/* Pulse Animation for Map Markers */
+@keyframes marker-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.animate-marker-pulse {
+  animation: marker-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Slide Up Animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up var(--transition-slow) var(--ease-out);
+}
+
+/* Fade In Scale */
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-scale {
+  animation: fade-in-scale var(--transition-base) var(--ease-out);
+}
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* Focus Visible for Interactive Elements */
+.team-card:focus-visible,
+.filter-chip:focus-visible,
+.map-control-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .timeline-line {
+    width: 3px;
+  }
+
+  .filter-chip.active {
+    border-width: 2px;
+  }
+
+  .team-card:hover {
+    border-width: 2px;
+  }
+}

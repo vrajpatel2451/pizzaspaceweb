@@ -153,6 +153,7 @@ export function CustomImage({
         setHasError(true);
         onError?.(e);
       }}
+      unoptimized={imageSrc.startsWith(IMAGE_DOMAIN)}
       {...props}
     />
   );
