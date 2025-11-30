@@ -64,12 +64,13 @@ export function formatRelativeTime(date: Date): string {
 }
 
 /**
- * Format time only (HH:MM)
+ * Format time only (HH:MM in 24-hour format)
  */
 export function formatTime(date: Date | string | number): string {
   const dateObj = date instanceof Date ? date : new Date(date);
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false, // 24-hour format for UK
   }).format(dateObj);
 }

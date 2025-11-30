@@ -2,19 +2,15 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Pizza,
   Search,
-  Clock,
   MapPin,
   ShoppingCart,
   User,
   Phone,
-  Star,
   Flame,
-  Salad,
-  Coffee,
-  IceCream,
 } from "lucide-react";
 import {
   Command,
@@ -27,19 +23,16 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { getCategories } from "@/lib/api/categories";
+import { getProducts } from "@/lib/api/products";
+import { formatPrice } from "@/lib/formatters";
+import { useDebounce } from "@/hooks/use-debounce";
+import type { CategoryResponse, ProductResponse } from "@/types";
 
 interface SearchCommandProps {
   className?: string;
-}
-
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  price: string;
-  icon?: React.ComponentType<{ className?: string }>;
 }
 
 interface QuickAction {
@@ -50,53 +43,18 @@ interface QuickAction {
   action: () => void;
 }
 
-// Sample menu items - in production, this would come from API
-const popularItems: MenuItem[] = [
-  {
-    id: "margherita",
-    name: "Margherita Pizza",
-    description: "Classic tomato sauce, mozzarella, fresh basil",
-    category: "Pizzas",
-    price: "12.99",
-    icon: Pizza,
-  },
-  {
-    id: "pepperoni",
-    name: "Pepperoni Pizza",
-    description: "Pepperoni, mozzarella, tomato sauce",
-    category: "Pizzas",
-    price: "14.99",
-    icon: Pizza,
-  },
-  {
-    id: "bbq-chicken",
-    name: "BBQ Chicken Pizza",
-    description: "BBQ sauce, grilled chicken, red onions",
-    category: "Pizzas",
-    price: "15.99",
-    icon: Flame,
-  },
-  {
-    id: "caesar-salad",
-    name: "Caesar Salad",
-    description: "Romaine lettuce, parmesan, croutons, caesar dressing",
-    category: "Sides",
-    price: "8.99",
-    icon: Salad,
-  },
-  {
-    id: "garlic-bread",
-    name: "Garlic Bread",
-    description: "Freshly baked with garlic butter and herbs",
-    category: "Sides",
-    price: "4.99",
-  },
-];
-
 export function SearchCommand({ className }: SearchCommandProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [categories, setCategories] = React.useState<CategoryResponse[]>([]);
+  const [trendingCategories, setTrendingCategories] = React.useState<CategoryResponse[]>([]);
+  const [products, setProducts] = React.useState<ProductResponse[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = React.useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(null);
   const router = useRouter();
+
+  // Debounce search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Handle keyboard shortcut (Cmd/Ctrl + K)
   React.useEffect(() => {
@@ -110,6 +68,53 @@ export function SearchCommand({ className }: SearchCommandProps) {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  // Fetch categories when popup opens
+  React.useEffect(() => {
+    if (open && categories.length === 0) {
+      Promise.all([
+        getCategories({ limit: 5 }),
+        getCategories({ limit: 3 })
+      ])
+        .then(([allCategoriesResponse, trendingResponse]) => {
+          if (allCategoriesResponse.data?.data) {
+            setCategories(allCategoriesResponse.data.data);
+          }
+          if (trendingResponse.data?.data) {
+            setTrendingCategories(trendingResponse.data.data);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch categories:", error);
+        });
+    }
+  }, [open, categories.length]);
+
+  // Fetch products when search query changes
+  React.useEffect(() => {
+    if (!debouncedSearchQuery) {
+      setProducts([]);
+      return;
+    }
+
+    setIsLoadingProducts(true);
+    getProducts({
+      search: debouncedSearchQuery,
+      categoryId: selectedCategoryId || undefined,
+      limit: 10
+    })
+      .then((response) => {
+        if (response.data?.data) {
+          setProducts(response.data.data);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to fetch products:", error);
+      })
+      .finally(() => {
+        setIsLoadingProducts(false);
+      });
+  }, [debouncedSearchQuery, selectedCategoryId]);
 
   // Quick actions
   const quickActions: QuickAction[] = React.useMemo(
@@ -167,22 +172,27 @@ export function SearchCommand({ className }: SearchCommandProps) {
     [router]
   );
 
-  // Filter items based on search
-  const filteredItems = React.useMemo(() => {
-    if (!searchQuery) return popularItems;
-
-    const query = searchQuery.toLowerCase();
-    return popularItems.filter(
-      (item) =>
-        item.name.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.category.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
-
-  const handleItemSelect = (itemId: string) => {
-    router.push(`/menu/${itemId}`);
+  // Handler for selecting a product
+  const handleItemSelect = (productId: string) => {
+    router.push(`/menu/${productId}`);
     setOpen(false);
+    setSearchQuery("");
+  };
+
+  // Handler for category filter
+  const handleCategorySelect = (categoryId: string) => {
+    if (selectedCategoryId === categoryId) {
+      setSelectedCategoryId(null);
+    } else {
+      setSelectedCategoryId(categoryId);
+    }
+  };
+
+  // Handler for navigating to category page
+  const handleCategoryNavigate = (categoryId: string) => {
+    router.push(`/menu?category=${categoryId}`);
+    setOpen(false);
+    setSearchQuery("");
   };
 
   return (
@@ -230,7 +240,7 @@ export function SearchCommand({ className }: SearchCommandProps) {
               <div className="flex flex-col items-center gap-2 py-6">
                 <Pizza className="size-10 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">
-                  No results found for &quot;{searchQuery}&quot;
+                  {searchQuery ? `No results found for "${searchQuery}"` : "Start typing to search..."}
                 </p>
                 <p className="text-xs text-muted-foreground/70">
                   Try searching for pizza, salad, or drinks
@@ -262,61 +272,122 @@ export function SearchCommand({ className }: SearchCommandProps) {
               </>
             )}
 
-            {/* Menu Items */}
-            <CommandGroup
-              heading={searchQuery ? "Search Results" : "Popular Items"}
-            >
-              {filteredItems.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={item.name}
-                  onSelect={() => handleItemSelect(item.id)}
-                  className="flex items-center gap-3 py-3 cursor-pointer"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    {item.icon ? (
-                      <item.icon className="size-5" />
-                    ) : (
-                      <Pizza className="size-5" />
-                    )}
+            {/* Trending Categories */}
+            {!searchQuery && trendingCategories.length > 0 && (
+              <>
+                <CommandGroup heading="Trending Categories">
+                  <div className="flex flex-wrap gap-2 px-2 py-2">
+                    {trendingCategories.map((category) => (
+                      <button
+                        key={category._id}
+                        onClick={() => handleCategoryNavigate(category._id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-colors cursor-pointer"
+                      >
+                        <Flame className="size-3" />
+                        {category.name}
+                      </button>
+                    ))}
                   </div>
-                  <div className="flex flex-1 flex-col gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{item.name}</span>
-                      <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {item.category}
+                </CommandGroup>
+                <CommandSeparator />
+              </>
+            )}
+
+            {/* Category Filters */}
+            {searchQuery && categories.length > 0 && (
+              <>
+                <CommandGroup heading="Filter by Category">
+                  <div className="flex flex-wrap gap-2 px-2 py-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category._id}
+                        onClick={() => handleCategorySelect(category._id)}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer",
+                          selectedCategoryId === category._id
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                        )}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                </CommandGroup>
+                <CommandSeparator />
+              </>
+            )}
+
+            {/* Loading State */}
+            {isLoadingProducts && (
+              <CommandGroup heading="Search Results">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 py-3 px-2">
+                    <Skeleton className="size-12 rounded-lg" />
+                    <div className="flex flex-1 flex-col gap-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-48" />
+                    </div>
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                ))}
+              </CommandGroup>
+            )}
+
+            {/* Product Results */}
+            {!isLoadingProducts && searchQuery && products.length > 0 && (
+              <CommandGroup heading={`Search Results (${products.length})`}>
+                {products.map((product) => (
+                  <CommandItem
+                    key={product._id}
+                    value={product.name}
+                    onSelect={() => handleItemSelect(product._id)}
+                    className="flex items-center gap-3 py-3 cursor-pointer"
+                  >
+                    {/* Product Image */}
+                    <div className="relative size-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      {product.photoList[0] ? (
+                        <Image
+                          src={product.photoList[0]}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                        />
+                      ) : (
+                        <div className="flex size-full items-center justify-center">
+                          <Pizza className="size-6 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate">{product.name}</span>
+                        {product.type && (
+                          <span className={cn(
+                            "text-xs px-1.5 py-0.5 rounded flex-shrink-0",
+                            product.type === "veg" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                            product.type === "vegan" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                            "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          )}>
+                            {product.type}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground line-clamp-1">
+                        {product.description}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground line-clamp-1">
-                      {item.description}
-                    </span>
-                  </div>
-                  <span className="font-semibold text-primary">
-                    {item.price} GBP
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
 
-            {/* Recently Viewed - placeholder for future implementation */}
-            {!searchQuery && (
-              <>
-                <CommandSeparator />
-                <CommandGroup heading="Recently Viewed">
-                  <CommandItem
-                    onSelect={() => handleItemSelect("margherita")}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <div className="flex size-8 items-center justify-center rounded-md bg-muted">
-                      <Clock className="size-4 text-muted-foreground" />
-                    </div>
-                    <span className="text-muted-foreground">Margherita Pizza</span>
-                    <span className="ml-auto text-xs text-muted-foreground/70">
-                      2 hours ago
+                    {/* Price */}
+                    <span className="font-semibold text-primary flex-shrink-0">
+                      {formatPrice(product.basePrice)}
                     </span>
                   </CommandItem>
-                </CommandGroup>
-              </>
+                ))}
+              </CommandGroup>
             )}
           </CommandList>
 
@@ -342,68 +413,7 @@ export function SearchCommand({ className }: SearchCommandProps) {
 }
 
 // Inline search bar variant for larger screens
+// This is a simple wrapper that just shows the search trigger and reuses SearchCommand
 export function SearchBar({ className }: { className?: string }) {
-  const [open, setOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen(true);
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
-
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className={cn(
-          "flex items-center gap-3 w-full max-w-sm",
-          "px-4 py-2.5 rounded-full",
-          "bg-muted/50 hover:bg-muted",
-          "border border-transparent hover:border-border",
-          "transition-all duration-200 cursor-pointer",
-          "text-muted-foreground",
-          "focus-visible:ring-2 focus-visible:ring-ring outline-none",
-          className
-        )}
-      >
-        <Search className="size-4" />
-        <span className="flex-1 text-left text-sm">Search menu...</span>
-        <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border bg-background px-1.5 font-mono text-[10px] font-medium">
-          <span className="text-xs">Ctrl</span>K
-        </kbd>
-      </button>
-
-      <CommandDialog
-        open={open}
-        onOpenChange={setOpen}
-        title="Search Pizza Space"
-        description="Search for menu items"
-        showCloseButton={false}
-      >
-        <Command shouldFilter={true}>
-          <CommandInput placeholder="Search pizzas, sides, drinks..." />
-          <CommandList className="max-h-[400px]">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Popular Items">
-              {popularItems.map((item) => (
-                <CommandItem key={item.id} className="cursor-pointer">
-                  <Pizza className="mr-2 size-4" />
-                  <span>{item.name}</span>
-                  <span className="ml-auto text-muted-foreground">
-                    {item.price} GBP
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </CommandDialog>
-    </>
-  );
+  return <SearchCommand className={className} />;
 }

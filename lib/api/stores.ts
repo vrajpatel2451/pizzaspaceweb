@@ -13,7 +13,8 @@ export async function getStores(
 
   if (params?.page) queryParams.append("page", params.page.toString());
   if (params?.limit) queryParams.append("limit", params.limit.toString());
-  if (params?.lat !== undefined) queryParams.append("lat", params.lat.toString());
+  if (params?.lat !== undefined)
+    queryParams.append("lat", params.lat.toString());
   if (params?.long !== undefined)
     queryParams.append("long", params.long.toString());
   if (params?.search) queryParams.append("search", params.search);
@@ -21,7 +22,7 @@ export async function getStores(
     queryParams.append("isActive", params.isActive.toString());
 
   const queryString = queryParams.toString();
-  const url = `/stores${queryString ? `?${queryString}` : ""}`;
+  const url = `/store${queryString ? `?${queryString}` : ""}`;
 
   const response = await apiClient.get<
     APIResponse<PaginatedResponse<StoreResponse>>

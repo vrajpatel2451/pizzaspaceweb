@@ -6,6 +6,7 @@ import { Star, Flame, Sparkles, TrendingUp } from "lucide-react";
 import { ProductResponse } from "@/types";
 import { QuickAddButton } from "./quick-add-button";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/formatters";
 
 interface ProductCardProps {
   product: ProductResponse;
@@ -187,7 +188,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col">
             <span className="text-xl sm:text-2xl font-bold text-orange-500">
-              ${product.basePrice.toFixed(2)}
+              {formatPrice(product.basePrice)}
             </span>
           </div>
 

@@ -1,20 +1,24 @@
 import { Suspense } from "react";
 import { getCategories } from "@/lib/api";
-import { getMockCategories } from "@/lib/mocks/categories";
 import { CategoriesContent, CategoriesContentSkeleton } from "./categories-content";
+import { CategoryResponse } from "@/types";
 
 export async function CategoriesSection() {
-  let categories;
+  let categories: CategoryResponse[] = [];
 
   try {
     // Fetch categories from API
     const response = await getCategories({ limit: 10 });
-    categories = response.data.data;
+    categories = response.data?.data || [];
   } catch (error) {
-    // Fallback to mock data if API fails
-    console.error("Failed to fetch categories, using mock data:", error);
-    const mockResponse = getMockCategories(1, 10);
-    categories = mockResponse.data.data;
+    // Log error and show empty state
+    console.error("Failed to fetch categories:", error);
+    categories = [];
+  }
+
+  // Don't render section if no categories
+  if (categories.length === 0) {
+    return null;
   }
 
   return (

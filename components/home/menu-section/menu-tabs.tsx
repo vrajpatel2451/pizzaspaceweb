@@ -111,10 +111,11 @@ export function MenuTabs({
           {activeTabRect && containerRect && (
             <motion.div
               layoutId="activeTab"
-              className="absolute bg-orange-500 rounded-full shadow-lg shadow-orange-500/25 dark:shadow-orange-500/15 hidden sm:block"
+              className="absolute bg-orange-500 rounded-full shadow-lg shadow-orange-500/25 dark:shadow-orange-500/15 hidden sm:block pointer-events-none"
               initial={false}
               animate={{
-                x: activeTabRect.left - containerRect.left,
+                left: activeTabRect.left - containerRect.left,
+                top: activeTabRect.top - containerRect.top,
                 width: activeTabRect.width,
                 height: activeTabRect.height,
               }}
@@ -122,9 +123,6 @@ export function MenuTabs({
                 type: "spring",
                 stiffness: 400,
                 damping: 30,
-              }}
-              style={{
-                top: activeTabRect.top - containerRect.top,
               }}
             />
           )}

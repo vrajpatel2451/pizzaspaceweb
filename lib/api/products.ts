@@ -25,7 +25,7 @@ export async function getProducts(
   }
 
   const queryString = queryParams.toString();
-  const url = `/products${queryString ? `?${queryString}` : ""}`;
+  const url = `/product${queryString ? `?${queryString}` : ""}`;
 
   const response = await apiClient.get<
     APIResponse<PaginatedResponse<ProductResponse>>

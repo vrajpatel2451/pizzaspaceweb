@@ -27,9 +27,9 @@ export function HighlightCard({
       whileHover={{ y: -4, scale: 1.02 }}
       className="group"
     >
-      <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} p-5 sm:p-6 border border-primary/10 dark:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10`}>
+      <div className={`relative rounded-2xl bg-gradient-to-br ${gradient} p-5 sm:p-6 border border-primary/10 dark:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10`}>
         {/* Subtle pattern background */}
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{
+        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] rounded-2xl overflow-hidden pointer-events-none" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f97316' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
 
@@ -47,17 +47,17 @@ export function HighlightCard({
 
           {/* Content */}
           <div className="min-w-0 flex-1">
-            <h4 className="font-semibold text-base sm:text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+            <h4 className="font-semibold text-base sm:text-lg text-foreground group-hover:text-primary transition-colors duration-300 leading-snug break-words">
               {title}
             </h4>
-            <p className="text-muted-foreground text-sm sm:text-base mt-1 leading-relaxed">
+            <p className="text-muted-foreground text-sm sm:text-base mt-1.5 leading-relaxed whitespace-normal break-words">
               {description}
             </p>
           </div>
         </div>
 
         {/* Decorative corner accent */}
-        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-tl from-primary/10 to-transparent rounded-full opacity-50 group-hover:opacity-80 transition-opacity duration-300" />
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-tl from-primary/10 to-transparent rounded-full opacity-50 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none overflow-hidden" />
       </div>
     </motion.div>
   );

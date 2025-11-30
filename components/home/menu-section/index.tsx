@@ -1,7 +1,6 @@
 import { getProducts, getCategories } from "@/lib/api";
-import { getMockProducts } from "@/lib/mocks/products";
-import { getMockCategories } from "@/lib/mocks/categories";
 import { MenuContent } from "./menu-content";
+import { ProductResponse, CategoryResponse, PaginationMeta } from "@/types";
 
 function SectionBadge({ children }: { children: React.ReactNode }) {
   return (
@@ -61,26 +60,41 @@ function SectionHeader() {
 }
 
 export async function MenuSection() {
-  let products;
-  let categories;
-  let meta;
+  let products: ProductResponse[] = [];
+  let categories: CategoryResponse[] = [];
+  let meta: PaginationMeta = {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 8,
+    hasNextPage: false,
+    hasPrevPage: false,
+  };
 
   try {
-    const [productsRes, categoriesRes] = await Promise.all([
+    // Fetch real data from API - no mock data fallback
+    const [productsRes, categoriesRes] = await Promise.allSettled([
       getProducts({ limit: 8, page: 1 }),
       getCategories({ limit: 10 }),
     ]);
-    products = productsRes.data.data;
-    categories = categoriesRes.data.data;
-    meta = productsRes.data.meta;
+
+    // Extract products if fetch was successful
+    if (productsRes.status === 'fulfilled') {
+      products = productsRes.value?.data?.data || [];
+      meta = productsRes.value?.data?.meta || meta;
+    } else {
+      console.error("Failed to fetch products for menu:", productsRes.reason);
+    }
+
+    // Extract categories if fetch was successful
+    if (categoriesRes.status === 'fulfilled') {
+      categories = categoriesRes.value?.data?.data || [];
+    } else {
+      console.error("Failed to fetch categories for menu:", categoriesRes.reason);
+    }
   } catch (error) {
-    // Fallback to mock data if API fails
-    console.error("Failed to fetch menu data, using mock data:", error);
-    const mockProducts = getMockProducts(1, 8);
-    const mockCategories = getMockCategories(1, 10);
-    products = mockProducts.data.data;
-    categories = mockCategories.data.data;
-    meta = mockProducts.data.meta;
+    console.error("Menu data fetch error:", error);
+    // products and categories remain empty arrays
   }
 
   return (

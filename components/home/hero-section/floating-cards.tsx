@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Star, Clock, Flame } from "lucide-react";
+import { formatPrice } from "@/lib/formatters";
+import { ProductResponse } from "@/types/product";
 
 interface FeaturedProduct {
   id: string;
@@ -13,9 +15,11 @@ interface FeaturedProduct {
   badgeColor?: "orange" | "green" | "red";
   gradientFrom: string;
   gradientTo: string;
+  imageUrl?: string;
 }
 
-const featuredProducts: FeaturedProduct[] = [
+// Fallback products in case API fails
+const fallbackProducts: FeaturedProduct[] = [
   {
     id: "1",
     name: "Margherita Pizza",
@@ -38,6 +42,36 @@ const featuredProducts: FeaturedProduct[] = [
     gradientTo: "to-orange-500",
   },
 ];
+
+// Transform API product to featured product format
+function transformProduct(product: ProductResponse, index: number): FeaturedProduct {
+  const gradients = [
+    { from: "from-amber-200", to: "to-orange-400" },
+    { from: "from-red-300", to: "to-orange-500" },
+    { from: "from-yellow-200", to: "to-amber-400" },
+  ];
+
+  const badges = [
+    { label: "Best Seller", color: "orange" as const },
+    { label: "Hot", color: "red" as const },
+    { label: "Popular", color: "green" as const },
+  ];
+
+  const gradient = gradients[index % gradients.length];
+  const badge = badges[index % badges.length];
+
+  return {
+    id: product._id,
+    name: product.name,
+    price: product.basePrice,
+    rating: 4.5 + Math.random() * 0.5, // Random rating between 4.5-5.0
+    badge: badge.label,
+    badgeColor: badge.color,
+    gradientFrom: gradient.from,
+    gradientTo: gradient.to,
+    imageUrl: product.photoList?.[0],
+  };
+}
 
 const badgeColors = {
   orange: "bg-primary text-white",
@@ -123,11 +157,11 @@ function FloatingProductCard({
             {/* Price */}
             <div className="flex items-center gap-1.5">
               <span className="text-base font-bold text-primary">
-                ${product.price.toFixed(2)}
+                {formatPrice(product.price)}
               </span>
               {product.originalPrice && (
                 <span className="text-xs text-muted-foreground line-through">
-                  ${product.originalPrice.toFixed(2)}
+                  {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
@@ -229,20 +263,33 @@ function OrdersBadge() {
   );
 }
 
-export function FloatingCards() {
+interface FloatingCardsProps {
+  products: ProductResponse[];
+}
+
+export function FloatingCards({ products }: FloatingCardsProps) {
+  // Transform API products or use fallback
+  const featuredProducts = products.length > 0
+    ? products.slice(0, 2).map((product, index) => transformProduct(product, index))
+    : fallbackProducts;
+
   return (
     <div className="absolute inset-0 pointer-events-none hidden md:block">
       {/* Product Cards */}
-      <FloatingProductCard
-        product={featuredProducts[0]}
-        delay={0.5}
-        className="top-[25%] right-[12%] lg:right-[15%] z-20"
-      />
-      <FloatingProductCard
-        product={featuredProducts[1]}
-        delay={0.7}
-        className="bottom-[20%] right-[20%] lg:right-[25%] z-10"
-      />
+      {featuredProducts[0] && (
+        <FloatingProductCard
+          product={featuredProducts[0]}
+          delay={0.5}
+          className="top-[25%] right-[12%] lg:right-[15%] z-20"
+        />
+      )}
+      {featuredProducts[1] && (
+        <FloatingProductCard
+          product={featuredProducts[1]}
+          delay={0.7}
+          className="bottom-[20%] right-[20%] lg:right-[25%] z-10"
+        />
+      )}
 
       {/* Info Badges */}
       <DeliveryBadge />

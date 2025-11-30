@@ -10,8 +10,8 @@ export function StoresGrid({ stores, maxStores = 3 }: StoresGridProps) {
   if (!stores || stores.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No stores available at the moment.</p>
-        <p className="text-gray-400 text-sm mt-2">
+        <p className="text-gray-500 dark:text-gray-400 text-lg">No stores available at the moment.</p>
+        <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
           Check back soon for locations near you.
         </p>
       </div>

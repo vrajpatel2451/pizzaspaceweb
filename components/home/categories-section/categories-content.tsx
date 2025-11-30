@@ -1,79 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { CategoryResponse } from "@/types";
-import { CategoriesPills, CategoryPill, defaultCategories } from "./categories-pills";
-import { FilterTags, defaultFilterTags } from "./filter-tags";
 import { CategoryCard, CategoryCardSkeleton } from "./category-card";
 
 interface CategoriesContentProps {
   categories: CategoryResponse[];
 }
 
-// Stable product count generator based on category id
-function getStableCount(categoryId: string): number {
-  let hash = 0;
-  for (let i = 0; i < categoryId.length; i++) {
-    const char = categoryId.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash % 15) + 5;
-}
-
-// Map API categories to pill format with icons
-function mapCategoriesToPills(categories: CategoryResponse[]): CategoryPill[] {
-  // Start with "All" option
-  const allOption = defaultCategories.find((c) => c.id === "all");
-  const pills: CategoryPill[] = allOption
-    ? [{ ...allOption, count: categories.length * 8 }]
-    : [];
-
-  // Map each API category to a pill, using default icon if available
-  categories.forEach((category) => {
-    const defaultCat = defaultCategories.find(
-      (c) => c.name.toLowerCase() === category.name.toLowerCase()
-    );
-
-    pills.push({
-      id: category._id,
-      name: category.name,
-      icon: defaultCat?.icon || defaultCategories[3].icon, // Default to UtensilsCrossed
-      count: getStableCount(category._id),
-    });
-  });
-
-  return pills;
-}
-
 export function CategoriesContent({ categories }: CategoriesContentProps) {
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-
-  // Map categories to pills format
-  const categoryPills = useMemo(
-    () => mapCategoriesToPills(categories),
-    [categories]
-  );
-
-  // Filter categories based on selection
-  const filteredCategories = useMemo(() => {
-    if (activeCategory === "all") {
-      return categories;
-    }
-    return categories.filter((c) => c._id === activeCategory);
-  }, [categories, activeCategory]);
-
-  // Handle filter toggle
-  const handleFilterToggle = (filterId: string) => {
-    setActiveFilters((prev) =>
-      prev.includes(filterId)
-        ? prev.filter((f) => f !== filterId)
-        : [...prev, filterId]
-    );
-  };
-
   // Animation variants
   const gridVariants = {
     hidden: { opacity: 0 },
@@ -87,50 +22,25 @@ export function CategoriesContent({ categories }: CategoriesContentProps) {
 
   return (
     <div className="space-y-8 md:space-y-10">
-      {/* Category Pills */}
-      <CategoriesPills
-        categories={categoryPills}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-      />
-
-      {/* Filter Tags */}
-      <FilterTags
-        tags={defaultFilterTags}
-        activeFilters={activeFilters}
-        onFilterToggle={handleFilterToggle}
-      />
-
-      {/* Divider */}
-      <div className="flex items-center justify-center gap-4">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-slate-600 to-transparent" />
-        <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-          {filteredCategories.length} Categories
-        </span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-slate-600 to-transparent" />
-      </div>
-
-      {/* Category Cards Grid */}
+      {/* Category Cards Grid - 2 columns on mobile, responsive scaling */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6"
         variants={gridVariants}
         initial="hidden"
         animate="visible"
-        key={activeCategory} // Re-animate on category change
       >
-        {filteredCategories.length > 0 ? (
-          filteredCategories.map((category, index) => (
+        {categories.length > 0 ? (
+          categories.map((category, index) => (
             <CategoryCard
               key={category._id}
               category={category}
-              productCount={getStableCount(category._id) + 3}
               index={index}
             />
           ))
         ) : (
           <div className="col-span-full text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 text-lg">
-              No categories found matching your criteria.
+              No categories available at the moment.
             </p>
           </div>
         )}
@@ -171,28 +81,8 @@ export function CategoriesContent({ categories }: CategoriesContentProps) {
 export function CategoriesContentSkeleton() {
   return (
     <div className="space-y-8 md:space-y-10">
-      {/* Pills skeleton */}
-      <div className="flex gap-3 justify-center flex-wrap">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="h-11 w-24 rounded-full bg-gray-200 dark:bg-slate-700 animate-pulse"
-          />
-        ))}
-      </div>
-
-      {/* Filter tags skeleton */}
-      <div className="flex gap-2 justify-center flex-wrap">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="h-8 w-20 rounded-full bg-gray-200 dark:bg-slate-700 animate-pulse"
-          />
-        ))}
-      </div>
-
-      {/* Grid skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      {/* Grid skeleton - 2 columns on mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6">
         {[...Array(6)].map((_, i) => (
           <CategoryCardSkeleton key={i} />
         ))}

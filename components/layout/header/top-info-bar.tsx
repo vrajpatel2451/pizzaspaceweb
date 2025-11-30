@@ -38,16 +38,16 @@ export function TopInfoBar({ className }: TopInfoBarProps) {
             <div className="flex items-center gap-1.5 text-secondary-foreground/80 hover:text-secondary-foreground transition-colors">
               <Clock className="size-3.5 text-primary" />
               <span className="hidden sm:inline">Open:</span>
-              <span className="font-medium">10am - 11pm</span>
+              <span className="font-medium">10:00 - 23:00</span>
             </div>
 
             {/* Phone - Hidden on extra small screens */}
             <Link
-              href="tel:+442071234567"
+              href="tel:+442012345678"
               className="hidden xs:flex items-center gap-1.5 text-secondary-foreground/80 hover:text-primary transition-colors group"
             >
               <Phone className="size-3.5 text-primary group-hover:animate-pulse" />
-              <span className="font-medium">+44 207 123 4567</span>
+              <span className="font-medium">+44 20 1234 5678</span>
             </Link>
 
             {/* Location - Hidden on mobile */}
@@ -65,7 +65,7 @@ export function TopInfoBar({ className }: TopInfoBarProps) {
             {/* Promo Badge */}
             <div className="hidden lg:flex items-center">
               <span className="bg-primary/20 text-primary px-2.5 py-0.5 rounded-full text-xs font-semibold animate-pulse">
-                Free Delivery Over 25 GBP
+                Free Delivery Over £25
               </span>
             </div>
 

@@ -191,7 +191,7 @@ export function ContactForm() {
             id="phone"
             label="Phone (Optional)"
             type="tel"
-            placeholder="+1 (555) 123-4567"
+            placeholder="+44 20 1234 5678"
             autoComplete="tel"
             error={errors.phone?.message}
             {...register('phone')}

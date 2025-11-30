@@ -4,14 +4,14 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "Visit Us",
-    content: "123 Pizza Street, Food City, FC 12345",
+    content: "123 Pizza Street, London, SW1A 1AA",
     href: "https://maps.google.com",
   },
   {
     icon: Phone,
     label: "Call Us",
-    content: "+1 (234) 567-8900",
-    href: "tel:+12345678900",
+    content: "+44 20 1234 5678",
+    href: "tel:+442012345678",
   },
   {
     icon: Mail,
@@ -22,9 +22,9 @@ const contactInfo = [
 ];
 
 const openingHours = [
-  { days: "Monday - Thursday", hours: "11:00 AM - 10:00 PM" },
-  { days: "Friday - Saturday", hours: "11:00 AM - 11:00 PM" },
-  { days: "Sunday", hours: "12:00 PM - 9:00 PM" },
+  { days: "Monday - Thursday", hours: "11:00 - 22:00" },
+  { days: "Friday - Saturday", hours: "11:00 - 23:00" },
+  { days: "Sunday", hours: "12:00 - 21:00" },
 ];
 
 export function FooterContact() {

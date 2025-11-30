@@ -177,16 +177,6 @@ export function ProductGrid({
           </Link>
         </Button>
       </motion.div>
-
-      {/* Results info */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-center text-sm text-slate-400 dark:text-slate-500 mt-6"
-      >
-        Showing {products.length} of {meta.totalItems} dishes
-      </motion.p>
     </>
   );
 }

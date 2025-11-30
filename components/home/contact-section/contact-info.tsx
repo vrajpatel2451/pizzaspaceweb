@@ -46,8 +46,8 @@ export function ContactInfo() {
     {
       icon: Phone,
       title: 'Phone',
-      primary: '+1 (555) 123-4567',
-      secondary: 'Mon-Sun, 10:00 AM - 11:00 PM',
+      primary: '+44 20 1234 5678',
+      secondary: 'Mon-Sun, 10:00 - 23:00',
       action: 'Call us',
     },
     {
@@ -60,15 +60,15 @@ export function ContactInfo() {
     {
       icon: MapPin,
       title: 'Location',
-      primary: '123 Pizza Street, Food District',
-      secondary: 'New York, NY 10001',
+      primary: '123 Pizza Street, London',
+      secondary: 'SW1A 1AA',
       action: 'Visit us',
     },
     {
       icon: Clock,
       title: 'Opening Hours',
-      primary: 'Mon-Thu: 10:00 AM - 11:00 PM',
-      secondary: 'Fri-Sun: 10:00 AM - 12:00 AM',
+      primary: 'Mon-Thu: 11:00 - 22:00',
+      secondary: 'Fri-Sun: 11:00 - 23:00',
     },
   ];
 

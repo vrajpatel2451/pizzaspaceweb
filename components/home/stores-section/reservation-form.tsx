@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, isFuture, startOfToday } from "date-fns";
+import { enGB } from "date-fns/locale";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -37,6 +38,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { StoreResponse } from "@/types";
+import { isValidUKPhone } from "@/lib/validators/phone";
 
 // Validation schema
 const reservationSchema = z.object({
@@ -49,7 +51,9 @@ const reservationSchema = z.object({
   time: z.string().min(1, "Please select a time"),
   guests: z.number().min(1, "At least 1 guest required").max(20, "Maximum 20 guests allowed"),
   name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().regex(/^[\d\s\-\+\(\)]+$/, "Please enter a valid phone number").min(10, "Phone number must be at least 10 digits"),
+  phone: z.string().min(1, "Phone number is required").refine((val) => isValidUKPhone(val), {
+    message: "Please enter a valid UK phone number",
+  }),
   specialRequests: z.string().optional(),
   agreeToTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms and conditions",
@@ -62,15 +66,15 @@ interface ReservationFormProps {
   stores: StoreResponse[];
 }
 
-// Time slots for reservation
+// Time slots for reservation (24-hour format for UK)
 const timeSlots = [
-  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM",
-  "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM",
-  "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM",
-  "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM",
-  "8:00 PM", "8:30 PM", "9:00 PM", "9:30 PM",
-  "10:00 PM", "10:30 PM",
+  "10:00", "10:30", "11:00", "11:30",
+  "12:00", "12:30", "13:00", "13:30",
+  "14:00", "14:30", "15:00", "15:30",
+  "16:00", "16:30", "17:00", "17:30",
+  "18:00", "18:30", "19:00", "19:30",
+  "20:00", "20:30", "21:00", "21:30",
+  "22:00", "22:30",
 ];
 
 export function ReservationForm({ stores }: ReservationFormProps) {
@@ -108,7 +112,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
       // Show success message
       setShowSuccess(true);
       toast.success("Reservation Confirmed!", {
-        description: `Your table for ${data.guests} at ${selectedStore?.name} on ${format(data.date, "MMM dd, yyyy")} at ${data.time} has been booked.`,
+        description: `Your table for ${data.guests} at ${selectedStore?.name} on ${format(data.date, "dd/MM/yyyy", { locale: enGB })} at ${data.time} has been booked.`,
         duration: 5000,
       });
 
@@ -133,11 +137,11 @@ export function ReservationForm({ stores }: ReservationFormProps) {
 
   if (showSuccess) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-8 flex items-center justify-center min-h-[600px]">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-2xl p-8 flex items-center justify-center min-h-[600px]">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto">
             <svg
-              className="w-8 h-8 text-green-500"
+              className="w-8 h-8 text-green-500 dark:text-green-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -150,27 +154,27 @@ export function ReservationForm({ stores }: ReservationFormProps) {
               />
             </svg>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">Reservation Confirmed!</h3>
-          <p className="text-gray-600">We look forward to serving you.</p>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Reservation Confirmed!</h3>
+          <p className="text-gray-600 dark:text-gray-300">We look forward to serving you.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg dark:shadow-2xl p-6 lg:p-8">
       <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900">Make a Reservation</h3>
-        <p className="text-gray-600 mt-1">Book your table in advance</p>
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Make a Reservation</h3>
+        <p className="text-gray-600 dark:text-gray-300 mt-1">Book your table in advance</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Location Select */}
         <div className="space-y-2">
           <Label htmlFor="storeId" className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-orange-500" />
+            <MapPin className="w-4 h-4 text-orange-500 dark:text-orange-400" />
             Location
-            <span className="text-red-500">*</span>
+            <span className="text-red-500 dark:text-red-400">*</span>
           </Label>
           <Controller
             name="storeId"
@@ -210,9 +214,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
           {/* Date Picker */}
           <div className="space-y-2">
             <Label htmlFor="date" className="flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-orange-500" />
+              <CalendarIcon className="w-4 h-4 text-orange-500 dark:text-orange-400" />
               Date
-              <span className="text-red-500">*</span>
+              <span className="text-red-500 dark:text-red-400">*</span>
             </Label>
             <Controller
               name="date"
@@ -231,7 +235,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                       aria-describedby={errors.date ? "date-error" : undefined}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                      {field.value ? format(field.value, "PPP", { locale: enGB }) : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -241,6 +245,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                       onSelect={field.onChange}
                       disabled={(date) => date < startOfToday()}
                       initialFocus
+                      locale={enGB}
                     />
                   </PopoverContent>
                 </Popover>
@@ -256,9 +261,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
           {/* Time Select */}
           <div className="space-y-2">
             <Label htmlFor="time" className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-orange-500" />
+              <Clock className="w-4 h-4 text-orange-500 dark:text-orange-400" />
               Time
-              <span className="text-red-500">*</span>
+              <span className="text-red-500 dark:text-red-400">*</span>
             </Label>
             <Controller
               name="time"
@@ -297,9 +302,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Number of Guests */}
         <div className="space-y-2">
           <Label htmlFor="guests" className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-orange-500" />
+            <Users className="w-4 h-4 text-orange-500 dark:text-orange-400" />
             Number of Guests
-            <span className="text-red-500">*</span>
+            <span className="text-red-500 dark:text-red-400">*</span>
           </Label>
           <Controller
             name="guests"
@@ -313,16 +318,17 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                   onClick={() => field.onChange(Math.max(1, (field.value || 1) - 1))}
                   disabled={(field.value || 1) <= 1}
                   aria-label="Decrease guest count"
+                  className="h-10 w-10"
                 >
                   <span className="text-lg">-</span>
                 </Button>
                 <div className="flex-1 text-center">
-                  <input
+                  <Input
                     {...field}
                     type="number"
                     min="1"
                     max="20"
-                    className="w-full text-center border rounded-md px-4 py-2"
+                    className="text-center h-10"
                     aria-label="Number of guests"
                     onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                   />
@@ -334,6 +340,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
                   onClick={() => field.onChange(Math.min(20, (field.value || 1) + 1))}
                   disabled={(field.value || 1) >= 20}
                   aria-label="Increase guest count"
+                  className="h-10 w-10"
                 >
                   <span className="text-lg">+</span>
                 </Button>
@@ -350,9 +357,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Name */}
         <div className="space-y-2">
           <Label htmlFor="name" className="flex items-center gap-2">
-            <User className="w-4 h-4 text-orange-500" />
+            <User className="w-4 h-4 text-orange-500 dark:text-orange-400" />
             Your Name
-            <span className="text-red-500">*</span>
+            <span className="text-red-500 dark:text-red-400">*</span>
           </Label>
           <Input
             id="name"
@@ -373,14 +380,14 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Phone */}
         <div className="space-y-2">
           <Label htmlFor="phone" className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-orange-500" />
+            <Phone className="w-4 h-4 text-orange-500 dark:text-orange-400" />
             Phone Number
-            <span className="text-red-500">*</span>
+            <span className="text-red-500 dark:text-red-400">*</span>
           </Label>
           <Input
             id="phone"
             type="tel"
-            placeholder="+1 (555) 123-4567"
+            placeholder="+44 20 1234 5678"
             autoComplete="tel"
             className={cn(errors.phone && "border-red-500 focus:ring-red-500")}
             aria-invalid={errors.phone ? "true" : "false"}
@@ -397,9 +404,9 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         {/* Special Requests */}
         <div className="space-y-2">
           <Label htmlFor="specialRequests" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-orange-500" />
+            <MessageSquare className="w-4 h-4 text-orange-500 dark:text-orange-400" />
             Special Requests
-            <span className="text-gray-400 text-sm font-normal">(Optional)</span>
+            <span className="text-gray-400 dark:text-gray-500 text-sm font-normal">(Optional)</span>
           </Label>
           <TextArea
             id="specialRequests"
@@ -435,10 +442,10 @@ export function ReservationForm({ stores }: ReservationFormProps) {
               className="text-sm font-normal cursor-pointer"
             >
               I agree to the{" "}
-              <a href="/terms" className="text-orange-500 hover:underline">
+              <a href="/terms" className="text-orange-500 dark:text-orange-400 hover:underline">
                 terms and conditions
               </a>
-              <span className="text-red-500 ml-1">*</span>
+              <span className="text-red-500 dark:text-red-400 ml-1">*</span>
             </Label>
             {errors.agreeToTerms && (
               <p id="terms-error" role="alert" className="text-sm text-red-500">
@@ -452,7 +459,7 @@ export function ReservationForm({ stores }: ReservationFormProps) {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg font-semibold"
+          className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white py-6 text-lg font-semibold"
         >
           {isSubmitting ? (
             <>

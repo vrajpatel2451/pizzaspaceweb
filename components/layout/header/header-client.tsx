@@ -12,6 +12,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { UserDropdown } from "./user-dropdown";
 import { CartBadge } from "./cart-badge";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
+import { StoreLocator } from "./store-locator";
 
 interface NavLink {
   label: string;
@@ -105,11 +106,11 @@ export function HeaderClient({ className }: HeaderClientProps) {
                       "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none",
                       // Active state
                       isActive && "text-primary",
-                      // Non-scrolled on homepage: light text
+                      // Non-scrolled on homepage: light text (dark mode only)
                       !scrolled && isHomePage
                         ? isActive
                           ? "text-primary"
-                          : "text-white/90 hover:text-white"
+                          : "dark:text-white/90 dark:hover:text-white text-foreground/70 hover:text-foreground"
                         : isActive
                         ? "text-primary"
                         : "text-foreground/70 hover:text-foreground"
@@ -165,7 +166,7 @@ export function HeaderClient({ className }: HeaderClientProps) {
             <SearchCommand
               className={cn(
                 !scrolled && isHomePage
-                  ? "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10"
                   : ""
               )}
             />
@@ -176,18 +177,27 @@ export function HeaderClient({ className }: HeaderClientProps) {
                 size="sm"
                 className={cn(
                   !scrolled && isHomePage
-                    ? "text-white/80 hover:text-white hover:bg-white/10"
+                    ? "dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10"
                     : ""
                 )}
               />
             </div>
+
+            {/* Store Locator */}
+            <StoreLocator
+              className={cn(
+                !scrolled && isHomePage
+                  ? "dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10"
+                  : ""
+              )}
+            />
 
             {/* Cart */}
             <CartBadge
               itemCount={cartItemCount}
               className={cn(
                 !scrolled && isHomePage
-                  ? "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10"
                   : ""
               )}
             />
@@ -198,7 +208,7 @@ export function HeaderClient({ className }: HeaderClientProps) {
                 isLoggedIn={false}
                 className={cn(
                   !scrolled && isHomePage
-                    ? "text-white/80 hover:text-white hover:bg-white/10"
+                    ? "dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10"
                     : ""
                 )}
               />
@@ -208,7 +218,7 @@ export function HeaderClient({ className }: HeaderClientProps) {
             <MobileNavDrawer
               className={cn(
                 !scrolled && isHomePage
-                  ? "[&_button]:text-white/80 [&_button]:hover:text-white [&_button]:hover:bg-white/10"
+                  ? "[&_button]:dark:text-white/80 [&_button]:dark:hover:text-white [&_button]:dark:hover:bg-white/10"
                   : ""
               )}
             />

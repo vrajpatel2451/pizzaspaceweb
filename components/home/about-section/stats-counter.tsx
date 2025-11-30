@@ -126,9 +126,9 @@ function StatCard({ stat, index }: StatCardProps) {
       whileHover={{ y: -5, scale: 1.02 }}
       className="group relative"
     >
-      <div className="relative bg-white dark:bg-navy-800 rounded-2xl p-4 sm:p-5 shadow-lg shadow-black/5 dark:shadow-black/20 border border-gray-100 dark:border-navy-700 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-black/10 dark:group-hover:shadow-black/30 overflow-hidden">
+      <div className="relative bg-white dark:bg-navy-800 rounded-2xl p-4 sm:p-5 shadow-lg shadow-black/5 dark:shadow-black/20 border border-gray-100 dark:border-navy-700 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-black/10 dark:group-hover:shadow-black/30">
         {/* Subtle gradient background on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
 
         <div className="relative z-10 flex items-center gap-3 sm:gap-4">
           {/* Icon */}
@@ -141,28 +141,28 @@ function StatCard({ stat, index }: StatCardProps) {
           </motion.div>
 
           {/* Content */}
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-0.5">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-0.5 flex-wrap">
               <motion.span
                 key={count}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums"
+                className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums leading-tight"
               >
                 {count}
               </motion.span>
-              <span className="text-xl sm:text-2xl font-bold text-primary">
+              <span className="text-xl sm:text-2xl font-bold text-primary leading-tight">
                 {stat.suffix}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-0.5 truncate">
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium mt-1 leading-snug whitespace-normal break-words">
               {stat.label}
             </p>
           </div>
         </div>
 
         {/* Corner accent */}
-        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     </motion.div>
   );

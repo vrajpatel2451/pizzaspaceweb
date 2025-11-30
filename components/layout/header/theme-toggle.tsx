@@ -90,7 +90,7 @@ export function ThemeToggle({ className, size = "default" }: ThemeToggleProps) {
           className={cn(
             iconSizeClasses[size],
             "transition-all duration-500 ease-in-out",
-            "text-slate-700 dark:text-slate-300",
+            "text-slate-600 dark:text-slate-300",
             isDark
               ? "rotate-90 scale-0 opacity-0"
               : "rotate-0 scale-100 opacity-100"
@@ -141,7 +141,7 @@ export function ThemeTogglePill({ className }: { className?: string }) {
       className={cn(
         "relative h-8 w-16 rounded-full p-1 transition-colors duration-300 cursor-pointer",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none",
-        isDark ? "bg-slate-700" : "bg-slate-200",
+        isDark ? "bg-slate-700 dark:bg-slate-700" : "bg-slate-200",
         className
       )}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
@@ -156,7 +156,7 @@ export function ThemeTogglePill({ className }: { className?: string }) {
         )}
       >
         {isDark ? (
-          <Moon className="size-3.5 text-slate-700" strokeWidth={2.5} />
+          <Moon className="size-3.5 text-slate-700 dark:text-slate-700" strokeWidth={2.5} />
         ) : (
           <Sun className="size-3.5 text-amber-500" strokeWidth={2.5} />
         )}
@@ -167,7 +167,7 @@ export function ThemeTogglePill({ className }: { className?: string }) {
         <Sun
           className={cn(
             "size-3.5 transition-colors duration-300",
-            isDark ? "text-slate-500" : "text-transparent"
+            isDark ? "text-slate-500 dark:text-slate-500" : "text-transparent"
           )}
         />
         <Moon

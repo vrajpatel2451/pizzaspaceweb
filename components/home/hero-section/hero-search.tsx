@@ -4,15 +4,27 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CategoryResponse } from "@/types/category";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
-const popularSearches = [
+// Fallback popular searches
+const defaultPopularSearches = [
   "Margherita",
   "Pepperoni",
   "BBQ Chicken",
   "Veggie Supreme",
 ];
 
-export function HeroSearch() {
+interface HeroSearchProps {
+  trendingCategories: CategoryResponse[];
+}
+
+export function HeroSearch({ trendingCategories }: HeroSearchProps) {
+  // Use category names for popular searches if available
+  const popularSearches = trendingCategories.length > 0
+    ? trendingCategories.slice(0, 4).map((cat) => cat.name)
+    : defaultPopularSearches;
   const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -149,29 +161,34 @@ export function HeroSearch() {
         </AnimatePresence>
       </div>
 
-      {/* Popular tags below search */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
-        className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm"
-      >
-        <span className="text-muted-foreground">Trending:</span>
-        {["Pizza", "Pasta", "Burgers", "Desserts"].map((tag, index) => (
-          <motion.button
-            key={tag}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
-            onClick={() => setSearchValue(tag)}
-            className="text-primary hover:text-primary-600 dark:hover:text-primary-400 font-medium hover:underline transition-colors min-h-[28px] px-1 touch-manipulation"
-            aria-label={`Search for ${tag}`}
-          >
-            {tag}
-            {index < 3 && <span className="text-muted-foreground ml-2 hidden sm:inline" aria-hidden="true">|</span>}
-          </motion.button>
-        ))}
-      </motion.div>
+      {/* Trending categories below search */}
+      {trendingCategories.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+          className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm"
+        >
+          <span className="text-muted-foreground">Trending:</span>
+          {trendingCategories.slice(0, 3).map((category, index) => (
+            <motion.div
+              key={category._id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
+            >
+              <Link href={`/menu?category=${category._id}`}>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-primary/20 transition-colors min-h-[28px] px-3 py-1"
+                >
+                  {category.name}
+                </Badge>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </motion.div>
   );
 }

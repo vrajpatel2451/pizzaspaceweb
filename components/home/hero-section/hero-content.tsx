@@ -5,6 +5,7 @@ import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { HeroSearch } from "./hero-search";
 import { HeroStats } from "./hero-stats";
+import { CategoryResponse } from "@/types/category";
 
 // Animation variants for staggered entrance
 const containerVariants: Variants = {
@@ -43,19 +44,11 @@ const badgeVariants: Variants = {
   },
 };
 
-const buttonVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.4,
-      ease: "easeOut",
-    },
-  },
-};
+interface HeroContentProps {
+  trendingCategories: CategoryResponse[];
+}
 
-export function HeroContent() {
+export function HeroContent({ trendingCategories }: HeroContentProps) {
   return (
     <motion.div
       variants={containerVariants}
@@ -120,13 +113,13 @@ export function HeroContent() {
 
       {/* Search Bar */}
       <motion.div variants={itemVariants} className="mt-6 sm:mt-8 w-full lg:max-w-xl">
-        <HeroSearch />
+        <HeroSearch trendingCategories={trendingCategories} />
       </motion.div>
 
-      {/* CTA Buttons */}
+      {/* CTA Button */}
       <motion.div
         variants={itemVariants}
-        className="mt-6 sm:mt-8 flex flex-wrap items-center gap-4"
+        className="mt-6 sm:mt-8"
       >
         <Link href="/menu">
           <Button size="lg" className="group shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30">
@@ -144,31 +137,6 @@ export function HeroContent() {
                 d="M17 8l4 4m0 0l-4 4m4-4H3"
               />
             </svg>
-          </Button>
-        </Link>
-
-        <Link href="/menu">
-          <Button size="lg" variant="outline" className="group">
-            <svg
-              className="mr-2 w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-              />
-            </svg>
-            View Menu
           </Button>
         </Link>
       </motion.div>

@@ -20,7 +20,7 @@ export async function getCategories(
   if (params?.categoryId) queryParams.append("categoryId", params.categoryId);
 
   const queryString = queryParams.toString();
-  const url = `/categories${queryString ? `?${queryString}` : ""}`;
+  const url = `/category${queryString ? `?${queryString}` : ""}`;
 
   const response = await apiClient.get<
     APIResponse<PaginatedResponse<CategoryResponse>>
