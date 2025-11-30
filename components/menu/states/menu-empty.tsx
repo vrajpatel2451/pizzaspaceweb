@@ -64,7 +64,12 @@ export function MenuEmpty({
     : "bg-orange-50 dark:bg-orange-950";
 
   return (
-    <div className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] py-8 sm:py-12 px-4">
+    <div
+      className="flex items-center justify-center min-h-[300px] sm:min-h-[400px] py-8 sm:py-12 px-4"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <motion.div
         variants={shouldAnimate ? emptyStateContainer : undefined}
         initial={shouldAnimate ? "hidden" : false}
@@ -157,6 +162,7 @@ export function MenuEmpty({
                     onClick={handleClearFilters}
                     variant="outline"
                     className="w-full min-h-[44px] border-orange-200 dark:border-orange-900 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950"
+                    aria-label="Clear all active filters and show all products"
                   >
                     Clear Filters
                   </Button>
@@ -172,6 +178,7 @@ export function MenuEmpty({
                   <Button
                     onClick={handleBrowseAll}
                     className="w-full min-h-[44px] bg-orange-500 hover:bg-orange-600 text-white"
+                    aria-label="Browse all available products"
                   >
                     Browse All Products
                   </Button>
@@ -187,6 +194,7 @@ export function MenuEmpty({
                 <Button
                   onClick={handleBrowseAll}
                   className="w-full min-h-[44px] bg-orange-500 hover:bg-orange-600 text-white"
+                  aria-label="View the complete menu"
                 >
                   View Menu
                 </Button>

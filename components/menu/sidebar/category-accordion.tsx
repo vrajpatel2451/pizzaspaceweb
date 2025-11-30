@@ -20,6 +20,8 @@ interface CategoryAccordionProps {
   subcategoriesByCategory: Map<string, SubCategoryResponse[]>;
   activeCategory?: string;
   activeSubcategory?: string;
+  startTransition?: (callback: () => void) => void;
+  isPending?: boolean;
 }
 
 /**
@@ -38,6 +40,8 @@ export const CategoryAccordion = memo(function CategoryAccordion({
   subcategoriesByCategory,
   activeCategory,
   activeSubcategory,
+  startTransition,
+  isPending,
 }: CategoryAccordionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -64,9 +68,15 @@ export const CategoryAccordion = memo(function CategoryAccordion({
       params.delete("page");
 
       const queryString = params.toString();
-      router.push(`${pathname}?${queryString}`, { scroll: false });
+      if (startTransition) {
+        startTransition(() => {
+          router.push(`${pathname}?${queryString}`, { scroll: false });
+        });
+      } else {
+        router.push(`${pathname}?${queryString}`, { scroll: false });
+      }
     },
-    [router, pathname, searchParams, activeCategory]
+    [router, pathname, searchParams, activeCategory, startTransition]
   );
 
   /**
@@ -85,17 +95,29 @@ export const CategoryAccordion = memo(function CategoryAccordion({
       params.delete("page");
 
       const queryString = params.toString();
-      router.push(`${pathname}?${queryString}`, { scroll: false });
+      if (startTransition) {
+        startTransition(() => {
+          router.push(`${pathname}?${queryString}`, { scroll: false });
+        });
+      } else {
+        router.push(`${pathname}?${queryString}`, { scroll: false });
+      }
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams, startTransition]
   );
 
   /**
    * Clear all filters
    */
   const handleClearFilters = useCallback(() => {
-    router.push(pathname, { scroll: false });
-  }, [router, pathname]);
+    if (startTransition) {
+      startTransition(() => {
+        router.push(pathname, { scroll: false });
+      });
+    } else {
+      router.push(pathname, { scroll: false });
+    }
+  }, [router, pathname, startTransition]);
 
   const shouldAnimate = !prefersReducedMotion();
 
@@ -159,6 +181,7 @@ export const CategoryAccordion = memo(function CategoryAccordion({
                     subcategories={subcategories}
                     activeSubcategory={activeSubcategory}
                     onSelect={handleSubcategorySelect}
+                    isPending={isPending ?? false}
                   />
                 ) : (
                   <p className="px-4 py-2 text-sm text-muted-foreground italic">
@@ -175,10 +198,16 @@ export const CategoryAccordion = memo(function CategoryAccordion({
       {(activeCategory || activeSubcategory) && (
         <motion.button
           onClick={handleClearFilters}
-          className="w-full min-h-[44px] px-4 py-2 text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-lg transition-colors font-medium"
+          disabled={isPending}
+          className={cn(
+            "w-full min-h-[44px] px-4 py-2 text-sm rounded-lg transition-colors font-medium",
+            isPending
+              ? "text-orange-400 dark:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 cursor-not-allowed opacity-60"
+              : "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+          )}
           aria-label="Clear all category filters"
-          whileHover={shouldAnimate ? { scale: 1.01 } : undefined}
-          whileTap={shouldAnimate ? { scale: 0.99 } : undefined}
+          whileHover={shouldAnimate && !isPending ? { scale: 1.01 } : undefined}
+          whileTap={shouldAnimate && !isPending ? { scale: 0.99 } : undefined}
         >
           Clear Filters
         </motion.button>

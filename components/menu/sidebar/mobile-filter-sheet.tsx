@@ -21,6 +21,8 @@ interface MobileFilterSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onClearFilters: () => void;
+  startTransition?: (callback: () => void) => void;
+  isPending?: boolean;
 }
 
 /**
@@ -41,6 +43,8 @@ export function MobileFilterSheet({
   open,
   onOpenChange,
   onClearFilters,
+  startTransition,
+  isPending,
 }: MobileFilterSheetProps) {
   // Group subcategories by category ID for the accordion
   const subcategoriesByCategory = new Map<string, SubCategoryResponse[]>();
@@ -126,6 +130,8 @@ export function MobileFilterSheet({
             subcategoriesByCategory={subcategoriesByCategory}
             activeCategory={activeCategory}
             activeSubcategory={activeSubcategory}
+            startTransition={startTransition}
+            isPending={isPending}
           />
         </ScrollArea>
 
@@ -140,7 +146,7 @@ export function MobileFilterSheet({
             variant="outline"
             onClick={handleClearAll}
             className="flex-1 min-h-[44px]"
-            disabled={!activeCategory && !activeSubcategory}
+            disabled={isPending || (!activeCategory && !activeSubcategory)}
             aria-label="Clear all active filters"
           >
             Clear All
@@ -149,6 +155,7 @@ export function MobileFilterSheet({
             onClick={handleApply}
             className="flex-1 min-h-[44px] bg-orange-500 hover:bg-orange-600 text-white"
             aria-label="Apply selected filters and close dialog"
+            disabled={isPending}
           >
             Apply Filters
           </Button>
