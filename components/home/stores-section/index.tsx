@@ -55,16 +55,51 @@ export function StoresSection() {
       <div className="container mx-auto px-4 relative">
         {/* Section Header */}
         <div className="text-center mb-12 lg:mb-16">
-          <span className="inline-block bg-orange-500 dark:bg-orange-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-sm">
-            Our Locations
-          </span>
-          <h2 id="stores-heading" className="text-3xl lg:text-4xl font-bold mt-4 text-gray-900 dark:text-gray-50">
-            Visit Us In Person
+          {/* Badge */}
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Our Locations
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h2 id="stores-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+            Visit Us{" "}
+            <span className="text-orange-500 relative">
+              In Person
+              {/* Decorative underline */}
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                viewBox="0 0 100 12"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M0 8 Q 25 0, 50 8 T 100 8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mt-3 max-w-2xl mx-auto text-base lg:text-lg">
+
+          {/* Subheadline */}
+          <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
             Experience the authentic taste of our handcrafted pizzas in a warm, inviting atmosphere.
             Dine with us or make a reservation for a special occasion.
           </p>
+
+          {/* Decorative elements */}
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+            <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+            <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+          </div>
         </div>
 
         {/* Content Grid */}

@@ -17,19 +17,18 @@ function SectionHeader() {
       transition={{ duration: 0.6 }}
       className="text-center mb-12 md:mb-16"
     >
-      {/* Overline */}
+      {/* Badge */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="inline-flex items-center gap-2 mb-4"
+        className="mb-4"
       >
-        <span className="h-px w-8 bg-gradient-to-r from-transparent to-orange-500 dark:to-orange-400" aria-hidden="true" />
-        <span className="text-sm font-semibold text-orange-600 dark:text-orange-400 tracking-widest uppercase">
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+          <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
           Find Us
         </span>
-        <span className="h-px w-8 bg-gradient-to-l from-transparent to-orange-500 dark:to-orange-400" aria-hidden="true" />
       </motion.div>
 
       {/* Main heading */}
@@ -42,8 +41,22 @@ function SectionHeader() {
         className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 md:mb-6"
       >
         Visit Our{" "}
-        <span className="bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent">
+        <span className="text-orange-500 relative">
           Locations
+          {/* Decorative underline */}
+          <svg
+            className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+            viewBox="0 0 100 12"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 8 Q 25 0, 50 8 T 100 8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
         </span>
       </motion.h2>
 
@@ -58,6 +71,19 @@ function SectionHeader() {
         Experience authentic Italian pizza at any of our welcoming locations. Find the
         nearest Pizza Space and join us for a memorable meal.
       </motion.p>
+
+      {/* Decorative elements */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="flex items-center justify-center gap-3 mt-6"
+      >
+        <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+        <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+        <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+      </motion.div>
     </motion.div>
   );
 }

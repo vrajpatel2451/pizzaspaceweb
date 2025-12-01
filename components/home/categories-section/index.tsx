@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getCategories } from "@/lib/api";
 import { CategoriesContent, CategoriesContentSkeleton } from "./categories-content";
 import { CategoryResponse } from "@/types";
+import { Grid3X3 } from "lucide-react";
 
 export async function CategoriesSection() {
   let categories: CategoryResponse[] = [];
@@ -46,40 +47,51 @@ export async function CategoriesSection() {
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-10 md:mb-14">
-          {/* Section Badge */}
-          <span className="inline-flex items-center gap-2 bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 px-5 py-2 rounded-full text-sm font-semibold uppercase tracking-wider mb-4">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            Our Categories
-          </span>
+          {/* Badge */}
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+              <Grid3X3 className="w-3.5 h-3.5" />
+              Our Categories
+            </span>
+          </div>
 
-          {/* Main Headline */}
+          {/* Headline */}
           <h2
             id="categories-heading"
-            className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4"
           >
             Choose Your{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">
+            <span className="text-orange-500 relative">
               Favorite
+              {/* Decorative underline */}
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                viewBox="0 0 100 12"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M0 8 Q 25 0, 50 8 T 100 8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
             </span>
           </h2>
 
           {/* Subheadline */}
-          <p className="text-gray-600 dark:text-gray-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
             Explore our carefully curated menu categories and discover
             delicious options crafted to satisfy every craving
           </p>
+
+          {/* Decorative elements */}
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+            <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+            <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+          </div>
         </div>
 
         {/* Categories Content with Interactive Pills, Filters, and Cards */}

@@ -107,35 +107,56 @@ export function ContactHeroSection() {
           {/* Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-950/30 backdrop-blur-sm px-4 py-2 rounded-full border border-orange-200 dark:border-orange-800 mb-6"
+            className="mb-4"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-            </span>
-            <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+              <Mail className="w-3.5 h-3.5" />
               We&apos;re Here to Help
             </span>
           </motion.div>
 
-          {/* Main headline */}
+          {/* Headline */}
           <motion.h1
             variants={itemVariants}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-gray-50 mb-3 sm:mb-4 px-4 sm:px-0"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 px-4 sm:px-0"
           >
             Get In{" "}
-            <span className="bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent">
+            <span className="text-orange-500 relative">
               Touch
+              {/* Decorative underline */}
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                viewBox="0 0 100 12"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M0 8 Q 25 0, 50 8 T 100 8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
             </span>
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Subheadline */}
           <motion.p
             variants={itemVariants}
-            className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 sm:px-0"
+            className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
           >
             We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
           </motion.p>
+
+          {/* Decorative elements */}
+          <motion.div
+            variants={itemVariants}
+            className="flex items-center justify-center gap-3 mt-6"
+          >
+            <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+            <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+            <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+          </motion.div>
         </motion.div>
       </div>
 

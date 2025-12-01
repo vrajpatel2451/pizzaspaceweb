@@ -103,38 +103,51 @@ function SectionHeader() {
       transition={{ duration: 0.6 }}
       className="text-center mb-12 md:mb-16 lg:mb-20"
     >
-      {/* Overline */}
+      {/* Badge */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="inline-flex items-center gap-2 mb-4"
+        className="mb-4"
       >
-        <span className="h-px w-8 bg-gradient-to-r from-transparent to-orange-500 dark:to-orange-400" aria-hidden="true" />
-        <span className="text-sm font-semibold text-orange-600 dark:text-orange-400 tracking-widest uppercase">
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+          <Target className="w-3.5 h-3.5" />
           Why We Do It
         </span>
-        <span className="h-px w-8 bg-gradient-to-l from-transparent to-orange-500 dark:to-orange-400" aria-hidden="true" />
       </motion.div>
 
-      {/* Main heading */}
+      {/* Headline */}
       <motion.h2
         id="mission-vision-heading"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 md:mb-6"
+        className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4"
       >
         Our{" "}
-        <span className="bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent">
+        <span className="text-orange-500 relative">
           Purpose
+          {/* Decorative underline */}
+          <svg
+            className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+            viewBox="0 0 100 12"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 8 Q 25 0, 50 8 T 100 8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
         </span>{" "}
         & Direction
       </motion.h2>
 
-      {/* Subtitle */}
+      {/* Subheadline */}
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -145,6 +158,19 @@ function SectionHeader() {
         Driven by passion, guided by values. Discover what fuels our commitment
         to crafting exceptional pizza experiences for our community.
       </motion.p>
+
+      {/* Decorative elements */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="flex items-center justify-center gap-3 mt-6"
+      >
+        <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+        <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+        <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+      </motion.div>
     </motion.div>
   );
 }
@@ -159,15 +185,47 @@ function ValuesHeader() {
       transition={{ duration: 0.6, delay: 0.3 }}
       className="text-center mb-10 md:mb-14"
     >
-      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-3">
-        Our{" "}
-        <span className="bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-400 dark:to-amber-400 bg-clip-text text-transparent">
+      {/* Badge */}
+      <div className="mb-4">
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+          <Heart className="w-3.5 h-3.5" />
+          Our Values
+        </span>
+      </div>
+
+      {/* Headline */}
+      <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+        Our Core{" "}
+        <span className="text-orange-500 relative">
           Values
+          {/* Decorative underline */}
+          <svg
+            className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+            viewBox="0 0 100 12"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 8 Q 25 0, 50 8 T 100 8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
         </span>
       </h3>
-      <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+
+      {/* Subheadline */}
+      <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
         The principles that guide everything we do, from crafting pizzas to serving our community
       </p>
+
+      {/* Decorative elements */}
+      <div className="flex items-center justify-center gap-3 mt-6">
+        <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+        <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+        <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+      </div>
     </motion.div>
   );
 }

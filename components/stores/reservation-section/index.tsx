@@ -12,19 +12,48 @@ export function ReservationSection({ stores }: ReservationSectionProps) {
       <div className="container mx-auto px-4 lg:px-6">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-orange-100 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 mb-3 sm:mb-4">
-            <CalendarDays className="w-4 h-4 text-orange-600 dark:text-orange-400" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">
+          {/* Badge */}
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+              <CalendarDays className="w-3.5 h-3.5" aria-hidden="true" />
               Book a Table
             </span>
           </div>
-          <h2 id="reservation-section-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-3 sm:mb-4 px-4 sm:px-0">
-            Reserve Your Table
+
+          {/* Headline */}
+          <h2 id="reservation-section-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+            Reserve Your{" "}
+            <span className="text-orange-500 relative">
+              Table
+              {/* Decorative underline */}
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                viewBox="0 0 100 12"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M0 8 Q 25 0, 50 8 T 100 8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
           </h2>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4 sm:px-0">
+
+          {/* Subheadline */}
+          <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
             Plan ahead and reserve your spot at any of our locations. We&apos;ll make sure
             everything is ready for your visit.
           </p>
+
+          {/* Decorative elements */}
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+            <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+            <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+          </div>
         </div>
 
         {/* Reservation Form */}

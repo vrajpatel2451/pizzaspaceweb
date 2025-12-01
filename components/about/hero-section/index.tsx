@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, BookOpen } from "lucide-react";
 
 // Background gradient and decorative shapes
 function BackgroundShapes() {
@@ -169,52 +169,62 @@ export function AboutHeroSection() {
           animate="visible"
           className="text-center max-w-4xl mx-auto"
         >
-          {/* Overline */}
+          {/* Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center gap-2 mb-4 sm:mb-6"
+            className="mb-4"
           >
-            <span className="h-px w-6 sm:w-8 bg-gradient-to-r from-transparent to-orange-500 dark:to-orange-400" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-semibold text-orange-600 dark:text-orange-400 tracking-widest uppercase">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+              <BookOpen className="w-3.5 h-3.5" />
               Welcome to Pizza Space
             </span>
-            <span className="h-px w-6 sm:w-8 bg-gradient-to-l from-transparent to-orange-500 dark:to-orange-400" aria-hidden="true" />
           </motion.div>
 
-          {/* Main headline with word stagger */}
+          {/* Headline */}
           <motion.h1
             variants={itemVariants}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-slate-900 dark:text-white mb-4 sm:mb-6 tracking-tight px-2 sm:px-0"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight px-2 sm:px-0"
           >
             Our{" "}
-            <motion.span
-              className="inline-block bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent"
-              whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
+            <span className="text-orange-500 relative">
               Story
-            </motion.span>
-            ,{" "}
-            <br className="hidden sm:block" />
-            Your{" "}
-            <motion.span
-              className="inline-block bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent"
-              whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              Experience
-            </motion.span>
+              {/* Decorative underline */}
+              <svg
+                className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                viewBox="0 0 100 12"
+                preserveAspectRatio="none"
+              >
+                <path
+                  d="M0 8 Q 25 0, 50 8 T 100 8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            , Your Experience
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Subheadline */}
           <motion.p
             variants={itemVariants}
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 dark:text-slate-300 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0"
+            className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
           >
             For over two decades, we have been serving authentic Italian pizzas crafted
             with passion, quality ingredients, and a commitment to bringing joy to every
             table. Discover the journey that made us a beloved community favorite.
           </motion.p>
+
+          {/* Decorative elements */}
+          <motion.div
+            variants={itemVariants}
+            className="flex items-center justify-center gap-3 mt-6"
+          >
+            <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+            <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+            <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+          </motion.div>
 
           {/* Decorative scroll indicator */}
           <motion.div

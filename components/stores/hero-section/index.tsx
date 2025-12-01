@@ -48,28 +48,55 @@ export function HeroSection({ stores }: HeroSectionProps) {
           >
             <motion.div
               variants={itemVariants}
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-orange-100 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800"
+              className="mb-4"
             >
-              <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400" aria-hidden="true" />
-              <span className="text-xs sm:text-sm font-medium text-orange-600 dark:text-orange-400">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+                <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
                 Find Your Nearest Store
               </span>
             </motion.div>
 
             <motion.h1
               variants={itemVariants}
-              className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-50 leading-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 leading-tight"
             >
-              Visit Us Today
+              Visit Us{" "}
+              <span className="text-orange-500 relative">
+                Today
+                {/* Decorative underline */}
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                  viewBox="0 0 100 12"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M0 8 Q 25 0, 50 8 T 100 8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
             </motion.h1>
 
             <motion.p
               variants={itemVariants}
-              className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-xl"
+              className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl"
             >
               Discover our locations across the UK. Fresh pizza, warm atmosphere,
               and exceptional service await you at every Pizza Space restaurant.
             </motion.p>
+
+            {/* Decorative elements */}
+            <motion.div
+              variants={itemVariants}
+              className="flex items-center gap-3 mt-2"
+            >
+              <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+              <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+              <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+            </motion.div>
 
             <div className="flex items-center gap-4 sm:gap-6 pt-3 sm:pt-4" role="list" aria-label="Store statistics">
               <div className="flex items-center gap-2" role="listitem">

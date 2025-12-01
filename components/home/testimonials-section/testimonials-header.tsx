@@ -2,7 +2,7 @@
 
 import { CustomImage } from "@/components/ui/custom-image";
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, MessageSquareQuote } from "lucide-react";
 
 const customerAvatars = [
   {
@@ -41,9 +41,10 @@ export function TestimonialsHeader() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
+        className="mb-4"
       >
-        <span className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 px-4 py-2 rounded-full text-sm font-medium">
-          <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+          <MessageSquareQuote className="w-3.5 h-3.5" />
           Testimonials
         </span>
       </motion.div>
@@ -54,22 +55,52 @@ export function TestimonialsHeader() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="text-3xl md:text-4xl lg:text-5xl font-bold mt-6 text-slate-900 dark:text-white"
+        className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4"
       >
-        What Our Customers Say
+        What Our Customers{" "}
+        <span className="text-orange-500 relative">
+          Say
+          {/* Decorative underline */}
+          <svg
+            className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+            viewBox="0 0 100 12"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0 8 Q 25 0, 50 8 T 100 8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
       </motion.h2>
 
-      {/* Subtitle */}
+      {/* Subheadline */}
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-slate-600 dark:text-slate-400 mt-4 max-w-2xl mx-auto text-base md:text-lg"
+        className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed"
       >
         Join thousands of satisfied customers who have made Pizza Space their
         go-to destination for authentic, delicious pizza.
       </motion.p>
+
+      {/* Decorative elements */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="flex items-center justify-center gap-3 mt-6"
+      >
+        <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+        <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
+        <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
+      </motion.div>
 
       {/* Rating and Avatars Row */}
       <motion.div
