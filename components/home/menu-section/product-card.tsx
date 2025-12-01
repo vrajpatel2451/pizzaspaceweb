@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Star, Flame, Sparkles, TrendingUp, Plus } from "lucide-react";
 import { ProductResponse } from "@/types";
 import { ProductDetailsContainer } from "@/components/product-details";
-import type { CartItem } from "@/types/product-details";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/formatters";
 import { CustomImage } from "@/components/ui/custom-image";
@@ -131,13 +130,6 @@ export function ProductCard({
     ? `${product.weight}g`
     : null;
 
-  // Handle add to cart callback
-  const handleAddToCart = (cartItem: CartItem) => {
-    // TODO: Integrate with actual cart context/state
-    console.log("Adding to cart:", cartItem);
-    // You can dispatch to cart context, call API, or show toast here
-  };
-
   // Card content to be wrapped by ProductDetailsContainer
   const cardContent = (
     <motion.article
@@ -248,7 +240,6 @@ export function ProductCard({
     <ProductDetailsContainer
       productId={product._id}
       trigger={cardContent}
-      onAddToCart={handleAddToCart}
     />
   );
 }

@@ -38,9 +38,8 @@ export type {
 } from "./user";
 
 // Auth Types
-export type {
-  AuthState,
-  AuthActions,
-  AuthStore,
-} from "./auth";
+export type { AuthState, AuthActions, AuthStore } from "./auth";
 export { AUTH_STORAGE_KEY } from "./auth";
+export * from "./cart";
+export * from "./discount";
+export * from "./address";

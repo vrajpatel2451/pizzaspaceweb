@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { CartProvider } from "@/components/providers/cart-provider";
 import { StoreProvider } from "@/lib/contexts/store-context";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -144,11 +145,13 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <StoreProvider>
-            <AuthProvider>
-              <Header />
-              <main id="main-content" className="min-h-screen">{children}</main>
-              <Footer />
-            </AuthProvider>
+            <CartProvider>
+              <AuthProvider>
+                <Header />
+                <main id="main-content" className="min-h-screen">{children}</main>
+                <Footer />
+              </AuthProvider>
+            </CartProvider>
           </StoreProvider>
         </ThemeProvider>
       </body>

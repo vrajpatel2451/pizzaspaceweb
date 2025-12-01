@@ -6,12 +6,15 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useScroll } from "@/hooks/use-scroll";
 import { useAuthStore } from "@/store/auth-store";
+import { useDeviceId, useIsDeviceHydrated } from "@/store/device-store";
+import { useStore } from "@/lib/contexts/store-context";
+import { useCart } from "@/lib/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { SearchCommand } from "./search-command";
 import { ThemeToggle } from "./theme-toggle";
 import { UserDropdown } from "./user-dropdown";
-import { CartBadge } from "./cart-badge";
+import { MiniCartDropdown } from "./mini-cart-dropdown";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 import { StoreLocator } from "./store-locator";
 
@@ -48,8 +51,56 @@ const linkUnderlineVariants: Variants = {
 export function HeaderClient({ className }: HeaderClientProps) {
   const pathname = usePathname();
   const scrolled = useScroll(50);
-  const [cartItemCount] = React.useState(3); // TODO: Connect to cart context
   const { isAuthenticated, user } = useAuthStore();
+  const { selectedStore } = useStore();
+  const deviceId = useDeviceId();
+  const isDeviceHydrated = useIsDeviceHydrated();
+
+  // Fetch cart on mount and when store/auth changes
+  const { refetch: refetchCart } = useCart(
+    deviceId || '',
+    selectedStore?._id || '',
+    false // Don't auto-fetch, we'll control it manually
+  );
+
+  // Track previous values to detect changes
+  const prevStoreId = React.useRef<string | null>(null);
+  const prevIsAuthenticated = React.useRef<boolean>(false);
+
+  // Fetch cart when component mounts and dependencies are ready
+  React.useEffect(() => {
+    if (isDeviceHydrated && deviceId && selectedStore?._id) {
+      refetchCart();
+    }
+  }, [isDeviceHydrated, deviceId, selectedStore?._id, refetchCart]);
+
+  // Refetch cart when store changes
+  React.useEffect(() => {
+    const currentStoreId = selectedStore?._id;
+    if (
+      isDeviceHydrated &&
+      deviceId &&
+      currentStoreId &&
+      prevStoreId.current &&
+      prevStoreId.current !== currentStoreId
+    ) {
+      refetchCart();
+    }
+    prevStoreId.current = currentStoreId || null;
+  }, [selectedStore?._id, isDeviceHydrated, deviceId, refetchCart]);
+
+  // Refetch cart when auth state changes (login/logout)
+  React.useEffect(() => {
+    if (
+      isDeviceHydrated &&
+      deviceId &&
+      selectedStore?._id &&
+      prevIsAuthenticated.current !== isAuthenticated
+    ) {
+      refetchCart();
+    }
+    prevIsAuthenticated.current = isAuthenticated;
+  }, [isAuthenticated, isDeviceHydrated, deviceId, selectedStore?._id, refetchCart]);
 
   // Determine if we're on the homepage for transparent header behavior
   const isHomePage = pathname === "/";
@@ -194,12 +245,11 @@ export function HeaderClient({ className }: HeaderClientProps) {
               )}
             />
 
-            {/* Cart */}
-            <CartBadge
-              itemCount={cartItemCount}
+            {/* Cart - with mini cart dropdown */}
+            <MiniCartDropdown
               className={cn(
                 !scrolled && isHomePage
-                  ? "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"
+                  ? "[&_button]:text-slate-700 [&_button]:dark:text-white/80 [&_button]:hover:text-slate-900 [&_button]:dark:hover:text-white [&_button]:hover:bg-slate-100 [&_button]:dark:hover:bg-white/10"
                   : ""
               )}
             />

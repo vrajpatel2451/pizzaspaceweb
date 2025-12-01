@@ -7,3 +7,6 @@ export { getSubCategories } from "./subcategories";
 export { getProducts, getProductDetails } from "./products";
 export { getStores } from "./stores";
 export { loginUser, registerUser, getProfile } from "./auth";
+export * from "./cart";
+export * from "./address";
+export * from "./discount";

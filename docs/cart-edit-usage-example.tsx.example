@@ -1,0 +1,194 @@
+/**
+ * USAGE EXAMPLE: How to integrate Cart Item Edit functionality
+ *
+ * This file demonstrates how to use the CartItemCard component
+ * with the edit functionality in a cart page.
+ */
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { CartItemCard } from '@/components/cart/cart-item-card';
+import {
+  useCart,
+  useUpdateCartItem,
+  useRemoveCartItem,
+  useCartSummary,
+} from '@/lib/hooks/use-cart';
+
+interface CartPageProps {
+  storeId: string;
+}
+
+export default function CartPageExample({ storeId }: CartPageProps) {
+  const [deviceId, setDeviceId] = useState<string>('');
+
+  // Get device ID on mount (example - implement your own device ID logic)
+  useEffect(() => {
+    // Example: Generate or retrieve device ID
+    const id = localStorage.getItem('deviceId') || crypto.randomUUID();
+    localStorage.setItem('deviceId', id);
+    setDeviceId(id);
+  }, []);
+
+  // Fetch cart items
+  const { items, isLoading, refetch } = useCart(deviceId, storeId);
+
+  // Cart summary
+  const { summary } = useCartSummary({ storeId });
+
+  // Update cart item hook (used internally by EditCartItemModal)
+  const { mutate: updateCart } = useUpdateCartItem();
+
+  // Remove cart item hook
+  const { mutate: removeCart } = useRemoveCartItem();
+
+  /**
+   * Handle quantity change from QuantityControl
+   * This updates only the quantity without changing variants/addons
+   */
+  const handleQuantityChange = async (cartId: string, newQuantity: number) => {
+    const cartItem = items.find((item) => item._id === cartId);
+    if (!cartItem) return;
+
+    await updateCart(cartId, {
+      quantity: newQuantity,
+      variantId: cartItem.variantId,
+      pricing: cartItem.pricing,
+      sessionId: cartItem.sessionId,
+    });
+  };
+
+  /**
+   * Handle remove item
+   */
+  const handleRemove = async (cartId: string) => {
+    await removeCart(cartId, deviceId);
+  };
+
+  /**
+   * Handle successful edit
+   * This is called after EditCartItemModal successfully updates the item
+   * Refetch cart to ensure UI is in sync with server
+   */
+  const handleEditSuccess = () => {
+    refetch();
+  };
+
+  if (isLoading) {
+    return <div>Loading cart...</div>;
+  }
+
+  if (items.length === 0) {
+    return <div>Your cart is empty</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Cart Items */}
+      <div className="space-y-3">
+        {items.map((item) => {
+          // You would typically fetch product details to get name, image, etc.
+          // For this example, we'll use placeholder data
+          const itemDetails = {
+            name: 'Product Name', // Fetch from product API
+            image: '/placeholder.jpg', // Fetch from product API
+            variantName: 'Medium', // Fetch from variant API
+            price: 12.99, // Calculate from pricing
+          };
+
+          return (
+            <CartItemCard
+              key={item._id}
+              item={item}
+              onQuantityChange={handleQuantityChange}
+              onRemove={handleRemove}
+              onEditSuccess={handleEditSuccess}
+              itemDetails={itemDetails}
+            />
+          );
+        })}
+      </div>
+
+      {/* Cart Summary */}
+      {summary && (
+        <div className="rounded-lg border p-4">
+          <h3 className="font-semibold mb-3">Order Summary</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal</span>
+              <span>£{summary.itemTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Delivery</span>
+              <span>£{summary.deliveryCharges.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-semibold border-t pt-2">
+              <span>Total</span>
+              <span>£{summary.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * KEY FEATURES DEMONSTRATED:
+ *
+ * 1. QUANTITY CHANGE:
+ *    - Uses QuantityControl component in CartItemCard
+ *    - Updates quantity without opening modal
+ *    - Preserves variants and addons
+ *
+ * 2. EDIT ITEM:
+ *    - Click Edit button on CartItemCard
+ *    - Opens EditCartItemModal automatically
+ *    - Modal pre-populates with current selections
+ *    - User can change variants, addons, quantity
+ *    - Save button updates cart via API
+ *    - onEditSuccess callback refetches cart
+ *
+ * 3. REMOVE ITEM:
+ *    - Click trash icon
+ *    - Confirmation dialog appears
+ *    - Removes item from cart on confirm
+ *
+ * 4. REAL-TIME UPDATES:
+ *    - All changes update cart store
+ *    - Cart summary recalculates automatically
+ *    - UI stays in sync with server
+ *
+ * WORKFLOW:
+ *
+ * User Flow for Editing:
+ * 1. User sees cart item with Edit button
+ * 2. User clicks Edit button
+ * 3. EditCartItemModal opens with loading state
+ * 4. Product details fetch (variants, addons, pricing)
+ * 5. Modal displays current selections
+ * 6. User changes variant (RadioGroup)
+ * 7. User adds/removes addons (Checkbox)
+ * 8. User adjusts addon quantities (QuantityControl)
+ * 9. User changes item quantity (QuantityControl)
+ * 10. Price updates in real-time as user makes changes
+ * 11. User clicks "Save Changes"
+ * 12. API request sent with new data
+ * 13. Success toast appears
+ * 14. Modal closes
+ * 15. onEditSuccess callback fires
+ * 16. Cart refetches and updates UI
+ *
+ * Data Flow:
+ * 1. CartItemCard displays item from cart store
+ * 2. Edit button opens EditCartItemModal with item data
+ * 3. useProductDetails fetches full product info
+ * 4. User makes changes in modal form
+ * 5. Save button calls useUpdateCartItem
+ * 6. API updates cart item
+ * 7. Cart store updates optimistically
+ * 8. onEditSuccess refetches to ensure sync
+ * 9. CartItemCard re-renders with new data
+ * 10. Cart summary recalculates
+ */

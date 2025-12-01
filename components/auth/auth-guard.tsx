@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import { useCartStore } from '@/store/cart-store';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -12,13 +13,25 @@ interface AuthGuardProps {
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const router = useRouter();
   const { isAuthenticated, isHydrated, isLoading } = useAuthStore();
+  const { getCartIds } = useCartStore();
 
   useEffect(() => {
     if (isHydrated && !isLoading && !isAuthenticated) {
       const currentPath = window.location.pathname;
-      router.push(`/login?returnUrl=${encodeURIComponent(currentPath)}`);
+      const searchParams = new URLSearchParams();
+
+      // Add return URL
+      searchParams.set('returnUrl', currentPath);
+
+      // Add cart context if cart has items
+      const cartIds = getCartIds();
+      if (cartIds.length > 0) {
+        searchParams.set('hasCart', 'true');
+      }
+
+      router.push(`/login?${searchParams.toString()}`);
     }
-  }, [isAuthenticated, isHydrated, isLoading, router]);
+  }, [isAuthenticated, isHydrated, isLoading, router, getCartIds]);
 
   if (!isHydrated || isLoading) {
     return fallback || <AuthLoadingSkeleton />;
