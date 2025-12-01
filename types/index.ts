@@ -16,8 +16,15 @@ export type {
   DishSize,
   ProductResponse,
   ProductQueryParams,
+  ProductDetailsResponse,
+  AddonGroupResponse,
+  AddonResponse,
+  DishSizeUnit,
+  VariantGroupResponse,
+  VariantPricingResponse,
+  VariantResponse,
+  VariantPricingType,
 } from "./product";
-export { DishSizeUnit } from "./product";
 
 // Store Types
 export type { StoreQueryParams, StoreResponse } from "./store";

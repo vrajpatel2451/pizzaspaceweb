@@ -75,3 +75,72 @@ export interface ProductQueryParams {
   all?: boolean;
   subCategoryId?: string;
 }
+
+export interface ProductDetailsResponse {
+  product: ProductResponse;
+  variantList: VariantResponse[];
+  variantGroupList: VariantGroupResponse[];
+  addonList: AddonResponse[];
+  addonGroupList: AddonGroupResponse[];
+  pricing: VariantPricingResponse[];
+}
+export interface VariantResponse {
+  _id: string;
+  label: string;
+  price: number;
+  groupId: string;
+  itemId: string;
+  isPrimary: boolean;
+  storeIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+export interface VariantGroupResponse {
+  _id: string;
+  label: string;
+  description: string;
+  itemId: string;
+  isPrimary: boolean;
+  storeIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddonResponse {
+  _id: string;
+  label: string;
+  price: number;
+  groupId: string;
+  storeIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddonGroupResponse {
+  _id: string;
+  label: string;
+  description: string;
+  storeIds: string[];
+  allowMulti: boolean;
+  min: number;
+  max: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type VariantPricingType = "addonGroup" | "addon" | "variant";
+
+export interface VariantPricingResponse {
+  _id: string;
+  type: VariantPricingType;
+  variantId: string;
+  variantGroupId: string;
+  subVariantId: string;
+  addonGroupId: string;
+  addonId: string;
+  productId: string;
+  isVisible: boolean;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+}

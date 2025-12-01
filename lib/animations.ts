@@ -423,3 +423,242 @@ export function createSpringTransition(
     damping,
   };
 }
+
+// ============================================================================
+// PRODUCT DETAILS ANIMATIONS
+// ============================================================================
+
+/**
+ * Desktop Dialog Animations (fade + scale)
+ */
+export const dialogVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.95,
+    y: 20,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 25,
+      stiffness: 300,
+      mass: 0.5,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: 20,
+    transition: {
+      duration: 0.15,
+      ease: "easeIn",
+    },
+  },
+};
+
+/**
+ * Mobile Bottomsheet Animations (slide up with spring)
+ */
+export const bottomsheetVariants: Variants = {
+  hidden: { y: "100%" },
+  visible: {
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 30,
+      stiffness: 400,
+      mass: 0.8,
+    },
+  },
+  exit: {
+    y: "100%",
+    transition: {
+      duration: 0.25,
+      ease: [0.4, 0, 1, 1], // ease-in
+    },
+  },
+};
+
+/**
+ * Product Details Content Stagger Container
+ */
+export const productDetailsContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+/**
+ * Product Details Section Item (for stagger)
+ */
+export const productDetailsSectionVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: durations.normal,
+      ease: easings.easeOut,
+    },
+  },
+};
+
+/**
+ * Variant Card Selection Animation
+ */
+export const variantCardVariants: Variants = {
+  unselected: {
+    scale: 1,
+    transition: {
+      duration: 0.2,
+      ease: easings.easeOut,
+    },
+  },
+  selected: {
+    scale: [1, 1.02, 1],
+    transition: {
+      duration: 0.3,
+      ease: easings.easeOut,
+    },
+  },
+  hover: {
+    y: -2,
+    transition: {
+      duration: 0.2,
+      ease: easings.easeOut,
+    },
+  },
+};
+
+/**
+ * Addon Checkbox Animation
+ */
+export const addonCheckboxVariants: Variants = {
+  unchecked: {
+    scale: 1,
+  },
+  checked: {
+    scale: [1, 1.2, 1],
+    transition: {
+      duration: 0.2,
+      ease: easings.easeOut,
+    },
+  },
+};
+
+/**
+ * Addon Quantity Appear Animation
+ */
+export const addonQuantityVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    x: -10,
+    width: 0,
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    width: "auto",
+    transition: {
+      duration: 0.2,
+      ease: easings.easeOut,
+    },
+  },
+};
+
+/**
+ * Price Change Animation
+ */
+export const priceChangeVariants: Variants = {
+  initial: {
+    opacity: 0,
+    y: -8,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: easings.easeOut,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 8,
+    transition: {
+      duration: 0.15,
+      ease: easings.easeIn,
+    },
+  },
+};
+
+/**
+ * Add to Cart Button States
+ */
+export const addToCartButtonVariants: Variants = {
+  idle: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.02,
+    y: -1,
+    transition: {
+      duration: 0.2,
+      ease: easings.easeOut,
+    },
+  },
+  tap: {
+    scale: 0.98,
+    transition: {
+      duration: 0.1,
+    },
+  },
+  loading: {
+    scale: 1,
+  },
+  success: {
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 0.4,
+      times: [0, 0.5, 1],
+    },
+  },
+};
+
+/**
+ * Image Load Animation
+ */
+export const imageLoadVariants: Variants = {
+  loading: {
+    opacity: 0,
+  },
+  loaded: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      ease: easings.easeOut,
+    },
+  },
+};
+
+/**
+ * Shimmer Animation for Skeleton Loading
+ */
+export const shimmerVariants: Variants = {
+  shimmer: {
+    backgroundPosition: ["200% 0", "-200% 0"],
+    transition: {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: "linear",
+    },
+  },
+};

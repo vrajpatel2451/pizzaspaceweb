@@ -98,7 +98,9 @@ const transformMap = {
   },
 };
 
-const paddingClass = "px-5 py-4";
+// Mobile-first padding: minimal on mobile, comfortable on desktop
+const paddingClass = "px-3 py-2 sm:px-5 sm:py-4";
+const bodyPaddingClass = "px-0 py-0 sm:px-5 sm:py-4";
 
 const Drawer: React.FC<DrawerProps> = ({
   isOpen,
@@ -176,7 +178,10 @@ const Drawer: React.FC<DrawerProps> = ({
           sizeMap[side][size],
           isOpen ? transformMap[side].open : transformMap[side].closed,
           (side === "left" || side === "right") && "max-h-screen",
-          (side === "top" || side === "bottom") && "max-w-screen"
+          (side === "top" || side === "bottom") && "max-w-screen",
+          // Remove rounded corners on mobile for bottom/top drawers (edge-to-edge)
+          side === "bottom" && "rounded-t-2xl sm:rounded-t-3xl",
+          side === "top" && "rounded-b-2xl sm:rounded-b-3xl",
         )}
         onClick={(e) => e.stopPropagation()}
       >
@@ -187,7 +192,7 @@ const Drawer: React.FC<DrawerProps> = ({
               <div
                 className={cn(
                   "flex shrink-0 items-center justify-between border-b",
-                  paddingClass
+                  side === "bottom" || side === "top" ? "px-3 py-2 sm:px-5 sm:py-4" : paddingClass
                 )}
               >
                 <div className="flex flex-col">
@@ -219,8 +224,8 @@ const Drawer: React.FC<DrawerProps> = ({
             )}
 
             {/* Body */}
-            <div className={cn("flex-1 overflow-hidden", paddingClass)}>
-              <div className="h-full overflow-y-auto">{children}</div>
+            <div className={cn("flex-1 overflow-hidden", bodyPaddingClass)}>
+              <div className="h-full overflow-y-auto scrollbar-hide">{children}</div>
             </div>
 
             {/* Footer */}

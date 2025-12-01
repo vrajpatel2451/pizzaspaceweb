@@ -1,10 +1,11 @@
-import { AxiosResponse } from "axios";
+import { AxiosResponse, isAxiosError } from "axios";
 import apiClient from "./client";
 import {
   APIResponse,
   PaginatedResponse,
   ProductResponse,
   ProductQueryParams,
+  ProductDetailsResponse,
 } from "@/types";
 
 export async function getProducts(
@@ -50,6 +51,26 @@ export async function getProducts(
           hasPrevPage: false,
         },
       },
+    };
+  }
+}
+export async function getProductDetails(
+  productId: string
+): Promise<APIResponse<ProductDetailsResponse>> {
+  const url = `/product/details/${productId}`;
+  try {
+    const response: AxiosResponse<APIResponse<ProductDetailsResponse>> =
+      await apiClient.get<APIResponse<ProductDetailsResponse>>(url);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    if (isAxiosError(error) && error.response) {
+      return error.response.data;
+    }
+    return {
+      statusCode: 500,
+      data: null,
+      errorMessage: "Internal Server Error",
     };
   }
 }

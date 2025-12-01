@@ -1,9 +1,9 @@
-import {
+import type {
   APIResponse,
   PaginatedResponse,
   ProductResponse,
-  DishSizeUnit,
 } from "@/types";
+import { DishSizeUnit } from "@/types/product";
 
 export const mockProducts: ProductResponse[] = [
   {

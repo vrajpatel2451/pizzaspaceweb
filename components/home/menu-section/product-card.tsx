@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, Flame, Sparkles, TrendingUp } from "lucide-react";
+import { Star, Flame, Sparkles, TrendingUp, Plus } from "lucide-react";
 import { ProductResponse } from "@/types";
-import { QuickAddButton } from "./quick-add-button";
+import { ProductDetailsContainer } from "@/components/product-details";
+import type { CartItem } from "@/types/product-details";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/formatters";
 import { CustomImage } from "@/components/ui/custom-image";
@@ -130,13 +131,21 @@ export function ProductCard({
     ? `${product.weight}g`
     : null;
 
-  return (
+  // Handle add to cart callback
+  const handleAddToCart = (cartItem: CartItem) => {
+    // TODO: Integrate with actual cart context/state
+    console.log("Adding to cart:", cartItem);
+    // You can dispatch to cart context, call API, or show toast here
+  };
+
+  // Card content to be wrapped by ProductDetailsContainer
+  const cardContent = (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       whileHover={{ y: -8 }}
-      className="group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-slate-900/50 transition-all duration-500 border border-slate-100 dark:border-slate-800"
+      className="group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-slate-900/50 transition-all duration-500 border border-slate-100 dark:border-slate-800 cursor-pointer"
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
@@ -167,18 +176,14 @@ export function ProductCard({
           aria-hidden="true"
         />
 
-        {/* Quick Add Button - Appears on Hover */}
+        {/* Quick Add Indicator - Shows + on hover */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileHover={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileHover={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg"
         >
-          <QuickAddButton
-            productId={product._id}
-            productName={product.name}
-            variant="icon"
-          />
+          <Plus className="w-5 h-5" />
         </motion.div>
       </div>
 
@@ -206,7 +211,7 @@ export function ProductCard({
           <StarRating rating={rating} />
         </div>
 
-        {/* Price and Add Button */}
+        {/* Price */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col">
             <span className="text-xl sm:text-2xl font-bold text-orange-500">
@@ -214,27 +219,15 @@ export function ProductCard({
             </span>
           </div>
 
-          {/* Mobile Add Button - Always Visible */}
-          <div className="sm:hidden">
-            <QuickAddButton
-              productId={product._id}
-              productName={product.name}
-              variant="icon"
-            />
+          {/* Add Indicator on Mobile */}
+          <div className="sm:hidden w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md">
+            <Plus className="w-5 h-5" />
           </div>
 
-          {/* Desktop Add Button - Full Width on Hover */}
-          <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: "auto", opacity: 1 }}
-            className="hidden sm:block"
-          >
-            <QuickAddButton
-              productId={product._id}
-              productName={product.name}
-              variant="icon"
-            />
-          </motion.div>
+          {/* Desktop Add Indicator */}
+          <div className="hidden sm:flex w-10 h-10 rounded-full bg-orange-500 text-white items-center justify-center shadow-md">
+            <Plus className="w-5 h-5" />
+          </div>
         </div>
       </div>
 
@@ -249,5 +242,13 @@ export function ProductCard({
         }}
       />
     </motion.article>
+  );
+
+  return (
+    <ProductDetailsContainer
+      productId={product._id}
+      trigger={cardContent}
+      onAddToCart={handleAddToCart}
+    />
   );
 }
