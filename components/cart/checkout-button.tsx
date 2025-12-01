@@ -3,6 +3,7 @@
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/format";
 
 interface CheckoutButtonProps {
   total: number;
@@ -41,9 +42,7 @@ export function CheckoutButton({
         <>
           Proceed to Checkout
           {showPrice && (
-            <span className="ml-2 font-semibold">
-              (£{total.toFixed(2)})
-            </span>
+            <span className="ml-2 font-semibold">({formatNumber(total)})</span>
           )}
           <ArrowRight className="ml-2 h-4 w-4" />
         </>

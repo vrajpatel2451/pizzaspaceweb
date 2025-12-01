@@ -4,6 +4,7 @@ import { CustomImage } from "@/components/ui/custom-image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ProductDetailsResponse, CartResponse } from "@/types";
+import { formatNumber } from "@/lib/utils/format";
 
 interface CartItemDetailsProps {
   item: CartResponse;
@@ -34,7 +35,7 @@ export function CartItemDetails({
   const selectedAddons = item.pricing
     .map((p) => {
       const pricingItem = pricing.find((pr) => pr._id === p.id);
-      if (pricingItem && pricingItem.type === 'addon') {
+      if (pricingItem && pricingItem.type === "addon") {
         return {
           id: p.id,
           quantity: p.quantity,
@@ -78,15 +79,19 @@ export function CartItemDetails({
           <div className="flex items-center gap-2">
             <Badge
               variant={
-                product.type === 'veg'
-                  ? 'veg'
-                  : product.type === 'non_veg'
-                  ? 'nonveg'
-                  : 'success'
+                product.type === "veg"
+                  ? "veg"
+                  : product.type === "non_veg"
+                  ? "nonveg"
+                  : "success"
               }
               className="text-xs"
             >
-              {product.type === 'veg' ? 'Veg' : product.type === 'non_veg' ? 'Non-Veg' : 'Vegan'}
+              {product.type === "veg"
+                ? "Veg"
+                : product.type === "non_veg"
+                ? "Non-Veg"
+                : "Vegan"}
             </Badge>
           </div>
         </div>
@@ -95,10 +100,14 @@ export function CartItemDetails({
       {/* Selected Variant */}
       {selectedVariant && (
         <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">Selected Variant</p>
+          <p className="text-sm font-medium text-foreground">
+            Selected Variant
+          </p>
           <div className="flex items-center justify-between rounded-md border bg-muted/50 px-3 py-2">
             <span className="text-sm">{selectedVariant.label}</span>
-            <span className="text-sm font-medium">£{selectedVariant.price.toFixed(2)}</span>
+            <span className="text-sm font-medium">
+              {formatNumber(selectedVariant?.price || 0)}
+            </span>
           </div>
         </div>
       )}
@@ -114,10 +123,11 @@ export function CartItemDetails({
                 className="flex items-center justify-between rounded-md border bg-muted/50 px-3 py-2"
               >
                 <span className="text-sm">
-                  {addon!.pricingItem.addonId || 'Addon'} {addon!.quantity > 1 && `x${addon!.quantity}`}
+                  {addon!.pricingItem.addonId || "Addon"}{" "}
+                  {addon!.quantity > 1 && `x${addon!.quantity}`}
                 </span>
                 <span className="text-sm font-medium">
-                  £{(addon!.pricingItem.price * addon!.quantity).toFixed(2)}
+                  {formatNumber(addon!.pricingItem.price * addon!.quantity)}
                 </span>
               </div>
             ))}
@@ -129,7 +139,7 @@ export function CartItemDetails({
       <div className="space-y-1 border-t pt-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Unit Price</span>
-          <span className="font-medium">£{unitPrice.toFixed(2)}</span>
+          <span className="font-medium">{formatNumber(unitPrice)}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Quantity</span>
@@ -137,7 +147,9 @@ export function CartItemDetails({
         </div>
         <div className="flex items-center justify-between border-t pt-2">
           <span className="font-semibold">Total</span>
-          <span className="font-semibold text-lg">£{totalPrice.toFixed(2)}</span>
+          <span className="font-semibold text-lg">
+            {formatNumber(totalPrice)}
+          </span>
         </div>
       </div>
     </div>

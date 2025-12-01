@@ -14,6 +14,7 @@ interface CartState {
   isSummaryLoading: boolean;
   error: string | null;
   isHydrated: boolean;
+  version: number; // Version tracking for force re-renders
 }
 
 interface CartActions {
@@ -49,6 +50,7 @@ const initialState: CartState = {
   isSummaryLoading: false,
   error: null,
   isHydrated: false,
+  version: 0,
 };
 
 export const useCartStore = create<CartStore>()(
@@ -56,20 +58,42 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       ...initialState,
 
-      setItems: (items) => set({ items }),
+      setItems: (items) => set((state) => ({ items, version: state.version + 1 })),
 
-      addItem: (item) => set((state) => ({
-        items: [...state.items, item],
-      })),
+      addItem: (item) => set((state) => {
+        // Check if item already exists in cart (same itemId and variantId)
+        const existingItemIndex = state.items.findIndex(
+          (i) => i.itemId === item.itemId && i.variantId === item.variantId
+        );
+
+        if (existingItemIndex !== -1) {
+          // Update existing item instead of adding duplicate
+          const updatedItems = [...state.items];
+          updatedItems[existingItemIndex] = item;
+          return { items: updatedItems, version: state.version + 1 };
+        }
+
+        // Add new item
+        return { items: [...state.items, item], version: state.version + 1 };
+      }),
 
       updateItem: (itemId, updates) => set((state) => ({
         items: state.items.map((item) =>
-          item._id === itemId ? { ...item, ...updates } : item
+          item._id === itemId
+            ? {
+                ...item,
+                ...updates,
+                // Ensure nested objects are properly updated
+                pricing: updates.pricing || item.pricing,
+              }
+            : item
         ),
+        version: state.version + 1,
       })),
 
       removeItem: (itemId) => set((state) => ({
         items: state.items.filter((item) => item._id !== itemId),
+        version: state.version + 1,
       })),
 
       clearItems: () => set({ items: [] }),

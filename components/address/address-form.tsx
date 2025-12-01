@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Home, Briefcase, MapPin, MapPinned, Loader2 } from "lucide-react";
+import { Home, Briefcase, MapPin, MapPinned, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { addressSchema, type AddressFormData } from "@/lib/schemas/address-schema";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useUser } from "@/store";
 
 interface AddressFormProps {
   defaultValues?: Partial<AddressFormData>;
@@ -29,6 +33,8 @@ export function AddressForm({
 }: AddressFormProps) {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
+  const user = useUser();
+
   const {
     register,
     handleSubmit,
@@ -36,7 +42,7 @@ export function AddressForm({
     watch,
     setValue,
   } = useForm<AddressFormData>({
-    resolver: zodResolver(addressSchema),
+    resolver: zodResolver(addressSchema) as any,
     defaultValues: {
       name: "",
       phone: "",
@@ -49,12 +55,31 @@ export function AddressForm({
       type: "home" as const,
       otherAddressLabel: "",
       isDefault: false,
+      isForMe: true,
+      recipientName: "",
+      recipientPhone: "",
       ...defaultValues,
     },
   });
 
   const addressType = watch("type");
   const isDefault = watch("isDefault");
+  const isForMe = watch("isForMe");
+  const watchLat = watch("lat");
+  const watchLong = watch("long");
+  const hasLocation = watchLat !== undefined && watchLong !== undefined;
+
+  // Auto-populate name and phone when isForMe changes
+  useEffect(() => {
+    if (isForMe && user) {
+      setValue("name", user.name || "");
+      setValue("phone", user.phone || "");
+    } else if (!isForMe) {
+      // Clear name and phone when switching to "For Other"
+      setValue("name", "");
+      setValue("phone", "");
+    }
+  }, [isForMe, user, setValue]);
 
   const handleGetLocation = async () => {
     if (!navigator.geolocation) {
@@ -104,25 +129,88 @@ export function AddressForm({
 
   const onFormSubmit: SubmitHandler<AddressFormData> = async (data) => {
     try {
-      await onSubmit(data);
+      // Prepare the payload
+      const payload: AddressFormData = {
+        ...data,
+        // Use user's profile data if isForMe, otherwise use recipient data
+        name: data.isForMe ? (user?.name || data.name) : (data.recipientName || data.name),
+        phone: data.isForMe ? (user?.phone || data.phone) : (data.recipientPhone || data.phone),
+      };
+
+      await onSubmit(payload);
     } catch (error) {
       console.error("Form submission error:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
-      {/* Name Field */}
+    <form onSubmit={handleSubmit(onFormSubmit as any)} className="space-y-5">
+      {/* Location Alert */}
+      {(errors.lat || errors.long) && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="size-4" />
+          <AlertDescription>
+            {errors.lat?.message || errors.long?.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* For Me / For Other Toggle */}
+      <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
+        <div className="flex-1">
+          <Label htmlFor="forMe" className="font-medium text-base">
+            For Me
+          </Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Use my profile contact details
+          </p>
+        </div>
+        <Switch
+          id="forMe"
+          checked={isForMe}
+          onCheckedChange={(checked) => setValue("isForMe", checked)}
+          disabled={isLoading}
+          aria-label="Toggle address recipient"
+        />
+      </div>
+
+      {/* Recipient Details (shown when isForMe is false) */}
+      {!isForMe && (
+        <div className="space-y-4 p-4 border rounded-lg bg-card">
+          <h4 className="font-medium text-sm">Recipient Details</h4>
+          <Input
+            label="Recipient Name"
+            placeholder="Enter recipient name"
+            error={errors.recipientName?.message}
+            {...register("recipientName")}
+            disabled={isLoading}
+            aria-required="true"
+          />
+          <Input
+            label="Recipient Phone"
+            type="tel"
+            inputMode="tel"
+            placeholder="07123 456789"
+            error={errors.recipientPhone?.message}
+            {...register("recipientPhone")}
+            disabled={isLoading}
+            aria-required="true"
+          />
+        </div>
+      )}
+
+      {/* Name Field (auto-populated when For Me) */}
       <Input
         label="Full Name"
         placeholder="Enter recipient name"
         error={errors.name?.message}
         {...register("name")}
-        disabled={isLoading}
+        disabled={isLoading || isForMe}
         aria-required="true"
+        className={isForMe ? "bg-muted/30" : ""}
       />
 
-      {/* Phone Field */}
+      {/* Phone Field (auto-populated when For Me) */}
       <Input
         label="Phone Number"
         type="tel"
@@ -130,8 +218,9 @@ export function AddressForm({
         placeholder="07123 456789"
         error={errors.phone?.message}
         {...register("phone")}
-        disabled={isLoading}
+        disabled={isLoading || isForMe}
         aria-required="true"
+        className={isForMe ? "bg-muted/30" : ""}
       />
 
       {/* Address Line 1 */}
@@ -194,22 +283,42 @@ export function AddressForm({
       </div>
 
       {/* Use My Location Button */}
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleGetLocation}
-          disabled={isLoading || isGettingLocation}
-          aria-label="Use my current location"
-        >
-          {isGettingLocation ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <MapPinned className="size-4" />
-          )}
-          <span>Use My Location</span>
-        </Button>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <div className="text-sm">
+            {hasLocation ? (
+              <div className="flex items-center gap-2 text-green-600">
+                <MapPinned className="size-4" />
+                <span className="font-medium">Location captured</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertCircle className="size-4" />
+                <span>Location required</span>
+              </div>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant={hasLocation ? "outline" : "default"}
+            size="sm"
+            onClick={handleGetLocation}
+            disabled={isLoading || isGettingLocation}
+            aria-label="Use my current location"
+          >
+            {isGettingLocation ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <MapPinned className="size-4" />
+            )}
+            <span>{hasLocation ? "Update Location" : "Use My Location"}</span>
+          </Button>
+        </div>
+        {hasLocation && (
+          <p className="text-xs text-muted-foreground">
+            Coordinates: {watchLat?.toFixed(6)}, {watchLong?.toFixed(6)}
+          </p>
+        )}
       </div>
 
       {/* Address Type Selector */}
@@ -217,63 +326,57 @@ export function AddressForm({
         <label className="text-sm font-medium text-foreground">
           Address Type <span className="text-destructive">*</span>
         </label>
-        <RadioGroup
+        <ToggleGroup
+          type="single"
           value={addressType}
-          onValueChange={(value) =>
-            setValue("type", value as "home" | "work" | "other")
-          }
+          onValueChange={(value) => {
+            if (value) {
+              setValue("type", value as "home" | "work" | "other");
+            }
+          }}
           disabled={isLoading}
           aria-required="true"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full"
         >
-          <label
-            htmlFor="type-home"
+          <ToggleGroupItem
+            value="home"
             className={cn(
-              "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
-              addressType === "home"
-                ? "border-primary bg-primary/5"
-                : "border-input hover:border-primary/50"
+              "flex items-center justify-center gap-2 px-4 py-3 h-auto rounded-lg border-2 transition-all",
+              "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
+              "data-[state=off]:border-input data-[state=off]:hover:border-primary/50"
             )}
+            aria-label="Set address type to Home"
           >
-            <RadioGroupItem value="home" id="type-home" />
-            <div className="flex items-center gap-2 flex-1">
-              <Home className="size-5 text-muted-foreground" />
-              <span className="font-medium">Home</span>
-            </div>
-          </label>
+            <Home className="size-4" />
+            <span className="font-medium">Home</span>
+          </ToggleGroupItem>
 
-          <label
-            htmlFor="type-work"
+          <ToggleGroupItem
+            value="work"
             className={cn(
-              "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
-              addressType === "work"
-                ? "border-primary bg-primary/5"
-                : "border-input hover:border-primary/50"
+              "flex items-center justify-center gap-2 px-4 py-3 h-auto rounded-lg border-2 transition-all",
+              "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
+              "data-[state=off]:border-input data-[state=off]:hover:border-primary/50"
             )}
+            aria-label="Set address type to Work"
           >
-            <RadioGroupItem value="work" id="type-work" />
-            <div className="flex items-center gap-2 flex-1">
-              <Briefcase className="size-5 text-muted-foreground" />
-              <span className="font-medium">Work</span>
-            </div>
-          </label>
+            <Briefcase className="size-4" />
+            <span className="font-medium">Work</span>
+          </ToggleGroupItem>
 
-          <label
-            htmlFor="type-other"
+          <ToggleGroupItem
+            value="other"
             className={cn(
-              "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
-              addressType === "other"
-                ? "border-primary bg-primary/5"
-                : "border-input hover:border-primary/50"
+              "flex items-center justify-center gap-2 px-4 py-3 h-auto rounded-lg border-2 transition-all",
+              "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
+              "data-[state=off]:border-input data-[state=off]:hover:border-primary/50"
             )}
+            aria-label="Set address type to Other"
           >
-            <RadioGroupItem value="other" id="type-other" />
-            <div className="flex items-center gap-2 flex-1">
-              <MapPin className="size-5 text-muted-foreground" />
-              <span className="font-medium">Other</span>
-            </div>
-          </label>
-        </RadioGroup>
+            <MapPin className="size-4" />
+            <span className="font-medium">Other</span>
+          </ToggleGroupItem>
+        </ToggleGroup>
         {errors.type && (
           <p role="alert" className="text-xs text-destructive">
             {errors.type.message}
@@ -331,10 +434,10 @@ export function AddressForm({
         <Button
           type="submit"
           loading={isLoading}
-          disabled={isLoading}
+          disabled={isLoading || !hasLocation}
           className="flex-1"
         >
-          {submitLabel}
+          {!hasLocation ? "Select Location First" : submitLabel}
         </Button>
       </div>
     </form>

@@ -10,8 +10,9 @@ import { bottomsheetVariants } from "@/lib/animations";
 export function ProductDetailsBottomsheet({
   isOpen,
   onClose,
+  isProcessing,
   ...contentProps
-}: Omit<ProductDetailsModalProps, 'productId' | 'children'> & React.ComponentProps<typeof ProductDetailsContent>) {
+}: Omit<ProductDetailsModalProps, 'productId' | 'children'> & React.ComponentProps<typeof ProductDetailsContent> & { isProcessing?: boolean }) {
   const shouldReduceMotion = useReducedMotion();
 
   // Simplified variants for reduced motion
@@ -52,6 +53,7 @@ export function ProductDetailsBottomsheet({
               <ProductDetailsContent
                 {...contentProps}
                 onClose={onClose}
+                isProcessing={isProcessing}
               />
             </motion.div>
           )}

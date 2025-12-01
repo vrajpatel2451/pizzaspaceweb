@@ -4,7 +4,6 @@ import * as React from "react";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { VariantCard } from "./variant-card";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
-import { getVariantPrice } from "@/lib/utils/price-calculator";
 import type { VariantGroupProps } from "@/types/product-details";
 import { cn } from "@/lib/utils";
 
@@ -17,33 +16,34 @@ export function VariantGroup({
 }: VariantGroupProps) {
   const context = useProductDetailsContext();
 
-  // Get primary variant ID from context for price calculation
-  const primaryVariantId = React.useMemo(() => {
-    if (!context.productData) return null;
+  /**
+   * Calculate variant price
+   * - For primary variants: use variant.price directly
+   * - For sub-variants: lookup in pricing array
+   */
+  const calculateVariantPrice = React.useCallback(
+    (variantId: string): number => {
+      if (!context.productData) return 0;
 
-    for (const [groupId, variantId] of context.selectedVariants.entries()) {
-      const variantGroup = context.productData.variantGroupList.find(
-        (g) => g._id === groupId
-      );
-      if (variantGroup?.isPrimary) {
-        return variantId;
+      const variant = variants.find((v) => v._id === variantId);
+      if (!variant) return 0;
+
+      if (group.isPrimary) {
+        // Primary variant: use direct price
+        return variant.price;
+      } else {
+        // Sub-variant: lookup in pricing array
+        const pricing = context.productData.pricing.find(
+          (p) =>
+            p.type === "variant" &&
+            p.variantId === context.selectedVariantId &&
+            p.subVariantId === variantId
+        );
+        return pricing?.price ?? 0;
       }
-    }
-    return null;
-  }, [context.selectedVariants, context.productData]);
-
-  // Calculate variant price using price-calculator utility
-  const calculateVariantPrice = (variantId: string) => {
-    if (!context.productData) return 0;
-
-    return getVariantPrice(
-      variantId,
-      primaryVariantId,
-      context.productData.variantList,
-      context.productData.variantGroupList,
-      context.productData.pricing
-    );
-  };
+    },
+    [context.productData, context.selectedVariantId, group.isPrimary, variants]
+  );
 
   return (
     <div className={cn("space-y-3 sm:space-y-4", className)}>

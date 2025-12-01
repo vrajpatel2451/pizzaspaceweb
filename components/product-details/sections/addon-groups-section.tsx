@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
  * Addon Groups Section
  *
  * Displays all addon groups using the premium AddonGroupCard component.
- * Handles selection state and provides clear all functionality.
+ * The card handles visibility filtering based on current variant.
+ *
+ * Key logic (from reference code):
+ * - Addon groups are filtered to only show those with visible addons for current variant
+ * - Each addon's visibility is determined by the pricing array (type="addon", isVisible=true)
  */
 export function AddonGroupsSection({
   className,
@@ -36,35 +40,13 @@ export function AddonGroupsSection({
     return addonList.filter((addon) => addon.groupId === groupId);
   };
 
-  // Convert Map to Record for compatibility with AddonGroupCard component
-  const selectedAddonsRecord = React.useMemo(() => {
-    const record: Record<string, number> = {};
-    for (const [addonId, selection] of context.selectedAddons.entries()) {
-      record[addonId] = selection.selected ? selection.quantity : 0;
-    }
-    return record;
-  }, [context.selectedAddons]);
-
-  // Handler to convert quantity to addon selection
-  const handleAddonSelect = (addonId: string, quantity: number) => {
-    if (quantity > 0) {
-      context.setAddonQuantity(addonId, quantity);
-    } else {
-      // If quantity is 0, deselect the addon
-      const currentSelection = context.selectedAddons.get(addonId);
-      if (currentSelection?.selected) {
-        context.toggleAddon(addonId);
-      }
-    }
-  };
-
   // Handler to clear all addons in a group
   const handleClearGroup = (groupId: string) => {
     const groupAddons = getAddonsForGroup(groupId);
     groupAddons.forEach((addon) => {
-      const selection = context.selectedAddons.get(addon._id);
-      if (selection?.selected) {
-        context.toggleAddon(addon._id);
+      const pricingId = context.getAddonPricingId(addon._id);
+      if (pricingId && context.isAddonSelected(addon._id)) {
+        context.toggleAddon(pricingId, 0); // Set to 0 to remove
       }
     });
   };
@@ -78,13 +60,16 @@ export function AddonGroupsSection({
       {addonGroupList.map((group) => {
         const groupAddons = getAddonsForGroup(group._id);
 
+        // Skip groups with no addons
+        if (groupAddons.length === 0) {
+          return null;
+        }
+
         return (
           <AddonGroupCard
             key={group._id}
             group={group}
             addons={groupAddons}
-            selectedAddons={selectedAddonsRecord}
-            onSelect={handleAddonSelect}
             onClearAll={() => handleClearGroup(group._id)}
           />
         );

@@ -5,7 +5,6 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, X } from "lucide-react";
 import { CompactQuantityPill } from "../controls/quantity-pill";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
-import { getAddonPrice } from "@/lib/utils/price-calculator";
 import { formatPrice } from "@/lib/utils/currency";
 import type { AddonGroupResponse, AddonResponse } from "@/types/product";
 import { cn } from "@/lib/utils";
@@ -13,8 +12,6 @@ import { cn } from "@/lib/utils";
 export interface AddonGroupCardProps {
   group: AddonGroupResponse;
   addons: AddonResponse[];
-  selectedAddons: Record<string, number>; // addonId -> quantity
-  onSelect: (addonId: string, quantity: number) => void;
   className?: string;
   onClearAll?: () => void;
 }
@@ -31,12 +28,15 @@ const COLLAPSE_THRESHOLD = 4;
  * - Quantity counter appears when selected
  * - Expandable "+X more" if many addons
  * - Smooth animations throughout
+ *
+ * Uses the new context pattern:
+ * - Uses context.isAddonVisible() to check visibility
+ * - Uses context.getAddonPricingId() to get pricing ID
+ * - Uses context.toggleAddon(pricingId, qty) for selection
  */
 export function AddonGroupCard({
   group,
   addons,
-  selectedAddons,
-  onSelect,
   className,
   onClearAll,
 }: AddonGroupCardProps) {
@@ -44,56 +44,53 @@ export function AddonGroupCard({
   const shouldReduceMotion = useReducedMotion();
   const [isExpanded, setIsExpanded] = React.useState(false);
 
-  // Get primary variant ID from context for price calculation
-  const primaryVariantId = React.useMemo(() => {
-    if (!context.productData) return null;
+  // Filter addons that are visible for current variant
+  const visibleAddons = React.useMemo(() => {
+    return addons.filter((addon) => context.isAddonVisible(addon._id));
+  }, [addons, context]);
 
-    for (const [groupId, variantId] of context.selectedVariants.entries()) {
-      const variantGroup = context.productData.variantGroupList.find(
-        (g) => g._id === groupId
+  // Get addon price from pricing array
+  const getAddonPrice = React.useCallback(
+    (addonId: string): number => {
+      if (!context.productData) return 0;
+
+      const pricing = context.productData.pricing.find(
+        (p) =>
+          p.type === "addon" &&
+          p.variantId === context.selectedVariantId &&
+          p.addonId === addonId
       );
-      if (variantGroup?.isPrimary) {
-        return variantId;
-      }
-    }
-    return null;
-  }, [context.selectedVariants, context.productData]);
+      return pricing?.price ?? 0;
+    },
+    [context.productData, context.selectedVariantId]
+  );
 
-  // Calculate addon price
-  const calculateAddonPrice = (addonId: string): number => {
-    if (!context.productData) return 0;
-
-    return getAddonPrice(
-      addonId,
-      primaryVariantId,
-      context.productData.pricing
-    );
-  };
-
-  // Selection counts - only count addons that belong to this group
-  const groupAddonIds = addons.map(a => a._id);
-  const selectedCount = Object.entries(selectedAddons).filter(
-    ([addonId, qty]) => groupAddonIds.includes(addonId) && qty > 0
+  // Selection counts - only count visible addons
+  const selectedCount = visibleAddons.filter((addon) =>
+    context.isAddonSelected(addon._id)
   ).length;
   const hasAnySelected = selectedCount > 0;
 
   // Collapse logic
-  const shouldCollapse = addons.length > COLLAPSE_THRESHOLD;
+  const shouldCollapse = visibleAddons.length > COLLAPSE_THRESHOLD;
   const displayedAddons =
     shouldCollapse && !isExpanded
-      ? addons.slice(0, COLLAPSE_THRESHOLD)
-      : addons;
-  const hiddenCount = addons.length - COLLAPSE_THRESHOLD;
+      ? visibleAddons.slice(0, COLLAPSE_THRESHOLD)
+      : visibleAddons;
+  const hiddenCount = visibleAddons.length - COLLAPSE_THRESHOLD;
 
   // Handlers
   const handleToggleAddon = (addonId: string, isSelected: boolean) => {
-    onSelect(addonId, isSelected ? 1 : 0);
+    const pricingId = context.getAddonPricingId(addonId);
+    if (!pricingId) return;
+    context.toggleAddon(pricingId, isSelected ? 1 : 0);
   };
 
   const handleQuantityChange = (addonId: string, quantity: number) => {
-    onSelect(addonId, quantity);
+    const pricingId = context.getAddonPricingId(addonId);
+    if (!pricingId) return;
+    context.toggleAddon(pricingId, quantity);
   };
-
 
   // Animation variants
   const cardVariants = {
@@ -119,6 +116,11 @@ export function AddonGroupCard({
       },
     }),
   };
+
+  // Don't render if no visible addons
+  if (visibleAddons.length === 0) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -182,9 +184,9 @@ export function AddonGroupCard({
         className="divide-y divide-border/30"
       >
         {displayedAddons.map((addon, index) => {
-          const quantity = selectedAddons[addon._id] || 0;
-          const isSelected = quantity > 0;
-          const price = calculateAddonPrice(addon._id);
+          const isSelected = context.isAddonSelected(addon._id);
+          const quantity = context.getAddonQuantity(addon._id);
+          const price = getAddonPrice(addon._id);
 
           return (
             <motion.div

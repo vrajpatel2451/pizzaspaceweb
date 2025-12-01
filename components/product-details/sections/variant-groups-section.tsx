@@ -11,6 +11,10 @@ import { cn } from "@/lib/utils";
  *
  * Displays all variant groups using the premium VariantGroupCard component.
  * Groups are sorted with primary variants first.
+ *
+ * Key logic (from reference code):
+ * - Primary variants use selectPrimaryVariant (stores just the variantId)
+ * - Sub-variants use selectSubVariant (stores pricing entry)
  */
 export function VariantGroupsSection({
   className,
@@ -53,7 +57,26 @@ export function VariantGroupsSection({
     <div className={cn("space-y-4", className)}>
       {sortedGroups.map((group) => {
         const groupVariants = getVariantsForGroup(group._id);
-        const selectedVariantId = context.selectedVariants.get(group._id);
+
+        // Determine selected variant ID based on group type
+        let selectedVariantId: string | undefined;
+
+        if (group.isPrimary) {
+          // For primary groups, use the selectedVariantId directly
+          selectedVariantId = context.selectedVariantId;
+        } else {
+          // For sub-variant groups, use the helper function
+          selectedVariantId = context.getSelectedSubVariantId(group._id);
+        }
+
+        // Handle selection based on group type
+        const handleSelect = (variantId: string) => {
+          if (group.isPrimary) {
+            context.selectPrimaryVariant(variantId);
+          } else {
+            context.selectSubVariant(variantId);
+          }
+        };
 
         return (
           <VariantGroupCard
@@ -61,7 +84,7 @@ export function VariantGroupsSection({
             group={group}
             variants={groupVariants}
             selectedVariantId={selectedVariantId}
-            onSelect={(variantId) => context.selectVariant(group._id, variantId)}
+            onSelect={handleSelect}
           />
         );
       })}

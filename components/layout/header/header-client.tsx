@@ -14,7 +14,7 @@ import { Logo } from "./logo";
 import { SearchCommand } from "./search-command";
 import { ThemeToggle } from "./theme-toggle";
 import { UserDropdown } from "./user-dropdown";
-import { MiniCartDropdown } from "./mini-cart-dropdown";
+import { CartBadge } from "./cart-badge";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 import { StoreLocator } from "./store-locator";
 
@@ -245,11 +245,11 @@ export function HeaderClient({ className }: HeaderClientProps) {
               )}
             />
 
-            {/* Cart - with mini cart dropdown */}
-            <MiniCartDropdown
+            {/* Cart - direct link to cart page */}
+            <CartBadge
               className={cn(
                 !scrolled && isHomePage
-                  ? "[&_button]:text-slate-700 [&_button]:dark:text-white/80 [&_button]:hover:text-slate-900 [&_button]:dark:hover:text-white [&_button]:hover:bg-slate-100 [&_button]:dark:hover:bg-white/10"
+                  ? "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"
                   : ""
               )}
             />

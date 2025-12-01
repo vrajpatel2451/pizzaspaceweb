@@ -4,7 +4,6 @@ import * as React from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
-import { getVariantPrice } from "@/lib/utils/price-calculator";
 import { formatPrice } from "@/lib/utils/currency";
 import type { VariantGroupResponse, VariantResponse } from "@/types/product";
 import { cn } from "@/lib/utils";
@@ -38,33 +37,34 @@ export function VariantGroupCard({
   const context = useProductDetailsContext();
   const shouldReduceMotion = useReducedMotion();
 
-  // Get primary variant ID from context for price calculation
-  const primaryVariantId = React.useMemo(() => {
-    if (!context.productData) return null;
+  /**
+   * Calculate variant price
+   * - For primary variants: use variant.price directly
+   * - For sub-variants: lookup in pricing array
+   */
+  const calculateVariantPrice = React.useCallback(
+    (variantId: string): number => {
+      if (!context.productData) return 0;
 
-    for (const [groupId, variantId] of context.selectedVariants.entries()) {
-      const variantGroup = context.productData.variantGroupList.find(
-        (g) => g._id === groupId
-      );
-      if (variantGroup?.isPrimary) {
-        return variantId;
+      const variant = variants.find((v) => v._id === variantId);
+      if (!variant) return 0;
+
+      if (group.isPrimary) {
+        // Primary variant: use direct price
+        return variant.price;
+      } else {
+        // Sub-variant: lookup in pricing array
+        const pricing = context.productData.pricing.find(
+          (p) =>
+            p.type === "variant" &&
+            p.variantId === context.selectedVariantId &&
+            p.subVariantId === variantId
+        );
+        return pricing?.price ?? 0;
       }
-    }
-    return null;
-  }, [context.selectedVariants, context.productData]);
-
-  // Calculate variant price using price-calculator utility
-  const calculateVariantPrice = (variantId: string): number => {
-    if (!context.productData) return 0;
-
-    return getVariantPrice(
-      variantId,
-      primaryVariantId,
-      context.productData.variantList,
-      context.productData.variantGroupList,
-      context.productData.pricing
-    );
-  };
+    },
+    [context.productData, context.selectedVariantId, group.isPrimary, variants]
+  );
 
   // Animation variants
   const cardVariants = {
@@ -147,6 +147,7 @@ export function VariantGroupCard({
                 variant={variant}
                 price={price}
                 isSelected={isSelected}
+                isPrimary={group.isPrimary}
                 onSelect={() => onSelect(variant._id)}
               />
             </motion.div>
@@ -164,6 +165,7 @@ interface VariantOptionRowProps {
   variant: VariantResponse;
   price: number;
   isSelected: boolean;
+  isPrimary: boolean;
   onSelect: () => void;
 }
 
@@ -171,6 +173,7 @@ function VariantOptionRow({
   variant,
   price,
   isSelected,
+  isPrimary,
   onSelect,
 }: VariantOptionRowProps) {
   const shouldReduceMotion = useReducedMotion();
@@ -215,7 +218,11 @@ function VariantOptionRow({
               : "text-muted-foreground"
           )}
         >
-          {price > 0 ? formatPrice(price, { showSign: true }) : "Included"}
+          {isPrimary
+            ? formatPrice(price) // Primary variants show full price
+            : price > 0
+              ? formatPrice(price, { showSign: true }) // Sub-variants show +price
+              : "Included"}
         </span>
       </div>
 
@@ -281,33 +288,30 @@ export function HorizontalVariantSelector({
   const context = useProductDetailsContext();
   const shouldReduceMotion = useReducedMotion();
 
-  // Get primary variant ID from context for price calculation
-  const primaryVariantId = React.useMemo(() => {
-    if (!context.productData) return null;
+  /**
+   * Calculate variant price
+   */
+  const calculateVariantPrice = React.useCallback(
+    (variantId: string): number => {
+      if (!context.productData) return 0;
 
-    for (const [groupId, variantId] of context.selectedVariants.entries()) {
-      const variantGroup = context.productData.variantGroupList.find(
-        (g) => g._id === groupId
-      );
-      if (variantGroup?.isPrimary) {
-        return variantId;
+      const variant = variants.find((v) => v._id === variantId);
+      if (!variant) return 0;
+
+      if (group.isPrimary) {
+        return variant.price;
+      } else {
+        const pricing = context.productData.pricing.find(
+          (p) =>
+            p.type === "variant" &&
+            p.variantId === context.selectedVariantId &&
+            p.subVariantId === variantId
+        );
+        return pricing?.price ?? 0;
       }
-    }
-    return null;
-  }, [context.selectedVariants, context.productData]);
-
-  // Calculate variant price
-  const calculateVariantPrice = (variantId: string): number => {
-    if (!context.productData) return 0;
-
-    return getVariantPrice(
-      variantId,
-      primaryVariantId,
-      context.productData.variantList,
-      context.productData.variantGroupList,
-      context.productData.pricing
-    );
-  };
+    },
+    [context.productData, context.selectedVariantId, group.isPrimary, variants]
+  );
 
   return (
     <div className={cn("space-y-3", className)}>

@@ -19,7 +19,8 @@ import {
   useCartCount,
 } from "@/store/cart-store";
 import { CartBadge } from "./cart-badge";
-import { formatCurrency } from "@/lib/utils/format";
+import { formatNumber } from "@/lib/utils/format";
+// import { formatCurrency } from "@/lib/utils/format";
 
 export interface MiniCartDropdownProps {
   className?: string;
@@ -113,8 +114,8 @@ export function MiniCartDropdown({ className }: MiniCartDropdownProps) {
               </span>
               <span className="text-lg font-bold">
                 {summary?.itemTotal
-                  ? formatCurrency(summary.itemTotal)
-                  : formatCurrency(0)}
+                  ? formatNumber(summary.itemTotal)
+                  : formatNumber(0)}
               </span>
             </div>
 

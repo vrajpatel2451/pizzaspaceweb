@@ -80,7 +80,7 @@ export async function removeFromCart(
   deviceId: string
 ): Promise<APIResponse<boolean>> {
   try {
-    const url = `/customer/cart/update/${id}?sessionId=${deviceId}`;
+    const url = `/customer/cart/delete/${id}?sessionId=${deviceId}`;
     const response: AxiosResponse<APIResponse<boolean>> =
       await apiClient.delete<APIResponse<boolean>>(url);
     return response.data;

@@ -1,48 +1,109 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tag, Sparkles } from "lucide-react";
+import { Tag } from "lucide-react";
 import { DiscountResponse } from "@/types";
 import { DiscountInput } from "@/components/discount/discount-input";
 import { AppliedDiscounts } from "@/components/discount/applied-discounts";
 import { DiscountModal } from "@/components/discount/discount-modal";
+import { useCartStore } from "@/store/cart-store";
+import { useStore } from "@/lib/contexts/store-context";
+import { getDiscounts } from "@/lib/api/discount";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 interface DiscountSectionProps {
-  availableDiscounts: DiscountResponse[];
-  appliedDiscounts: DiscountResponse[];
-  totalSavings: number;
-  isLoadingDiscounts?: boolean;
-  onApplyCode: (code: string) => Promise<{ success: boolean; message?: string }>;
-  onApplyDiscount: (discountId: string) => Promise<void>;
-  onRemoveDiscount: (discountId: string) => Promise<void>;
   className?: string;
 }
 
-export function DiscountSection({
-  availableDiscounts,
-  appliedDiscounts,
-  totalSavings,
-  isLoadingDiscounts = false,
-  onApplyCode,
-  onApplyDiscount,
-  onRemoveDiscount,
-  className,
-}: DiscountSectionProps) {
-  const [couponCode, setCouponCode] = React.useState("");
-  const [isApplying, setIsApplying] = React.useState(false);
-  const [isRemoving, setIsRemoving] = React.useState(false);
-  const [error, setError] = React.useState<string | undefined>();
-  const [showModal, setShowModal] = React.useState(false);
-  const [showSuccess, setShowSuccess] = React.useState(false);
+export function DiscountSection({ className }: DiscountSectionProps) {
+  const { selectedStore } = useStore();
+  const { selectedDiscountIds, addDiscount, removeDiscount, getCartIds } =
+    useCartStore();
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplying, setIsApplying] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  const [showModal, setShowModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
+  // Available discounts for modal
+  const [availableDiscounts, setAvailableDiscounts] = useState<
+    DiscountResponse[]
+  >([]);
+  const [isLoadingDiscounts, setIsLoadingDiscounts] = useState(false);
+
+  // Applied discount objects (for displaying details)
+  const [appliedDiscounts, setAppliedDiscounts] = useState<DiscountResponse[]>(
+    []
+  );
+
+  // Fetch available discounts for modal
+  const fetchAvailableDiscounts = useCallback(async () => {
+    if (!selectedStore?._id) return;
+
+    setIsLoadingDiscounts(true);
+    try {
+      const response = await getDiscounts({
+        cartIds: getCartIds(),
+        storeId: selectedStore._id,
+      });
+
+      if (response.statusCode === 201 && response.data) {
+        setAvailableDiscounts(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch discounts:", error);
+    } finally {
+      setIsLoadingDiscounts(false);
+    }
+  }, [selectedStore?._id, getCartIds]);
+
+  // Fetch applied discount details
+  const fetchAppliedDiscountDetails = useCallback(async () => {
+    if (!selectedStore?._id || selectedDiscountIds.length === 0) {
+      setAppliedDiscounts([]);
+      return;
+    }
+
+    try {
+      const response = await getDiscounts({
+        cartIds: getCartIds(),
+        storeId: selectedStore._id,
+      });
+
+      if (response.statusCode === 201 && response.data) {
+        // Filter to only get the applied discounts
+        const applied = response.data.filter((d) =>
+          selectedDiscountIds.includes(d._id)
+        );
+        setAppliedDiscounts(applied);
+      }
+    } catch (error) {
+      console.error("Failed to fetch applied discount details:", error);
+    }
+  }, [selectedStore?._id, selectedDiscountIds, getCartIds]);
+
+  // Fetch applied discount details when IDs change
+  useEffect(() => {
+    fetchAppliedDiscountDetails();
+  }, [fetchAppliedDiscountDetails]);
+
+  // Handle applying discount code from input
   const handleApplyCode = async () => {
-    if (!couponCode.trim()) {
+    const trimmedCode = couponCode.trim();
+
+    if (!trimmedCode) {
       setError("Please enter a coupon code");
+      return;
+    }
+
+    if (!selectedStore?._id) {
+      toast.error("No store selected");
       return;
     }
 
@@ -50,28 +111,55 @@ export function DiscountSection({
     setError(undefined);
 
     try {
-      const result = await onApplyCode(couponCode.trim());
+      // Call API to search for discount by code
+      const response = await getDiscounts({
+        cartIds: getCartIds(),
+        storeId: selectedStore._id,
+        search: trimmedCode,
+      });
 
-      if (result.success) {
-        // Show success animation
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 2000);
+      if (
+        response.statusCode === 201 &&
+        response.data &&
+        response.data.length > 0
+      ) {
+        // Find exact match (case-insensitive)
+        const matchedDiscount = response.data.find(
+          (d) => d.couponCode.toLowerCase() === trimmedCode.toLowerCase()
+        );
 
-        // Clear input
-        setCouponCode("");
+        if (matchedDiscount) {
+          // Check if already applied
+          if (selectedDiscountIds.includes(matchedDiscount._id)) {
+            setError("This discount is already applied");
+            toast.info("Discount already applied");
+          } else {
+            addDiscount(matchedDiscount._id);
 
-        // Show success toast
-        toast.success("Discount applied successfully!", {
-          description: result.message || "Your discount has been applied to the cart",
-        });
+            // Show success animation
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 2000);
+
+            // Clear input
+            setCouponCode("");
+            setError(undefined);
+
+            // Show success toast
+            toast.success(`Discount "${matchedDiscount.couponCode}" applied!`, {
+              description: "Your discount has been applied to the cart",
+            });
+          }
+        } else {
+          setError("Invalid or expired discount code");
+          toast.error("Invalid discount code");
+        }
       } else {
-        setError(result.message || "Invalid coupon code");
-        toast.error("Failed to apply discount", {
-          description: result.message || "Please check the code and try again",
-        });
+        setError("Invalid or expired discount code");
+        toast.error("Invalid discount code");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to apply discount";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to apply discount";
       setError(errorMessage);
       toast.error("Error applying discount", {
         description: errorMessage,
@@ -81,21 +169,38 @@ export function DiscountSection({
     }
   };
 
+  // Handle selecting discount from modal
   const handleApplyFromModal = async (discountId: string) => {
     setIsApplying(true);
     try {
-      await onApplyDiscount(discountId);
+      // Check if already applied
+      if (selectedDiscountIds.includes(discountId)) {
+        toast.info("Discount already applied");
+        setShowModal(false);
+        return;
+      }
+
+      addDiscount(discountId);
 
       // Show success animation
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
 
-      toast.success("Discount applied successfully!");
+      // Find the discount name for toast
+      const discount = availableDiscounts.find((d) => d._id === discountId);
+      if (discount) {
+        toast.success(`Discount "${discount.couponCode}" applied!`, {
+          description: "Your discount has been applied to the cart",
+        });
+      } else {
+        toast.success("Discount applied successfully!");
+      }
 
       // Close modal after a short delay
       setTimeout(() => setShowModal(false), 500);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to apply discount";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to apply discount";
       toast.error("Error applying discount", {
         description: errorMessage,
       });
@@ -104,13 +209,15 @@ export function DiscountSection({
     }
   };
 
+  // Handle removing a discount
   const handleRemoveDiscount = async (discountId: string) => {
     setIsRemoving(true);
     try {
-      await onRemoveDiscount(discountId);
+      removeDiscount(discountId);
       toast.success("Discount removed");
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to remove discount";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to remove discount";
       toast.error("Error removing discount", {
         description: errorMessage,
       });
@@ -119,7 +226,24 @@ export function DiscountSection({
     }
   };
 
-  const appliedDiscountIds = appliedDiscounts.map((d) => d._id);
+  // Handle opening modal - fetch discounts when opening
+  const handleOpenModal = () => {
+    setShowModal(true);
+    fetchAvailableDiscounts();
+  };
+
+  // Calculate total savings from applied discounts
+  const calculateTotalSavings = () => {
+    return appliedDiscounts.reduce((total, discount) => {
+      if (discount.discountAmountType === "fix") {
+        return total + discount.discountAmount;
+      }
+      // For percentage discounts, use maximum amount as potential savings
+      return total + (discount.maximumAmount || 0);
+    }, 0);
+  };
+
+  const appliedDiscountIds = selectedDiscountIds;
 
   return (
     <>
@@ -175,30 +299,18 @@ export function DiscountSection({
               <Tag className="size-5" />
               Apply Discount
             </CardTitle>
-            {availableDiscounts.length > 0 && (
-              <Button
-                variant="link"
-                size="sm"
-                onClick={() => setShowModal(true)}
-                className="h-auto p-0 font-semibold"
-              >
-                View All Discounts
-              </Button>
-            )}
+            <Button
+              variant="link"
+              size="sm"
+              onClick={handleOpenModal}
+              className="h-auto p-0 font-semibold"
+            >
+              View All
+            </Button>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Applied Discounts */}
-          {appliedDiscounts.length > 0 && (
-            <AppliedDiscounts
-              discounts={appliedDiscounts}
-              totalSavings={totalSavings}
-              onRemove={handleRemoveDiscount}
-              isRemoving={isRemoving}
-            />
-          )}
-
           {/* Coupon Code Input */}
           <DiscountInput
             value={couponCode}
@@ -212,15 +324,14 @@ export function DiscountSection({
             placeholder="Enter coupon code"
           />
 
-          {/* Available Discounts Count */}
-          {availableDiscounts.length > 0 && !isLoadingDiscounts && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Sparkles className="size-4" />
-              <span>
-                {availableDiscounts.length}{" "}
-                {availableDiscounts.length === 1 ? "discount" : "discounts"} available
-              </span>
-            </div>
+          {/* Applied Discounts */}
+          {appliedDiscounts.length > 0 && (
+            <AppliedDiscounts
+              discounts={appliedDiscounts}
+              totalSavings={calculateTotalSavings()}
+              onRemove={handleRemoveDiscount}
+              isRemoving={isRemoving}
+            />
           )}
         </CardContent>
       </Card>

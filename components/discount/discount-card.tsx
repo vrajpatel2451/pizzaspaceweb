@@ -12,6 +12,7 @@ import { DiscountValidity } from "./discount-validity";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { formatNumber } from "@/lib/utils/format";
 
 interface DiscountCardProps {
   discount: DiscountResponse;
@@ -131,10 +132,7 @@ export function DiscountCard({
               onClick={handleApply}
               disabled={isDisabled || isApplied}
               loading={isApplying}
-              className={cn(
-                "min-w-[90px]",
-                isApplied && "cursor-default"
-              )}
+              className={cn("min-w-[90px]", isApplied && "cursor-default")}
             >
               {isApplied ? "Applied" : "Apply"}
             </Button>
@@ -145,11 +143,12 @@ export function DiscountCard({
       <CardContent className="pt-0 space-y-3">
         {/* Basic Info - Always Visible */}
         <div className="space-y-2">
-          {discount.discountAmountType === "percentage" && discount.maximumAmount > 0 && (
-            <div className="text-sm text-muted-foreground">
-              Maximum discount: £{discount.maximumAmount.toFixed(2)}
-            </div>
-          )}
+          {discount.discountAmountType === "percentage" &&
+            discount.maximumAmount > 0 && (
+              <div className="text-sm text-muted-foreground">
+                Maximum discount: {formatNumber(discount.maximumAmount)}
+              </div>
+            )}
 
           <DiscountValidity
             startTime={discount.startTime}

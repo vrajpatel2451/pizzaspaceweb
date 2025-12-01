@@ -20,6 +20,7 @@ import {
   AddonResponse,
 } from "@/types";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/format";
 
 interface EditCartItemModalProps {
   isOpen: boolean;
@@ -34,15 +35,18 @@ export function EditCartItemModal({
   item,
   onSuccess,
 }: EditCartItemModalProps) {
-  const { data: productDetails, isLoading: isLoadingDetails, error: detailsError } = useProductDetails(
-    item.itemId,
-    isOpen
-  );
+  const {
+    data: productDetails,
+    isLoading: isLoadingDetails,
+    error: detailsError,
+  } = useProductDetails(item.itemId, isOpen);
   const { mutate: updateCartItem, isLoading: isUpdating } = useUpdateCartItem();
 
   // Form state
   const [selectedVariantId, setSelectedVariantId] = useState(item.variantId);
-  const [selectedAddons, setSelectedAddons] = useState<Map<string, number>>(new Map());
+  const [selectedAddons, setSelectedAddons] = useState<Map<string, number>>(
+    new Map()
+  );
   const [quantity, setQuantity] = useState(item.quantity);
 
   // Initialize form with current item data
@@ -54,8 +58,10 @@ export function EditCartItemModal({
       // Initialize addons from current cart item
       const addonsMap = new Map<string, number>();
       item.pricing.forEach((p) => {
-        const pricingItem = productDetails.pricing.find((pr) => pr._id === p.id);
-        if (pricingItem && pricingItem.type === 'addon') {
+        const pricingItem = productDetails.pricing.find(
+          (pr) => pr._id === p.id
+        );
+        if (pricingItem && pricingItem.type === "addon") {
           addonsMap.set(p.id, p.quantity);
         }
       });
@@ -70,7 +76,9 @@ export function EditCartItemModal({
     const { pricing, variantList } = productDetails;
 
     // Get variant price
-    const selectedVariant = variantList.find((v) => v._id === selectedVariantId);
+    const selectedVariant = variantList.find(
+      (v) => v._id === selectedVariantId
+    );
     let total = selectedVariant?.price || 0;
 
     // Add addon prices
@@ -111,7 +119,11 @@ export function EditCartItemModal({
   }, [productDetails]);
 
   // Handle addon selection
-  const handleAddonToggle = (pricingId: string, checked: boolean, _allowMulti: boolean) => {
+  const handleAddonToggle = (
+    pricingId: string,
+    checked: boolean,
+    _allowMulti: boolean
+  ) => {
     setSelectedAddons((prev) => {
       const newMap = new Map(prev);
       if (checked) {
@@ -124,7 +136,10 @@ export function EditCartItemModal({
   };
 
   // Handle addon quantity change
-  const handleAddonQuantityChange = async (pricingId: string, newQuantity: number) => {
+  const handleAddonQuantityChange = async (
+    pricingId: string,
+    newQuantity: number
+  ) => {
     setSelectedAddons((prev) => {
       const newMap = new Map(prev);
       if (newQuantity > 0) {
@@ -148,7 +163,7 @@ export function EditCartItemModal({
 
     // Add variant pricing
     const variantPricing = productDetails.pricing.find(
-      (p) => p.type === 'variant' && p.variantId === selectedVariantId
+      (p) => p.type === "variant" && p.variantId === selectedVariantId
     );
     if (variantPricing) {
       pricing.push({ id: variantPricing._id, quantity: 1 });
@@ -188,12 +203,7 @@ export function EditCartItemModal({
   // Render loading state
   if (isLoadingDetails) {
     return (
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Edit Item"
-        size="md"
-      >
+      <Modal isOpen={isOpen} onClose={onClose} title="Edit Item" size="md">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -204,12 +214,7 @@ export function EditCartItemModal({
   // Render error state
   if (detailsError || !productDetails) {
     return (
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Edit Item"
-        size="md"
-      >
+      <Modal isOpen={isOpen} onClose={onClose} title="Edit Item" size="md">
         <div className="flex flex-col items-center justify-center gap-3 py-12">
           <AlertCircle className="h-12 w-12 text-destructive" />
           <p className="text-center text-muted-foreground">
@@ -220,7 +225,14 @@ export function EditCartItemModal({
     );
   }
 
-  const { product, variantList, variantGroupList, addonList, addonGroupList, pricing } = productDetails;
+  const {
+    product,
+    variantList,
+    variantGroupList,
+    addonList,
+    addonGroupList,
+    pricing,
+  } = productDetails;
 
   return (
     <Modal
@@ -264,15 +276,19 @@ export function EditCartItemModal({
             </div>
             <Badge
               variant={
-                product.type === 'veg'
-                  ? 'veg'
-                  : product.type === 'non_veg'
-                  ? 'nonveg'
-                  : 'success'
+                product.type === "veg"
+                  ? "veg"
+                  : product.type === "non_veg"
+                  ? "nonveg"
+                  : "success"
               }
               className="text-xs"
             >
-              {product.type === 'veg' ? 'Veg' : product.type === 'non_veg' ? 'Non-Veg' : 'Vegan'}
+              {product.type === "veg"
+                ? "Veg"
+                : product.type === "non_veg"
+                ? "Non-Veg"
+                : "Vegan"}
             </Badge>
           </div>
         </div>
@@ -287,7 +303,9 @@ export function EditCartItemModal({
               <div>
                 <Label className="text-base font-semibold">{group.label}</Label>
                 {group.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {group.description}
+                  </p>
                 )}
               </div>
 
@@ -301,16 +319,22 @@ export function EditCartItemModal({
                     key={variant._id}
                     className={cn(
                       "flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent/50",
-                      selectedVariantId === variant._id && "border-primary bg-primary/5"
+                      selectedVariantId === variant._id &&
+                        "border-primary bg-primary/5"
                     )}
                   >
                     <div className="flex items-center gap-3">
                       <RadioGroupItem value={variant._id} id={variant._id} />
-                      <Label htmlFor={variant._id} className="cursor-pointer font-normal">
+                      <Label
+                        htmlFor={variant._id}
+                        className="cursor-pointer font-normal"
+                      >
                         {variant.label}
                       </Label>
                     </div>
-                    <span className="font-medium text-sm">£{variant.price.toFixed(2)}</span>
+                    <span className="font-medium text-sm">
+                      {formatNumber(variant.price)}
+                    </span>
                   </div>
                 ))}
               </RadioGroup>
@@ -328,7 +352,9 @@ export function EditCartItemModal({
               <div>
                 <Label className="text-base font-semibold">{group.label}</Label>
                 {group.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {group.description}
+                  </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">
                   {group.allowMulti
@@ -342,12 +368,13 @@ export function EditCartItemModal({
                 {addons.map((addon) => {
                   // Find pricing for this addon
                   const addonPricing = pricing.find(
-                    (p) => p.type === 'addon' && p.addonId === addon._id
+                    (p) => p.type === "addon" && p.addonId === addon._id
                   );
                   if (!addonPricing) return null;
 
                   const isSelected = selectedAddons.has(addonPricing._id);
-                  const addonQuantity = selectedAddons.get(addonPricing._id) || 1;
+                  const addonQuantity =
+                    selectedAddons.get(addonPricing._id) || 1;
 
                   return (
                     <div
@@ -362,10 +389,17 @@ export function EditCartItemModal({
                           id={addon._id}
                           checked={isSelected}
                           onCheckedChange={(checked) =>
-                            handleAddonToggle(addonPricing._id, checked as boolean, group.allowMulti)
+                            handleAddonToggle(
+                              addonPricing._id,
+                              checked as boolean,
+                              group.allowMulti
+                            )
                           }
                         />
-                        <Label htmlFor={addon._id} className="cursor-pointer font-normal flex-1">
+                        <Label
+                          htmlFor={addon._id}
+                          className="cursor-pointer font-normal flex-1"
+                        >
                           {addon.label}
                         </Label>
                       </div>
@@ -375,7 +409,10 @@ export function EditCartItemModal({
                           <QuantityControl
                             quantity={addonQuantity}
                             onQuantityChange={(newQty) =>
-                              handleAddonQuantityChange(addonPricing._id, newQty)
+                              handleAddonQuantityChange(
+                                addonPricing._id,
+                                newQty
+                              )
                             }
                             min={1}
                             max={group.max}
@@ -383,7 +420,7 @@ export function EditCartItemModal({
                           />
                         )}
                         <span className="font-medium text-sm min-w-[60px] text-right">
-                          £{(addonPricing.price * addonQuantity).toFixed(2)}
+                          {formatNumber(addonPricing.price * addonQuantity)}
                         </span>
                       </div>
                     </div>
@@ -405,7 +442,7 @@ export function EditCartItemModal({
               max={99}
             />
             <span className="text-sm text-muted-foreground">
-              £{calculatedPrice.toFixed(2)} per item
+              {formatNumber(calculatedPrice)} per item
             </span>
           </div>
         </div>
@@ -414,10 +451,12 @@ export function EditCartItemModal({
         <div className="rounded-lg border bg-muted/50 p-4">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-base">Total Price</span>
-            <span className="font-bold text-xl">£{totalPrice.toFixed(2)}</span>
+            <span className="font-bold text-xl">
+              {formatNumber(totalPrice)}
+            </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {quantity} x £{calculatedPrice.toFixed(2)}
+            {quantity} x {formatNumber(calculatedPrice)}
           </p>
         </div>
       </div>

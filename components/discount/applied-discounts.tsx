@@ -68,7 +68,11 @@ export function AppliedDiscounts({
                     {discount.couponCode}
                   </span>
                   <span className="text-xs">
-                    (-{formatAmount(calculateDiscountSavings(discount))})
+                    (-
+                    {discount.discountAmountType === "fix"
+                      ? formatAmount(discount.discountAmount)
+                      : `${discount.discountAmount}%`}
+                    )
                   </span>
                 </div>
                 <Button
@@ -86,25 +90,6 @@ export function AppliedDiscounts({
           ))}
         </AnimatePresence>
       </div>
-
-      {/* Total Savings Display */}
-      {totalSavings > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg"
-        >
-          <Sparkles className="size-5 text-green-600 dark:text-green-400" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-green-900 dark:text-green-300">
-              You saved {formatAmount(totalSavings)}!
-            </p>
-            <p className="text-xs text-green-700 dark:text-green-400">
-              {discounts.length} {discounts.length === 1 ? "discount" : "discounts"} applied
-            </p>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }

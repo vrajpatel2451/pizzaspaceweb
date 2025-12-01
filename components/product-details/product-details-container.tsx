@@ -5,13 +5,13 @@ import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ProductDetailsDialog } from "./product-details-dialog";
 import { ProductDetailsBottomsheet } from "./product-details-bottomsheet";
-import { ProductDetailsProvider } from "@/contexts/product-details-context";
+import { ProductDetailsProvider, PricingSelection } from "@/contexts/product-details-context";
 import { useProductDetails } from "@/hooks/use-product-details";
-import { useAddToCart } from "@/lib/hooks/use-cart";
+import { useAddToCart, useUpdateCartItem } from "@/lib/hooks/use-cart";
 import { useDeviceId } from "@/store/device-store";
 import { useStore } from "@/lib/contexts/store-context";
-import { createAddToCartPayload } from "@/lib/utils/cart-utils";
 import type { ProductDetailsContainerProps } from "@/types/product-details";
+import type { AddToCartPayload, UpdateCartPayload } from "@/types";
 
 export function ProductDetailsContainer({
   productId,
@@ -19,17 +19,24 @@ export function ProductDetailsContainer({
   mode = "lazy",
   onAddToCart,
   className,
+  editMode = "add",
+  cartItem,
+  onEditSuccess,
 }: ProductDetailsContainerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
   // Cart integration
   const { mutate: addToCart, isLoading: isAddingToCart } = useAddToCart();
+  const { mutate: updateCartItem, isLoading: isUpdatingCart } = useUpdateCartItem();
   const deviceId = useDeviceId();
   const { selectedStore } = useStore();
 
   // Use hook to fetch product details
   const { data, isLoading, error, refetch } = useProductDetails(productId);
+
+  // Processing state - defined early for use in handleClose
+  const isProcessing = isAddingToCart || isUpdatingCart;
 
   // Fetch data when modal opens (lazy mode)
   React.useEffect(() => {
@@ -49,16 +56,44 @@ export function ProductDetailsContainer({
     setIsOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
+    // Prevent closing during add/update operations
+    if (isProcessing) {
+      return;
+    }
     setIsOpen(false);
-  };
+  }, [isProcessing]);
 
-  // Handle add to cart from context - Integrate with API
+  // Prepare initial selections for edit mode
+  // Now returns variantId and pricing array directly (matching reference code)
+  const initialSelections = React.useMemo(() => {
+    if (editMode !== "edit" || !cartItem || !data) {
+      return { variantId: undefined, pricing: undefined, quantity: 1 };
+    }
+
+    // Get variant ID directly from cartItem
+    const variantId = cartItem.variantId || undefined;
+
+    // Get pricing array directly from cartItem (already in correct format)
+    const pricing: PricingSelection[] = cartItem.pricing?.map((p) => ({
+      id: p.id,
+      quantity: p.quantity,
+    })) || [];
+
+    return {
+      variantId,
+      pricing: pricing.length > 0 ? pricing : undefined,
+      quantity: cartItem.quantity,
+    };
+  }, [editMode, cartItem, data]);
+
+  // Handle add/edit cart from context
+  // Now receives the new format: {productId, variantId, pricing, quantity, totalPrice}
   const handleAddToCart = React.useCallback(
     async (cartData: {
       productId: string;
-      selectedVariants: Map<string, string>;
-      selectedAddons: Map<string, { selected: boolean; quantity: number }>;
+      variantId: string;
+      pricing: PricingSelection[];
       quantity: number;
       totalPrice: number;
     }) => {
@@ -78,37 +113,40 @@ export function ProductDetailsContainer({
         return;
       }
 
-      // Get the primary variant (required)
-      const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
-      const selectedVariantId = primaryGroup
-        ? cartData.selectedVariants.get(primaryGroup._id)
-        : null;
-      const selectedVariant = selectedVariantId
-        ? data.variantList.find((v) => v._id === selectedVariantId)
-        : null;
-
-      if (!selectedVariant) {
+      // Validate variant selection
+      if (!cartData.variantId) {
         toast.error("Please select a variant");
         return;
       }
 
-      // Create cart payload
-      const payload = createAddToCartPayload({
-        productId: data.product._id,
+      // Handle EDIT mode
+      if (editMode === "edit" && cartItem) {
+        const updatePayload: UpdateCartPayload = {
+          variantId: cartData.variantId,
+          pricing: cartData.pricing,
+          quantity: cartData.quantity,
+          sessionId: deviceId,
+        };
+
+        const result = await updateCartItem(cartItem._id, updatePayload, selectedStore._id);
+
+        if (result.success) {
+          handleClose();
+          onEditSuccess?.();
+        }
+        return;
+      }
+
+      // Handle ADD mode (default)
+      const payload: AddToCartPayload = {
+        itemId: data.product._id,
         categoryId: data.product.category,
         storeId: selectedStore._id,
         sessionId: deviceId,
-        selectedVariant,
-        selectedAddons: cartData.selectedAddons,
-        addonList: data.addonList,
-        pricing: data.pricing,
+        variantId: cartData.variantId,
+        pricing: cartData.pricing,
         quantity: cartData.quantity,
-      });
-
-      if (!payload) {
-        toast.error("Invalid cart data");
-        return;
-      }
+      };
 
       // Call API
       const result = await addToCart(payload);
@@ -119,39 +157,48 @@ export function ProductDetailsContainer({
 
         // Call optional callback with CartItem format (for legacy support)
         if (onAddToCart) {
-          const selectedVariantsList = Array.from(
-            cartData.selectedVariants.entries()
-          ).map(([groupId, variantId]) => {
-            const group = data.variantGroupList.find((g) => g._id === groupId);
-            const variant = data.variantList.find((v) => v._id === variantId);
-            return {
-              groupId,
-              groupLabel: group?.label ?? "",
-              variantId,
-              variantLabel: variant?.label ?? "",
-              price: variant?.price ?? 0,
-            };
-          });
+          // Find variant info for the callback
+          const selectedVariant = data.variantList.find(
+            (v) => v._id === cartData.variantId
+          );
+          const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
 
-          const selectedAddonsList = Array.from(
-            cartData.selectedAddons.entries()
-          )
-            .filter(([, sel]) => sel.selected && sel.quantity > 0)
-            .map(([addonId, sel]) => {
-              const addon = data.addonList.find((a) => a._id === addonId);
+          const selectedVariantsList = selectedVariant && primaryGroup
+            ? [{
+                groupId: primaryGroup._id,
+                groupLabel: primaryGroup.label,
+                variantId: selectedVariant._id,
+                variantLabel: selectedVariant.label,
+                price: selectedVariant.price,
+              }]
+            : [];
+
+          // Build addon list from pricing entries
+          const selectedAddonsList = cartData.pricing
+            .map((p) => {
+              const pricingEntry = data.pricing.find((pr) => pr._id === p.id);
+              if (!pricingEntry || pricingEntry.type !== "addon") return null;
+
+              const addon = data.addonList.find(
+                (a) => a._id === pricingEntry.addonId
+              );
               const group = data.addonGroupList.find(
                 (g) => g._id === addon?.groupId
               );
+
+              if (!addon) return null;
+
               return {
-                addonId,
-                addonLabel: addon?.label ?? "",
-                groupId: addon?.groupId ?? "",
+                addonId: addon._id,
+                addonLabel: addon.label,
+                groupId: addon.groupId,
                 groupLabel: group?.label ?? "",
-                quantity: sel.quantity,
-                unitPrice: addon?.price ?? 0,
-                totalPrice: (addon?.price ?? 0) * sel.quantity,
+                quantity: p.quantity,
+                unitPrice: pricingEntry.price,
+                totalPrice: pricingEntry.price * p.quantity,
               };
-            });
+            })
+            .filter((x): x is NonNullable<typeof x> => x !== null);
 
           onAddToCart({
             productId: data.product._id,
@@ -165,7 +212,7 @@ export function ProductDetailsContainer({
         }
       }
     },
-    [onAddToCart, data, addToCart, deviceId, selectedStore]
+    [onAddToCart, data, addToCart, updateCartItem, deviceId, selectedStore, editMode, cartItem, onEditSuccess, handleClose]
   );
 
   // Render trigger element
@@ -175,26 +222,48 @@ export function ProductDetailsContainer({
     </div>
   ) : null;
 
-  // Render appropriate modal based on viewport
+  // Add console logging for debugging
+  React.useEffect(() => {
+    if (isOpen) {
+      console.log('ProductDetailsContainer state:', {
+        isOpen,
+        hasData: !!data,
+        isLoading,
+        isProcessing,
+        error: error?.message,
+      });
+    }
+  }, [isOpen, data, isLoading, isProcessing, error]);
+
   return (
     <>
       {triggerElement}
-      <ProductDetailsProvider initialData={data} onAddToCart={handleAddToCart}>
+      <ProductDetailsProvider
+        initialData={data}
+        onAddToCart={handleAddToCart}
+        initialVariantId={initialSelections.variantId}
+        initialPricing={initialSelections.pricing}
+        initialQuantity={initialSelections.quantity}
+      >
         {isDesktop ? (
           <ProductDetailsDialog
             isOpen={isOpen}
             onClose={handleClose}
             data={data}
-            isLoading={isLoading || isAddingToCart}
+            isLoading={isLoading}
+            isProcessing={isProcessing}
             error={error}
+            editMode={editMode}
           />
         ) : (
           <ProductDetailsBottomsheet
             isOpen={isOpen}
             onClose={handleClose}
             data={data}
-            isLoading={isLoading || isAddingToCart}
+            isLoading={isLoading}
+            isProcessing={isProcessing}
             error={error}
+            editMode={editMode}
           />
         )}
       </ProductDetailsProvider>

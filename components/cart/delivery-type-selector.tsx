@@ -1,7 +1,6 @@
 "use client";
 
-import { Home, ShoppingBag, Truck } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UtensilsCrossed, ShoppingBag, Truck } from "lucide-react";
 import { OrderDeliveryType } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -16,20 +15,20 @@ const deliveryTypes = [
   {
     value: "dineIn" as const,
     label: "Dine In",
-    icon: Home,
-    description: "Enjoy your meal at our restaurant",
+    icon: UtensilsCrossed,
+    description: "Enjoy at our restaurant",
   },
   {
     value: "pickup" as const,
-    label: "Pickup",
+    label: "Takeaway",
     icon: ShoppingBag,
-    description: "Collect your order from the store",
+    description: "Pick up your order",
   },
   {
     value: "delivery" as const,
     label: "Delivery",
     icon: Truck,
-    description: "We'll deliver to your doorstep",
+    description: "Delivered to your door",
   },
 ];
 
@@ -40,58 +39,83 @@ export function DeliveryTypeSelector({
   disabled = false,
 }: DeliveryTypeSelectorProps) {
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-4", className)}>
+      {/* Section Header */}
       <div>
-        <h3 className="text-base font-semibold mb-1">Delivery Type</h3>
-        <p className="text-sm text-muted-foreground">
-          Choose how you&apos;d like to receive your order
-        </p>
+        <h3 className="text-base font-semibold text-foreground">
+          Select Delivery Type
+        </h3>
       </div>
 
-      <Tabs
-        value={value}
-        onValueChange={(val) => onChange(val as OrderDeliveryType)}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted">
-          {deliveryTypes.map((type) => (
-            <TabsTrigger
+      {/* Card-based Selection Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        {deliveryTypes.map((type) => {
+          const isSelected = value === type.value;
+          const Icon = type.icon;
+
+          return (
+            <button
               key={type.value}
-              value={type.value}
+              type="button"
+              onClick={() => !disabled && onChange(type.value)}
               disabled={disabled}
               className={cn(
-                "flex flex-col items-center gap-1.5 py-3 px-2 data-[state=active]:bg-background",
-                "sm:flex-row sm:gap-2 sm:py-2"
+                // Base styles
+                "relative flex flex-col items-center justify-center",
+                "p-4 sm:p-5 rounded-xl border-2",
+                "transition-all duration-200 ease-out",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                // Hover state
+                !disabled && !isSelected && "hover:border-primary/40 hover:bg-primary/5",
+                // Selected state
+                isSelected
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-input bg-card",
+                // Disabled state
+                disabled && "opacity-50 cursor-not-allowed"
               )}
+              aria-pressed={isSelected}
+              aria-label={`${type.label}: ${type.description}`}
             >
-              <type.icon className="h-4 w-4 sm:h-5 sm:w-5" />
-              <div className="flex flex-col items-center sm:items-start">
-                <span className="text-xs sm:text-sm font-medium">
-                  {type.label}
-                </span>
-                <span className="hidden lg:block text-[10px] text-muted-foreground font-normal">
-                  {type.description}
-                </span>
-              </div>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+              {/* Selection indicator dot */}
+              {isSelected && (
+                <span className="absolute top-2.5 right-2.5 size-2 rounded-full bg-primary" />
+              )}
 
-      {/* Mobile descriptions */}
-      <div className="lg:hidden">
-        {deliveryTypes.map((type) => {
-          if (type.value !== value) return null;
-          return (
-            <p
-              key={type.value}
-              className="text-xs text-muted-foreground text-center"
-            >
-              {type.description}
-            </p>
+              {/* Icon */}
+              <Icon
+                className={cn(
+                  "size-7 sm:size-9 mb-2 sm:mb-3 transition-colors duration-200",
+                  isSelected ? "text-primary" : "text-muted-foreground"
+                )}
+                strokeWidth={1.5}
+              />
+
+              {/* Label */}
+              <span
+                className={cn(
+                  "font-semibold text-sm sm:text-base transition-colors duration-200",
+                  isSelected ? "text-primary" : "text-foreground"
+                )}
+              >
+                {type.label}
+              </span>
+
+              {/* Description */}
+              <span className="text-xs text-muted-foreground mt-1 text-center leading-tight">
+                {type.description}
+              </span>
+            </button>
           );
         })}
       </div>
+
+      {/* Selected type contextual message */}
+      {value === "delivery" && (
+        <p className="text-sm text-muted-foreground">
+          Get your order delivered to your doorstep. Please select a delivery address below.
+        </p>
+      )}
     </div>
   );
 }

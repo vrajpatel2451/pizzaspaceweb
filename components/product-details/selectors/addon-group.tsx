@@ -3,7 +3,6 @@
 import * as React from "react";
 import { AddonItem } from "./addon-item";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
-import { getAddonPrice } from "@/lib/utils/price-calculator";
 import type { AddonGroupProps } from "@/types/product-details";
 import { cn } from "@/lib/utils";
 
@@ -17,31 +16,23 @@ export function AddonGroup({
 }: AddonGroupProps) {
   const context = useProductDetailsContext();
 
-  // Get primary variant ID from context for price calculation
-  const primaryVariantId = React.useMemo(() => {
-    if (!context.productData) return null;
+  /**
+   * Calculate addon price from pricing array
+   */
+  const calculateAddonPrice = React.useCallback(
+    (addonId: string): number => {
+      if (!context.productData) return 0;
 
-    for (const [groupId, variantId] of context.selectedVariants.entries()) {
-      const variantGroup = context.productData.variantGroupList.find(
-        (g) => g._id === groupId
+      const pricing = context.productData.pricing.find(
+        (p) =>
+          p.type === "addon" &&
+          p.variantId === context.selectedVariantId &&
+          p.addonId === addonId
       );
-      if (variantGroup?.isPrimary) {
-        return variantId;
-      }
-    }
-    return null;
-  }, [context.selectedVariants, context.productData]);
-
-  // Calculate addon price using price-calculator utility
-  const calculateAddonPrice = (addonId: string) => {
-    if (!context.productData) return 0;
-
-    return getAddonPrice(
-      addonId,
-      primaryVariantId,
-      context.productData.pricing
-    );
-  };
+      return pricing?.price ?? 0;
+    },
+    [context.productData, context.selectedVariantId]
+  );
 
   // Calculate selection count
   const selectedCount = addons.filter(

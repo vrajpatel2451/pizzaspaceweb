@@ -20,7 +20,9 @@ export function ProductDetailsContent({
   isLoading,
   error,
   onClose,
-}: ProductDetailsContentProps) {
+  editMode = "add",
+  isProcessing = false,
+}: ProductDetailsContentProps & { editMode?: "add" | "edit"; isProcessing?: boolean }) {
   const shouldReduceMotion = useReducedMotion();
   const context = useProductDetailsContext();
 
@@ -33,8 +35,8 @@ export function ProductDetailsContent({
     ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
     : productDetailsSectionVariants;
 
-  // Loading state
-  if (isLoading || !data) {
+  // Loading state - only show skeleton when actually loading data (not processing)
+  if (isLoading && !data) {
     return <ProductDetailsSkeleton />;
   }
 
@@ -51,6 +53,11 @@ export function ProductDetailsContent({
         </button>
       </div>
     );
+  }
+
+  // No data fallback (should not happen, but defensive)
+  if (!data) {
+    return <ProductDetailsSkeleton />;
   }
 
   // Check if product has variants or addons
@@ -110,7 +117,9 @@ export function ProductDetailsContent({
         totalPrice={context.totalPrice}
         isValid={context.isValid}
         validationErrors={context.validationErrors}
+        isLoading={isProcessing}
         onAddToCart={context.addToCart}
+        editMode={editMode}
       />
     </div>
   );

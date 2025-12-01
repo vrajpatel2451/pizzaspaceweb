@@ -131,6 +131,10 @@ export interface ProductDetailsContainerProps {
   mode?: 'lazy' | 'eager';
   onAddToCart?: (item: CartItem) => void | Promise<void>;
   className?: string;
+  // Edit mode props
+  editMode?: 'add' | 'edit';
+  cartItem?: import('./cart').CartResponse;
+  onEditSuccess?: () => void;
 }
 
 /**

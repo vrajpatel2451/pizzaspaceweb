@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   getCart,
   addToCart,
   updateCart,
   removeFromCart,
   getCartSummary,
-} from '@/lib/api/cart';
-import { useCartStore } from '@/store/cart-store';
+} from "@/lib/api/cart";
+import { useCartStore } from "@/store/cart-store";
 import {
   AddToCartPayload,
   CartResponse,
   CustomerBillingOnCart,
   PricingForCartParams,
   UpdateCartPayload,
-} from '@/types';
+} from "@/types";
 
 /**
  * Hook to fetch and manage cart items
@@ -48,13 +48,13 @@ export function useCart(
       if (response.statusCode === 200 && response.data) {
         setItems(response.data);
       } else {
-        const errorMsg = response.errorMessage || 'Failed to fetch cart';
+        const errorMsg = response.errorMessage || "Failed to fetch cart";
         setError(errorMsg);
       }
     } catch (err) {
-      const errorMsg = 'An unexpected error occurred while fetching cart';
+      const errorMsg = "An unexpected error occurred while fetching cart";
       setError(errorMsg);
-      console.error('Cart fetch error:', err);
+      console.error("Cart fetch error:", err);
     } finally {
       setIsLoading(false);
       setStoreLoading(false);
@@ -82,10 +82,11 @@ export function useCart(
 
 /**
  * Hook to add items to cart
+ * @param refetchOnSuccess - Whether to refetch the entire cart after successful add (default: false)
  */
-export function useAddToCart() {
+export function useAddToCart(refetchOnSuccess: boolean = false) {
   const [isLoading, setIsLoading] = useState(false);
-  const { addItem, setLoading: setStoreLoading } = useCartStore();
+  const { addItem, setItems, setLoading: setStoreLoading } = useCartStore();
 
   const mutate = useCallback(
     async (data: AddToCartPayload) => {
@@ -98,24 +99,39 @@ export function useAddToCart() {
         if (response.statusCode === 200 && response.data) {
           // Optimistically update the store
           addItem(response.data);
-          toast.success('Item added to cart');
+          toast.success("Item added to cart");
+
+          // Optionally refetch entire cart for consistency
+          if (refetchOnSuccess) {
+            try {
+              const cartResponse = await getCart(data.sessionId, data.storeId);
+              if (cartResponse.statusCode === 200 && cartResponse.data) {
+                setItems(cartResponse.data);
+              }
+            } catch (refetchError) {
+              console.error("Failed to refetch cart after add:", refetchError);
+              // Don't fail the operation if refetch fails
+            }
+          }
+
           return { success: true, data: response.data };
         } else {
-          const errorMsg = response.errorMessage || 'Failed to add item to cart';
+          const errorMsg =
+            response.errorMessage || "Failed to add item to cart";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Add to cart error:', err);
+        console.error("Add to cart error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
         setStoreLoading(false);
       }
     },
-    [addItem, setStoreLoading]
+    [addItem, setItems, setStoreLoading, refetchOnSuccess]
   );
 
   return {
@@ -126,13 +142,14 @@ export function useAddToCart() {
 
 /**
  * Hook to update cart items
+ * @param refetchOnSuccess - Whether to refetch the entire cart after successful update (default: false)
  */
-export function useUpdateCartItem() {
+export function useUpdateCartItem(refetchOnSuccess: boolean = false) {
   const [isLoading, setIsLoading] = useState(false);
-  const { updateItem, setLoading: setStoreLoading } = useCartStore();
+  const { updateItem, setItems, setLoading: setStoreLoading } = useCartStore();
 
   const mutate = useCallback(
-    async (id: string, data: UpdateCartPayload) => {
+    async (id: string, data: UpdateCartPayload, storeId?: string) => {
       setIsLoading(true);
       setStoreLoading(true);
 
@@ -142,24 +159,41 @@ export function useUpdateCartItem() {
         if (response.statusCode === 200 && response.data) {
           // Optimistically update the store
           updateItem(id, response.data);
-          toast.success('Cart updated');
+          toast.success("Cart updated");
+
+          // Optionally refetch entire cart for consistency
+          if (refetchOnSuccess && data.sessionId && storeId) {
+            try {
+              const cartResponse = await getCart(data.sessionId, storeId);
+              if (cartResponse.statusCode === 200 && cartResponse.data) {
+                setItems(cartResponse.data);
+              }
+            } catch (refetchError) {
+              console.error(
+                "Failed to refetch cart after update:",
+                refetchError
+              );
+              // Don't fail the operation if refetch fails
+            }
+          }
+
           return { success: true, data: response.data };
         } else {
-          const errorMsg = response.errorMessage || 'Failed to update cart';
+          const errorMsg = response.errorMessage || "Failed to update cart";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Update cart error:', err);
+        console.error("Update cart error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
         setStoreLoading(false);
       }
     },
-    [updateItem, setStoreLoading]
+    [updateItem, setItems, setStoreLoading, refetchOnSuccess]
   );
 
   return {
@@ -170,13 +204,14 @@ export function useUpdateCartItem() {
 
 /**
  * Hook to remove items from cart
+ * @param refetchOnSuccess - Whether to refetch the entire cart after successful removal (default: false)
  */
-export function useRemoveCartItem() {
+export function useRemoveCartItem(refetchOnSuccess: boolean = false) {
   const [isLoading, setIsLoading] = useState(false);
-  const { removeItem, setLoading: setStoreLoading } = useCartStore();
+  const { removeItem, setItems, setLoading: setStoreLoading } = useCartStore();
 
   const mutate = useCallback(
-    async (id: string, deviceId: string) => {
+    async (id: string, deviceId: string, storeId?: string) => {
       setIsLoading(true);
       setStoreLoading(true);
 
@@ -186,24 +221,41 @@ export function useRemoveCartItem() {
         if (response.statusCode === 200 && response.data) {
           // Optimistically update the store
           removeItem(id);
-          toast.success('Item removed from cart');
+          toast.success("Item removed from cart");
+
+          // Optionally refetch entire cart for consistency
+          if (refetchOnSuccess && deviceId && storeId) {
+            try {
+              const cartResponse = await getCart(deviceId, storeId);
+              if (cartResponse.statusCode === 200 && cartResponse.data) {
+                setItems(cartResponse.data);
+              }
+            } catch (refetchError) {
+              console.error(
+                "Failed to refetch cart after remove:",
+                refetchError
+              );
+              // Don't fail the operation if refetch fails
+            }
+          }
+
           return { success: true };
         } else {
-          const errorMsg = response.errorMessage || 'Failed to remove item';
+          const errorMsg = response.errorMessage || "Failed to remove item";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Remove from cart error:', err);
+        console.error("Remove from cart error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
         setStoreLoading(false);
       }
     },
-    [removeItem, setStoreLoading]
+    [removeItem, setItems, setStoreLoading, refetchOnSuccess]
   );
 
   return {
@@ -220,7 +272,7 @@ export function useRemoveCartItem() {
  * @param debounceMs - Debounce delay in milliseconds (default: 300)
  */
 export function useCartSummary(
-  params: Omit<PricingForCartParams, 'cartIds'>,
+  params: Omit<PricingForCartParams, "cartIds">,
   autoFetch: boolean = true,
   debounceMs: number = 300
 ) {
@@ -258,25 +310,27 @@ export function useCartSummary(
       const requestParams: PricingForCartParams = {
         cartIds,
         storeId: params.storeId,
-        discountIds: selectedDiscountIds.length > 0 ? selectedDiscountIds : undefined,
+        discountIds:
+          selectedDiscountIds.length > 0 ? selectedDiscountIds : undefined,
         deliveryType: deliveryType || undefined,
         addressId: selectedAddressId || undefined,
       };
 
       const response = await getCartSummary(requestParams);
 
-      if (response.statusCode === 200 && response.data) {
+      if (response.statusCode === 201 && response.data) {
         setSummary(response.data);
       } else {
-        const errorMsg = response.errorMessage || 'Failed to fetch cart summary';
+        const errorMsg =
+          response.errorMessage || "Failed to fetch cart summary";
         setError(errorMsg);
         setSummary(null);
       }
     } catch (err) {
-      const errorMsg = 'An unexpected error occurred while fetching summary';
+      const errorMsg = "An unexpected error occurred while fetching summary";
       setError(errorMsg);
       setSummary(null);
-      console.error('Cart summary error:', err);
+      console.error("Cart summary error:", err);
     } finally {
       setIsLoading(false);
       setSummaryLoading(false);

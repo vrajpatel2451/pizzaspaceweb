@@ -2,8 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Clock, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import {
+  Clock,
+  Phone,
+  MapPin,
+  Facebook,
+  Instagram,
+  Twitter,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/format";
 
 interface SocialLink {
   name: string;
@@ -67,7 +75,7 @@ export function TopInfoBar({ className }: TopInfoBarProps) {
             {/* Promo Badge */}
             <div className="hidden lg:flex items-center">
               <span className="bg-primary/20 text-primary px-2.5 py-0.5 rounded-full text-xs font-semibold animate-pulse">
-                Free Delivery Over £25
+                Free Delivery Over {formatNumber(25)}
               </span>
             </div>
 

@@ -29,5 +29,4 @@ export { SearchCommand, SearchBar } from "./search-command";
 export { ThemeToggle, ThemeTogglePill } from "./theme-toggle";
 export { UserDropdown } from "./user-dropdown";
 export { CartBadge } from "./cart-badge";
-export { MiniCartDropdown } from "./mini-cart-dropdown";
 export { MobileNavDrawer } from "./mobile-nav-drawer";

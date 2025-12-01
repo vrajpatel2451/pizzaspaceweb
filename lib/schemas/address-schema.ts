@@ -59,16 +59,18 @@ export const addressSchema = z.object({
     .trim(),
 
   lat: z
-    .number()
+    .number({
+      message: "Please select a location on the map or use 'Use My Location'",
+    })
     .min(-90, "Latitude must be between -90 and 90")
-    .max(90, "Latitude must be between -90 and 90")
-    .optional(),
+    .max(90, "Latitude must be between -90 and 90"),
 
   long: z
-    .number()
+    .number({
+      message: "Please select a location on the map or use 'Use My Location'",
+    })
     .min(-180, "Longitude must be between -180 and 180")
-    .max(180, "Longitude must be between -180 and 180")
-    .optional(),
+    .max(180, "Longitude must be between -180 and 180"),
 
   type: z.enum(["home", "work", "other"], {
     message: "Please select an address type",
@@ -83,6 +85,25 @@ export const addressSchema = z.object({
     .or(z.literal("")),
 
   isDefault: z.boolean(),
+
+  isForMe: z.boolean().default(true),
+
+  recipientName: z
+    .string()
+    .min(2, "Recipient name must be at least 2 characters")
+    .max(100, "Recipient name must not exceed 100 characters")
+    .trim()
+    .optional()
+    .or(z.literal("")),
+
+  recipientPhone: z
+    .string()
+    .min(10, "Recipient phone number must be at least 10 digits")
+    .max(15, "Recipient phone number must not exceed 15 digits")
+    .regex(/^[\d\s\+\(\)-]+$/, "Please enter a valid phone number")
+    .trim()
+    .optional()
+    .or(z.literal("")),
 }).refine(
   (data) => {
     // If type is "other", otherAddressLabel must be provided
@@ -94,6 +115,30 @@ export const addressSchema = z.object({
   {
     message: "Please provide a label for 'Other' address type",
     path: ["otherAddressLabel"],
+  }
+).refine(
+  (data) => {
+    // If not for me, recipient details must be provided
+    if (!data.isForMe) {
+      return !!data.recipientName && data.recipientName.trim().length >= 2;
+    }
+    return true;
+  },
+  {
+    message: "Recipient name is required when address is not for you",
+    path: ["recipientName"],
+  }
+).refine(
+  (data) => {
+    // If not for me, recipient phone must be provided
+    if (!data.isForMe) {
+      return !!data.recipientPhone && data.recipientPhone.trim().length >= 10;
+    }
+    return true;
+  },
+  {
+    message: "Recipient phone is required when address is not for you",
+    path: ["recipientPhone"],
   }
 );
 

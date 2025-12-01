@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddressResponse } from "@/types";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface AddressSelectorProps {
   addresses: AddressResponse[];
@@ -25,6 +26,15 @@ export function AddressSelector({
   loading = false,
   className,
 }: AddressSelectorProps) {
+  const defaultAddress = addresses?.find((addr) => addr.isDefault);
+  const effectiveSelectedId =
+    selectedAddressId || defaultAddress?._id || addresses?.[0]?._id;
+
+  useEffect(() => {
+    if (!selectedAddressId && effectiveSelectedId) {
+      onAddressSelect(effectiveSelectedId);
+    }
+  }, [effectiveSelectedId, onAddressSelect, selectedAddressId]);
   if (loading) {
     return (
       <div className={cn("space-y-3", className)}>
@@ -40,11 +50,6 @@ export function AddressSelector({
       </div>
     );
   }
-
-  // Find default address if no address is selected
-  const defaultAddress = addresses.find((addr) => addr.isDefault);
-  const effectiveSelectedId =
-    selectedAddressId || defaultAddress?._id || addresses[0]?._id;
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -73,7 +78,7 @@ export function AddressSelector({
         </div>
       ) : (
         <RadioGroup
-          value={effectiveSelectedId}
+          value={selectedAddressId}
           onValueChange={onAddressSelect}
           className="gap-2"
         >
@@ -81,7 +86,7 @@ export function AddressSelector({
             <AddressCard
               key={address._id}
               address={address}
-              isSelected={effectiveSelectedId === address._id}
+              isSelected={selectedAddressId === address._id}
             />
           ))}
         </RadioGroup>

@@ -1,7 +1,13 @@
 export { AddressCard } from "./address-card";
 export { AddressForm } from "./address-form";
+export { AddressFormWithMaps } from "./address-form-with-maps";
 export { AddressTypeBadge } from "./address-type-badge";
 export { AddAddressModal } from "./add-address-modal";
 export { EditAddressModal } from "./edit-address-modal";
 export { DeleteAddressDialog } from "./delete-address-dialog";
 export { EmptyAddresses } from "./empty-addresses";
+export { GoogleMapsProvider } from "./google-maps-provider";
+export { GooglePlacesInput } from "./google-places-input";
+export { AddressMap, useReverseGeocode } from "./address-map";
+export type { PlaceResult } from "./google-places-input";
+export type { MapPosition } from "./address-map";

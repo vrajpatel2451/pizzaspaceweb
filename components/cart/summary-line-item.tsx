@@ -1,3 +1,6 @@
+"use client";
+
+import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SummaryLineItemProps {
@@ -5,6 +8,8 @@ interface SummaryLineItemProps {
   value: number;
   originalValue?: number;
   showDiscount?: boolean;
+  hasInfoIcon?: boolean;
+  onInfoClick?: () => void;
   className?: string;
   labelClassName?: string;
   valueClassName?: string;
@@ -12,42 +17,62 @@ interface SummaryLineItemProps {
 }
 
 /**
- * Reusable component for displaying a single line item in the cart summary
- * Supports showing original price with strikethrough when discount is applied
+ * Premium line item component for order summary
+ * Supports strikethrough pricing for discounts and info icon with modal trigger
  */
 export function SummaryLineItem({
   label,
   value,
   originalValue,
   showDiscount = false,
+  hasInfoIcon = false,
+  onInfoClick,
   className,
   labelClassName,
   valueClassName,
   testId,
 }: SummaryLineItemProps) {
-  const hasDiscount = showDiscount && originalValue !== undefined && originalValue !== value;
+  const hasDiscount = showDiscount && originalValue !== undefined && originalValue !== value && originalValue > value;
 
   return (
     <div
-      className={cn("flex justify-between text-sm", className)}
+      className={cn(
+        "flex justify-between items-center py-2 transition-colors duration-200",
+        className
+      )}
       data-testid={testId}
     >
-      <span className={cn("text-muted-foreground", labelClassName)}>
-        {label}
-      </span>
-      <div className={cn("text-right", valueClassName)}>
+      {/* Label with optional info icon */}
+      <div className="flex items-center gap-1.5">
+        <span className={cn("text-muted-foreground text-sm", labelClassName)}>
+          {label}
+        </span>
+        {hasInfoIcon && (
+          <button
+            type="button"
+            onClick={onInfoClick}
+            className="inline-flex items-center justify-center rounded-full p-0.5 text-muted-foreground/70 hover:text-primary hover:bg-primary/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            aria-label={`More info about ${label}`}
+          >
+            <Info className="size-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* Value with optional strikethrough */}
+      <div className={cn("flex items-center gap-2", valueClassName)}>
         {hasDiscount && (
-          <span className="line-through text-muted-foreground text-xs mr-2">
-            £{originalValue.toFixed(2)}
+          <span className="text-xs text-muted-foreground/60 line-through font-normal">
+            {"\u00A3"}{originalValue.toFixed(2)}
           </span>
         )}
         <span
           className={cn(
-            "font-medium",
-            hasDiscount && "text-green-600 dark:text-green-400"
+            "font-medium text-sm tabular-nums",
+            hasDiscount && "text-foreground"
           )}
         >
-          £{value.toFixed(2)}
+          {"\u00A3"}{value.toFixed(2)}
         </span>
       </div>
     </div>

@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ShoppingBag, Check, Loader2, AlertCircle } from "lucide-react";
+import { ShoppingBag, AlertCircle, Check } from "lucide-react";
 import { QuantityIncrementor } from "@/components/composite/quantity-incrementor";
+import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +18,8 @@ export interface StickyActionBarProps {
   isLoading?: boolean;
   onAddToCart: () => void | Promise<void>;
   className?: string;
+  editMode?: "add" | "edit";
 }
-
-type ButtonState = "idle" | "loading" | "success" | "error";
 
 /**
  * Premium Sticky Action Bar Component
@@ -43,9 +43,9 @@ export function StickyActionBar({
   isLoading = false,
   onAddToCart,
   className,
+  editMode = "add",
 }: StickyActionBarProps) {
   const shouldReduceMotion = useReducedMotion();
-  const [buttonState, setButtonState] = React.useState<ButtonState>("idle");
   const [prevPrice, setPrevPrice] = React.useState(totalPrice);
 
   const hasDiscount = originalPrice && originalPrice > totalPrice;
@@ -60,36 +60,9 @@ export function StickyActionBar({
     setPrevPrice(totalPrice);
   }, [totalPrice]);
 
-  // Handle loading state changes
-  React.useEffect(() => {
-    if (isLoading && buttonState === "idle") {
-      setButtonState("loading");
-    } else if (!isLoading && buttonState === "loading") {
-      setButtonState("success");
-      const timer = setTimeout(() => {
-        setButtonState("idle");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, buttonState]);
-
   const handleAddToCart = async () => {
-    if (!isValid || buttonState !== "idle") return;
-
-    try {
-      setButtonState("loading");
-      await onAddToCart();
-      setButtonState("success");
-
-      setTimeout(() => {
-        setButtonState("idle");
-      }, 2000);
-    } catch {
-      setButtonState("error");
-      setTimeout(() => {
-        setButtonState("idle");
-      }, 2000);
-    }
+    if (!isValid || isLoading) return;
+    await onAddToCart();
   };
 
   // Animation variants
@@ -129,124 +102,6 @@ export function StickyActionBar({
     }),
   };
 
-  const buttonContentVariants = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
-  };
-
-  // Button content based on state
-  const renderButtonContent = () => {
-    switch (buttonState) {
-      case "loading":
-        return (
-          <motion.div
-            key="loading"
-            variants={buttonContentVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2"
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            >
-              <Loader2 className="size-5" />
-            </motion.div>
-            <span className="hidden sm:inline">Adding...</span>
-          </motion.div>
-        );
-
-      case "success":
-        return (
-          <motion.div
-            key="success"
-            variants={buttonContentVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 500, damping: 20 }}
-            >
-              <Check className="size-5" strokeWidth={3} />
-            </motion.div>
-            <span className="hidden sm:inline">Added!</span>
-          </motion.div>
-        );
-
-      case "error":
-        return (
-          <motion.div
-            key="error"
-            variants={buttonContentVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2"
-          >
-            <AlertCircle className="size-5" />
-            <span className="hidden sm:inline">Failed</span>
-          </motion.div>
-        );
-
-      default:
-        return (
-          <motion.div
-            key="idle"
-            variants={buttonContentVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.2 }}
-            className="flex items-center gap-2"
-          >
-            <ShoppingBag className="size-5" />
-            <span>Add item</span>
-            <span className="mx-1 opacity-60">-</span>
-            <div className="flex flex-col items-end leading-tight">
-              <AnimatePresence mode="popLayout" custom={priceDirection}>
-                <motion.span
-                  key={totalPrice}
-                  custom={priceDirection}
-                  variants={shouldReduceMotion ? undefined : priceVariants}
-                  initial={shouldReduceMotion ? undefined : "enter"}
-                  animate="center"
-                  exit={shouldReduceMotion ? undefined : "exit"}
-                  className="font-bold"
-                >
-                  {formatPrice(totalPrice)}
-                </motion.span>
-              </AnimatePresence>
-              {hasDiscount && (
-                <span className="text-[10px] line-through opacity-70">
-                  {formatPrice(originalPrice)}
-                </span>
-              )}
-            </div>
-          </motion.div>
-        );
-    }
-  };
-
-  // Get button styles based on state
-  const getButtonStyles = () => {
-    switch (buttonState) {
-      case "success":
-        return "bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 shadow-emerald-500/30";
-      case "error":
-        return "bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 shadow-red-500/30";
-      default:
-        return "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-500/30";
-    }
-  };
 
   return (
     <motion.div
@@ -280,38 +135,57 @@ export function StickyActionBar({
           </div>
 
           {/* Add to Cart Button */}
-          <motion.button
+          <Button
             type="button"
             onClick={handleAddToCart}
-            disabled={!isValid || buttonState !== "idle"}
+            disabled={!isValid}
+            loading={isLoading}
             className={cn(
               // Base styles
-              "flex-1 inline-flex items-center justify-center",
-              "rounded-full py-3 px-4 sm:py-3.5 sm:px-6 min-h-[44px] sm:min-h-[48px]",
-              "text-sm sm:text-base md:text-lg font-semibold text-white",
-              // Shadow
-              "shadow-lg",
-              // Transitions
-              "transition-all duration-200",
-              // Focus
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary",
-              // Disabled
-              "disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none",
-              // State-based colors
-              getButtonStyles()
+              "flex-1 min-h-[44px] sm:min-h-[48px]",
+              "rounded-full py-3 px-4 sm:py-3.5 sm:px-6",
+              "text-sm sm:text-base font-semibold",
+              // Custom gradient background
+              "bg-gradient-to-r from-orange-500 to-orange-600",
+              "hover:from-orange-600 hover:to-orange-700",
+              "shadow-lg shadow-orange-500/30",
+              // Disabled state
+              "disabled:opacity-60"
             )}
-            whileTap={
-              shouldReduceMotion || !isValid || buttonState !== "idle"
-                ? undefined
-                : { scale: 0.98 }
-            }
-            aria-busy={buttonState === "loading"}
-            aria-disabled={!isValid || buttonState !== "idle"}
+            size="lg"
           >
-            <AnimatePresence mode="wait">
-              {renderButtonContent()}
-            </AnimatePresence>
-          </motion.button>
+            {isLoading ? (
+              <span className="hidden sm:inline">
+                {editMode === "edit" ? "Updating..." : "Adding..."}
+              </span>
+            ) : (
+              <>
+                <ShoppingBag className="size-5" />
+                <span>{editMode === "edit" ? "Update cart" : "Add item"}</span>
+                <span className="mx-1 opacity-60">-</span>
+                <div className="flex flex-col items-end leading-tight">
+                  <AnimatePresence mode="popLayout" custom={priceDirection}>
+                    <motion.span
+                      key={totalPrice}
+                      custom={priceDirection}
+                      variants={shouldReduceMotion ? undefined : priceVariants}
+                      initial={shouldReduceMotion ? undefined : "enter"}
+                      animate="center"
+                      exit={shouldReduceMotion ? undefined : "exit"}
+                      className="font-bold"
+                    >
+                      {formatPrice(totalPrice)}
+                    </motion.span>
+                  </AnimatePresence>
+                  {hasDiscount && (
+                    <span className="text-[10px] line-through opacity-70">
+                      {formatPrice(originalPrice)}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Discount Badge */}
