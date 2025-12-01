@@ -28,3 +28,19 @@ export type {
 
 // Store Types
 export type { StoreQueryParams, StoreResponse } from "./store";
+
+// User Types
+export type {
+  RegisterUserPayload,
+  LoginUserPayload,
+  UserResponse,
+  UserResponseWithToken,
+} from "./user";
+
+// Auth Types
+export type {
+  AuthState,
+  AuthActions,
+  AuthStore,
+} from "./auth";
+export { AUTH_STORAGE_KEY } from "./auth";

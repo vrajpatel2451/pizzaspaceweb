@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
   Menu,
@@ -15,9 +15,6 @@ import {
   User,
   ShoppingBag,
   MapPin,
-  Heart,
-  Gift,
-  Settings,
   ChevronRight,
   Clock,
   Flame,
@@ -25,12 +22,15 @@ import {
   Coffee,
   IceCream,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ThemeTogglePill } from "./theme-toggle";
+import { useAuthStore } from "@/store/auth-store";
+import { clearAuthCookie } from "@/lib/actions/auth";
 
 interface NavLink {
   label: string;
@@ -63,9 +63,7 @@ const menuCategories: MenuCategory[] = [
 const accountLinks: NavLink[] = [
   { label: "My Orders", href: "/account/orders", icon: ShoppingBag },
   { label: "Saved Addresses", href: "/account/addresses", icon: MapPin },
-  { label: "Favorites", href: "/account/favorites", icon: Heart },
-  { label: "Rewards", href: "/account/rewards", icon: Gift },
-  { label: "Settings", href: "/account/settings", icon: Settings },
+  { label: "Profile", href: "/profile", icon: User },
 ];
 
 interface MobileNavDrawerProps {
@@ -76,7 +74,28 @@ export function MobileNavDrawer({ className }: MobileNavDrawerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [expandedSection, setExpandedSection] = React.useState<string | null>(null);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      // Clear server-side cookie
+      await clearAuthCookie();
+      // Clear client-side store
+      logout();
+      // Close drawer
+      setIsOpen(false);
+      // Navigate to home
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -408,14 +427,42 @@ export function MobileNavDrawer({ className }: MobileNavDrawerProps) {
 
           {/* Footer Actions */}
           <div className="p-4 border-t mt-auto">
-            <div className="space-y-2">
-              <Button asChild className="w-full" size="lg">
-                <Link href="/auth/signin">Sign In</Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full" size="lg">
-                <Link href="/auth/signup">Create Account</Link>
-              </Button>
-            </div>
+            {isAuthenticated ? (
+              // Logged in user - show user info and sign out
+              <div className="space-y-4">
+                {user && (
+                  <div className="flex items-center gap-3 px-3 py-2 bg-muted/50 rounded-lg">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                      {user.name?.charAt(0) || "U"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                  </div>
+                )}
+                <Button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  variant="destructive"
+                  className="w-full"
+                  size="lg"
+                >
+                  <LogOut className={cn("size-4 mr-2", isLoggingOut && "animate-spin")} />
+                  {isLoggingOut ? 'Signing out...' : 'Sign Out'}
+                </Button>
+              </div>
+            ) : (
+              // Guest - show sign in and create account
+              <div className="space-y-2">
+                <Button asChild className="w-full" size="lg">
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full" size="lg">
+                  <Link href="/register">Create Account</Link>
+                </Button>
+              </div>
+            )}
 
             <p className="mt-4 text-center text-xs text-muted-foreground">
               Need help?{" "}

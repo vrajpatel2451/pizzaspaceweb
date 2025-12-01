@@ -17,8 +17,8 @@ const inputVariants = cva(
           "border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20",
       },
       inputSize: {
-        default: "h-10 px-4 py-2 text-sm",
-        sm: "h-8 px-3 py-1 text-xs",
+        default: "h-11 px-4 py-2 text-sm",
+        sm: "h-9 px-3 py-1 text-xs",
         lg: "h-12 px-4 py-3 text-base",
       },
     },
@@ -37,6 +37,7 @@ export interface InputProps
   error?: string;
   label?: string;
   helperText?: string;
+  inputMode?: "text" | "email" | "tel" | "url" | "numeric" | "decimal" | "search" | "none";
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -103,7 +104,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p id={errorId} className="text-xs text-destructive">
+          <p id={errorId} role="alert" className="text-xs text-destructive">
             {error}
           </p>
         )}

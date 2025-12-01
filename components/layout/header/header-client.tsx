@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useScroll } from "@/hooks/use-scroll";
+import { useAuthStore } from "@/store/auth-store";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { SearchCommand } from "./search-command";
@@ -48,6 +49,7 @@ export function HeaderClient({ className }: HeaderClientProps) {
   const pathname = usePathname();
   const scrolled = useScroll(50);
   const [cartItemCount] = React.useState(3); // TODO: Connect to cart context
+  const { isAuthenticated, user } = useAuthStore();
 
   // Determine if we're on the homepage for transparent header behavior
   const isHomePage = pathname === "/";
@@ -205,7 +207,11 @@ export function HeaderClient({ className }: HeaderClientProps) {
             {/* User Dropdown - Desktop only */}
             <div className="hidden md:block">
               <UserDropdown
-                isLoggedIn={false}
+                isLoggedIn={isAuthenticated}
+                user={user ? {
+                  name: user.name,
+                  email: user.email,
+                } : undefined}
                 className={cn(
                   !scrolled && isHomePage
                     ? "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"
