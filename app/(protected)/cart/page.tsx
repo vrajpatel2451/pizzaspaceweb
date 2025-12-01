@@ -38,7 +38,7 @@ function SectionBadge({ children }: { children: React.ReactNode }) {
 // Premium Cart Section Header Component
 function CartSectionHeader({ itemCount }: { itemCount: number }) {
   return (
-    <div className="text-center mb-12 sm:mb-16">
+    <div className="text-center mb-12 mt-8 sm:mb-16">
       {/* Badge */}
       <div className="mb-4">
         <SectionBadge>Your Cart</SectionBadge>

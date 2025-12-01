@@ -102,7 +102,6 @@ export function StickyActionBar({
     }),
   };
 
-
   return (
     <motion.div
       className={cn(
@@ -130,7 +129,7 @@ export function StickyActionBar({
               onChange={onQuantityChange}
               min={1}
               max={10}
-              size="sm"
+              size="lg"
             />
           </div>
 

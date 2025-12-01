@@ -20,6 +20,7 @@ import { CartResponse } from "@/types";
 import { useProductDetails } from "@/lib/hooks/use-product-details";
 import { cn } from "@/lib/utils";
 import { formatNumber } from "@/lib/utils/format";
+import { formatPrice } from "@/lib/formatters";
 
 interface CartItemCardProps {
   item: CartResponse;
@@ -114,6 +115,40 @@ export function CartItemCard({
       price: number;
     }>;
   }, [productDetails, item.pricing]);
+  const sVariantsInfo = useMemo(() => {
+    if (!productDetails || !item.pricing || item.pricing.length === 0) {
+      return [];
+    }
+
+    return item.pricing
+      .map((pricingItem) => {
+        // Find the pricing entry by ID
+        const pricingEntry = productDetails.pricing.find(
+          (p) => p._id === pricingItem.id
+        );
+
+        // Only process addon type pricing entries
+        if (!pricingEntry || pricingEntry.type !== "variant") return null;
+
+        // Get the addon details using the addonId from pricing entry
+        const addon = productDetails.variantList.find(
+          (a) => a._id === pricingEntry.subVariantId
+        );
+
+        if (!addon) return null;
+
+        return {
+          label: addon.label,
+          quantity: pricingItem.quantity,
+          price: pricingEntry.price, // Use price from pricing entry, not addon.price
+        };
+      })
+      .filter(Boolean) as Array<{
+      label: string;
+      quantity: number;
+      price: number;
+    }>;
+  }, [productDetails, item.pricing]);
 
   // Calculate item price (variant price + addons)
   const itemPrice = useMemo(() => {
@@ -124,9 +159,13 @@ export function CartItemCard({
       (sum, addon) => sum + addon.price * addon.quantity,
       0
     );
+    const sVariantTotal = sVariantsInfo.reduce(
+      (sum, addon) => sum + addon.price * addon.quantity,
+      0
+    );
 
-    return variantPrice + addonsTotal;
-  }, [productDetails, variantInfo, addonInfo]);
+    return variantPrice + addonsTotal + sVariantTotal;
+  }, [productDetails, variantInfo, addonInfo, sVariantsInfo]);
 
   // Calculate total price for this cart item
   const itemTotal = itemPrice * item.quantity;
@@ -181,19 +220,29 @@ export function CartItemCard({
               <h3 className="font-semibold text-base sm:text-base line-clamp-2">
                 {product.name}
               </h3>
-              {variantInfo && (
-                <Badge variant="secondary" className="mt-1.5">
-                  {variantInfo.label}
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {variantInfo && (
+                  <Badge variant="secondary" className="mt-1.5">
+                    {variantInfo.label}
+                  </Badge>
+                )}
+                {sVariantsInfo?.length >= 1 &&
+                  sVariantsInfo.map((e) => (
+                    <Badge variant="secondary" className="mt-1.5" key={e.label}>
+                      {e.label}
+                    </Badge>
+                  ))}
+              </div>
             </div>
 
             {/* Price - Desktop */}
             <div className="hidden sm:block text-right">
-              <p className="font-semibold text-base"></p>
+              <p className="font-semibold text-base">
+                {formatPrice(itemTotal)}
+              </p>
               {item.quantity > 1 && (
                 <p className="text-xs text-muted-foreground">
-                  {formatNumber(itemPrice)} each
+                  {formatPrice(itemPrice)} each
                 </p>
               )}
             </div>
@@ -201,10 +250,10 @@ export function CartItemCard({
 
           {/* Price - Mobile */}
           <div className="sm:hidden flex justify-between items-center">
-            <p className="font-semibold text-lg">{formatNumber(itemTotal)}</p>
+            <p className="font-semibold text-lg">{formatPrice(itemTotal)}</p>
             {item.quantity > 1 && (
               <p className="text-sm text-muted-foreground">
-                {formatNumber(itemPrice)} each
+                {formatPrice(itemPrice)} each
               </p>
             )}
           </div>
