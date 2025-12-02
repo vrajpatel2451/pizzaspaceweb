@@ -149,7 +149,7 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
 
       {/* Main Container */}
       <section
-        className="relative bg-white dark:bg-slate-950 py-12 sm:py-16 lg:py-20 overflow-hidden"
+        className="relative bg-white dark:bg-slate-950 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 overflow-hidden"
         aria-labelledby="menu-heading"
       >
         {/* Background decorative elements */}

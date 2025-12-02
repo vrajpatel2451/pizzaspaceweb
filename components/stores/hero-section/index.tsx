@@ -36,7 +36,7 @@ export function HeroSection({ stores }: HeroSectionProps) {
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 sm:py-16 lg:py-24" aria-label="Store locator hero section">
+    <section className="relative bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-24" aria-label="Store locator hero section">
       <div className="container mx-auto px-4 lg:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
           {/* Left Content */}

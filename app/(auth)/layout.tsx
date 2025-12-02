@@ -37,11 +37,11 @@ export default function AuthLayout({
         }}
       />
 
-      {/* Auth pages layout - no header/footer */}
+      {/* Auth pages layout - with header offset for fixed header */}
       <main
         id="main-content"
         role="main"
-        className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8"
+        className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-20 sm:pt-24 lg:pt-28"
       >
         {children}
       </main>

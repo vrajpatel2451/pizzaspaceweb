@@ -32,7 +32,7 @@ export function ContactHeroSection() {
 
   return (
     <section
-      className="relative w-full overflow-hidden py-10 sm:py-12 md:py-16 lg:py-20"
+      className="relative w-full overflow-hidden pt-24 pb-10 sm:pt-28 sm:pb-12 md:pt-32 md:pb-16 lg:pt-36 lg:pb-20"
       aria-label="Contact hero section"
     >
       {/* Background gradient */}

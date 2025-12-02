@@ -72,13 +72,13 @@ const quickActions: QuickAction[] = [
   {
     label: "My Orders",
     description: "View your order history",
-    href: "/account/orders",
+    href: "/order",
     icon: ShoppingBag,
   },
   {
     label: "Saved Addresses",
     description: "Manage delivery addresses",
-    href: "/account/addresses",
+    href: "/addresses",
     icon: MapPin,
   },
 ];
@@ -126,7 +126,7 @@ export default function ProfilePage() {
 
   return (
     <section
-      className="relative bg-white dark:bg-slate-950 py-12 sm:py-16 lg:py-20 min-h-screen overflow-hidden"
+      className="relative bg-white dark:bg-slate-950 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 min-h-screen overflow-hidden"
       aria-labelledby="profile-heading"
     >
       {/* Background decorative elements */}

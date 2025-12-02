@@ -239,7 +239,7 @@ export default function AddressesPage() {
   // Loading state
   if (isLoading) {
     return (
-      <section className="relative bg-white dark:bg-slate-950 py-6 sm:py-12 lg:py-16 overflow-hidden min-h-screen">
+      <section className="relative bg-white dark:bg-slate-950 pt-24 pb-6 sm:pt-28 sm:pb-12 lg:pt-32 lg:pb-16 overflow-hidden min-h-screen">
         {/* Background decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Top left gradient blob */}
@@ -266,7 +266,7 @@ export default function AddressesPage() {
   }
 
   return (
-    <section className="relative bg-white dark:bg-slate-950 py-6 sm:py-12 lg:py-16 overflow-hidden min-h-screen">
+    <section className="relative bg-white dark:bg-slate-950 pt-24 pb-6 sm:pt-28 sm:pb-12 lg:pt-32 lg:pb-16 overflow-hidden min-h-screen">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Top left gradient blob */}

@@ -17,10 +17,6 @@ import {
   MapPin,
   ChevronRight,
   Clock,
-  Flame,
-  Salad,
-  Coffee,
-  IceCream,
   ChevronDown,
   LogOut,
 } from "lucide-react";
@@ -38,13 +34,6 @@ interface NavLink {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-interface MenuCategory {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  description?: string;
-}
-
 const mainNavLinks: NavLink[] = [
   { label: "Home", href: "/", icon: Home },
   { label: "Menu", href: "/menu", icon: Pizza },
@@ -53,16 +42,9 @@ const mainNavLinks: NavLink[] = [
   { label: "Contact", href: "/contact", icon: Phone },
 ];
 
-const menuCategories: MenuCategory[] = [
-  { label: "Pizza", href: "/menu?category=pizza", icon: Pizza, description: "Classic & specialty" },
-  { label: "Sides", href: "/menu?category=sides", icon: Salad, description: "Salads, garlic bread" },
-  { label: "Drinks", href: "/menu?category=drinks", icon: Coffee, description: "Soft drinks, juices" },
-  { label: "Desserts", href: "/menu?category=desserts", icon: IceCream, description: "Sweet treats" },
-];
-
 const accountLinks: NavLink[] = [
   { label: "My Orders", href: "/order", icon: ShoppingBag },
-  { label: "Saved Addresses", href: "/account/addresses", icon: MapPin },
+  { label: "Saved Addresses", href: "/addresses", icon: MapPin },
   { label: "Profile", href: "/profile", icon: User },
 ];
 
@@ -223,148 +205,37 @@ export function MobileNavDrawer({ className }: MobileNavDrawerProps) {
             <ul className="space-y-1">
               {mainNavLinks.map((link) => {
                 const isActive = pathname === link.href;
-                const isMenuLink = link.href === "/menu";
 
                 return (
                   <li key={link.href}>
-                    {isMenuLink ? (
-                      // Menu link with expandable categories
-                      <div>
-                        <button
-                          onClick={() => toggleSection("menu")}
-                          aria-expanded={expandedSection === "menu"}
-                          aria-controls="menu-categories"
-                          className={cn(
-                            "flex w-full items-center gap-3 px-4 py-3 rounded-xl",
-                            "text-base font-medium transition-all duration-200",
-                            "hover:bg-accent group cursor-pointer touch-manipulation",
-                            "min-h-[48px]",
-                            isActive && "bg-primary/10 text-primary"
-                          )}
-                        >
-                          <link.icon
-                            className={cn(
-                              "size-5 transition-colors",
-                              isActive
-                                ? "text-primary"
-                                : "text-muted-foreground group-hover:text-primary"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <span className="flex-1 text-left">{link.label}</span>
-                          <ChevronDown
-                            className={cn(
-                              "size-4 text-muted-foreground transition-transform duration-200",
-                              expandedSection === "menu" && "rotate-180"
-                            )}
-                            aria-hidden="true"
-                          />
-                        </button>
-
-                        {/* Expanded Menu Categories */}
-                        <div
-                          id="menu-categories"
-                          className={cn(
-                            "overflow-hidden transition-all duration-300 ease-in-out",
-                            expandedSection === "menu"
-                              ? "max-h-96 opacity-100"
-                              : "max-h-0 opacity-0"
-                          )}
-                        >
-                          <div className="pl-4 py-2 space-y-1">
-                            <Link
-                              href="/menu"
-                              className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-accent group touch-manipulation min-h-[44px]"
-                            >
-                              <Flame className="size-4 text-primary" />
-                              <div>
-                                <span className="text-sm font-medium">Full Menu</span>
-                                <p className="text-xs text-muted-foreground">
-                                  Browse all items
-                                </p>
-                              </div>
-                            </Link>
-                            {menuCategories.map((category) => (
-                              <Link
-                                key={category.href}
-                                href={category.href}
-                                className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-accent group touch-manipulation min-h-[44px]"
-                              >
-                                <category.icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <div>
-                                  <span className="text-sm font-medium">
-                                    {category.label}
-                                  </span>
-                                  {category.description && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {category.description}
-                                    </p>
-                                  )}
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      // Regular nav link
-                      <Link
-                        href={link.href}
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl",
+                        "text-base font-medium transition-all duration-200",
+                        "hover:bg-accent group touch-manipulation",
+                        "min-h-[48px]",
+                        isActive && "bg-primary/10 text-primary"
+                      )}
+                    >
+                      <link.icon
                         className={cn(
-                          "flex items-center gap-3 px-4 py-3 rounded-xl",
-                          "text-base font-medium transition-all duration-200",
-                          "hover:bg-accent group touch-manipulation",
-                          "min-h-[48px]",
-                          isActive && "bg-primary/10 text-primary"
+                          "size-5 transition-colors",
+                          isActive
+                            ? "text-primary"
+                            : "text-muted-foreground group-hover:text-primary"
                         )}
-                      >
-                        <link.icon
-                          className={cn(
-                            "size-5 transition-colors",
-                            isActive
-                              ? "text-primary"
-                              : "text-muted-foreground group-hover:text-primary"
-                          )}
-                        />
-                        <span>{link.label}</span>
-                        {isActive && (
-                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                        )}
-                      </Link>
-                    )}
+                      />
+                      <span>{link.label}</span>
+                      {isActive && (
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                      )}
+                    </Link>
                   </li>
                 );
               })}
             </ul>
 
-            {/* Orders Link - Only for authenticated users */}
-            {isAuthenticated && (
-              <div className="mt-2">
-                <Link
-                  href="/order"
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl",
-                    "text-base font-medium transition-all duration-200",
-                    "hover:bg-accent group touch-manipulation",
-                    "min-h-[48px]",
-                    pathname.startsWith("/order") && "bg-primary/10 text-primary"
-                  )}
-                >
-                  <ShoppingBag
-                    className={cn(
-                      "size-5 transition-colors",
-                      pathname.startsWith("/order")
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-primary"
-                    )}
-                  />
-                  <span>Orders</span>
-                  {pathname.startsWith("/order") && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                  )}
-                </Link>
-              </div>
-            )}
           </nav>
 
           <Separator className="mx-4" />

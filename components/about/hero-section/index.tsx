@@ -154,7 +154,7 @@ export function AboutHeroSection() {
 
   return (
     <section
-      className="relative w-full overflow-hidden py-16 sm:py-20 md:py-28 lg:py-36"
+      className="relative w-full overflow-hidden pt-24 pb-16 sm:pt-28 sm:pb-20 md:pt-32 md:pb-28 lg:pt-40 lg:pb-36"
       aria-label="About us hero section"
     >
       {/* Background decorative elements */}

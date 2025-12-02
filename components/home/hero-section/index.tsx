@@ -17,7 +17,7 @@ export async function HeroSection() {
 
   return (
     <section
-      className="relative w-full overflow-hidden py-16 md:py-20 lg:py-24"
+      className="relative w-full overflow-hidden pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-32 lg:pb-24"
       aria-label="Hero section"
     >
       {/* Background decorative elements */}
