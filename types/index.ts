@@ -43,3 +43,4 @@ export { AUTH_STORAGE_KEY } from "./auth";
 export * from "./cart";
 export * from "./discount";
 export * from "./address";
+export * from "./order";

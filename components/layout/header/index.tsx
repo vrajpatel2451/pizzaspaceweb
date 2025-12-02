@@ -13,7 +13,7 @@ export function Header() {
       </a>
 
       {/* Top Info Bar - Opening hours, contact, social links */}
-      <TopInfoBar />
+      {/* <TopInfoBar /> */}
 
       {/* Main Header - Logo, Navigation, Actions */}
       <HeaderClient />

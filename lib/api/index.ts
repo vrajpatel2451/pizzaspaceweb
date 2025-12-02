@@ -10,3 +10,4 @@ export { loginUser, registerUser, getProfile } from "./auth";
 export * from "./cart";
 export * from "./address";
 export * from "./discount";
+export * from "./order";

@@ -45,7 +45,7 @@ interface MenuLink {
 }
 
 const accountLinks: MenuLink[] = [
-  { label: "My Orders", href: "/account/orders", icon: ShoppingBag },
+  { label: "My Orders", href: "/order", icon: ShoppingBag },
   { label: "Saved Addresses", href: "/account/addresses", icon: MapPin },
   { label: "Profile", href: "/profile", icon: User },
 ];

@@ -61,7 +61,7 @@ const menuCategories: MenuCategory[] = [
 ];
 
 const accountLinks: NavLink[] = [
-  { label: "My Orders", href: "/account/orders", icon: ShoppingBag },
+  { label: "My Orders", href: "/order", icon: ShoppingBag },
   { label: "Saved Addresses", href: "/account/addresses", icon: MapPin },
   { label: "Profile", href: "/profile", icon: User },
 ];
@@ -336,6 +336,35 @@ export function MobileNavDrawer({ className }: MobileNavDrawerProps) {
                 );
               })}
             </ul>
+
+            {/* Orders Link - Only for authenticated users */}
+            {isAuthenticated && (
+              <div className="mt-2">
+                <Link
+                  href="/order"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl",
+                    "text-base font-medium transition-all duration-200",
+                    "hover:bg-accent group touch-manipulation",
+                    "min-h-[48px]",
+                    pathname.startsWith("/order") && "bg-primary/10 text-primary"
+                  )}
+                >
+                  <ShoppingBag
+                    className={cn(
+                      "size-5 transition-colors",
+                      pathname.startsWith("/order")
+                        ? "text-primary"
+                        : "text-muted-foreground group-hover:text-primary"
+                    )}
+                  />
+                  <span>Orders</span>
+                  {pathname.startsWith("/order") && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                  )}
+                </Link>
+              </div>
+            )}
           </nav>
 
           <Separator className="mx-4" />

@@ -10,6 +10,7 @@ import { useDeviceId, useIsDeviceHydrated } from "@/store/device-store";
 import { useStore } from "@/lib/contexts/store-context";
 import { useCart } from "@/lib/hooks/use-cart";
 import { cn } from "@/lib/utils";
+import { Package } from "lucide-react";
 import { Logo } from "./logo";
 import { SearchCommand } from "./search-command";
 import { ThemeToggle } from "./theme-toggle";
@@ -58,8 +59,8 @@ export function HeaderClient({ className }: HeaderClientProps) {
 
   // Fetch cart on mount and when store/auth changes
   const { refetch: refetchCart } = useCart(
-    deviceId || '',
-    selectedStore?._id || '',
+    deviceId || "",
+    selectedStore?._id || "",
     false // Don't auto-fetch, we'll control it manually
   );
 
@@ -100,7 +101,13 @@ export function HeaderClient({ className }: HeaderClientProps) {
       refetchCart();
     }
     prevIsAuthenticated.current = isAuthenticated;
-  }, [isAuthenticated, isDeviceHydrated, deviceId, selectedStore?._id, refetchCart]);
+  }, [
+    isAuthenticated,
+    isDeviceHydrated,
+    deviceId,
+    selectedStore?._id,
+    refetchCart,
+  ]);
 
   // Determine if we're on the homepage for transparent header behavior
   const isHomePage = pathname === "/";
@@ -258,10 +265,14 @@ export function HeaderClient({ className }: HeaderClientProps) {
             <div className="hidden md:block">
               <UserDropdown
                 isLoggedIn={isAuthenticated}
-                user={user ? {
-                  name: user.name,
-                  email: user.email,
-                } : undefined}
+                user={
+                  user
+                    ? {
+                        name: user.name,
+                        email: user.email,
+                      }
+                    : undefined
+                }
                 className={cn(
                   !scrolled && isHomePage
                     ? "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"
