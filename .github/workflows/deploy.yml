@@ -33,13 +33,10 @@ jobs:
 
       - name: Create deployment package
         run: |
-          tar -czf deploy.tar.gz \
-            .next \
-            public \
-            package.json \
-            yarn.lock \
-            next.config.ts \
-            ecosystem.config.js
+          cp -r public .next/standalone/public
+          cp -r .next/static .next/standalone/.next/static
+          cp ecosystem.config.js .next/standalone/
+          tar -czf deploy.tar.gz -C .next/standalone .
 
       - name: Copy to server
         uses: appleboy/scp-action@v0.1.7
@@ -49,7 +46,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           source: "deploy.tar.gz"
-          target: "~/pizza-web-v2"
+          target: "~/pizza-web-v3"
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.0
@@ -60,14 +57,11 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             set -e
-            cd ~/pizza-web-v2
+            cd ~/pizza-web-v3
 
             echo "=== Extracting build ==="
             tar -xzf deploy.tar.gz
             rm deploy.tar.gz
-
-            echo "=== Installing production dependencies ==="
-            yarn install --frozen-lockfile --production --prefer-offline
 
             echo "=== Restarting PM2 ==="
             pm2 reload ecosystem.config.js --update-env || pm2 start ecosystem.config.js

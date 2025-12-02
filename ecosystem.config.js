@@ -2,8 +2,7 @@ module.exports = {
   apps: [
     {
       name: "pizza-web-v2",
-      script: "yarn",
-      args: "start",
+      script: "server.js",
       cwd: ".",
       instances: 1,
       exec_mode: "fork",
@@ -20,6 +19,7 @@ module.exports = {
       node_args: "--max-old-space-size=512",
       env: {
         NODE_ENV: "production",
+        PORT: 3001,
       },
     },
   ],

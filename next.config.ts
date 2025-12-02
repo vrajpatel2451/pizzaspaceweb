@@ -6,6 +6,7 @@ const imageDomain =
 const imageHostname = imageDomain.replace(/^https?:\/\//, "");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {
