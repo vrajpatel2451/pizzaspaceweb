@@ -17,6 +17,10 @@ module.exports = {
       merge_logs: true,
       kill_timeout: 5000,
       listen_timeout: 3000,
+      node_args: "--max-old-space-size=512",
+      env: {
+        NODE_ENV: "production",
+      },
     },
   ],
 };
