@@ -44,3 +44,5 @@ export * from "./cart";
 export * from "./discount";
 export * from "./address";
 export * from "./order";
+export * from "./orderTicket";
+export * from "./orderReview";

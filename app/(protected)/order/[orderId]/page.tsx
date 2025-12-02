@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getOrderDetails } from "@/lib/api/order";
+import { getOrderReview } from "@/lib/api/orderReview";
 import { ORDER_STATUS_CONFIG } from "@/lib/order-status";
 import { OrderPageHeader } from "@/components/order/shared/order-page-header";
 import { OrderDetailsHeader } from "@/components/order/details/order-details-header";
@@ -21,15 +22,20 @@ export default async function OrderDetailsPage({
 }: OrderDetailsPageProps) {
   const { orderId } = await params;
 
-  // Fetch order details
-  const response = await getOrderDetails(orderId);
+  // Fetch order details and review data in parallel
+  const [orderResponse, reviewResponse] = await Promise.all([
+    getOrderDetails(orderId),
+    getOrderReview(orderId),
+  ]);
 
   // Handle error cases
-  if (!response.data || response.statusCode !== 200) {
+  if (!orderResponse.data || orderResponse.statusCode !== 200) {
     notFound();
   }
 
-  const order = response.data;
+  const order = orderResponse.data;
+  // Review may not exist (404) - that's expected for unreviewed orders
+  const existingReview = reviewResponse.statusCode === 200 ? reviewResponse.data : null;
 
   // Format order ID for display
   const formattedOrderId = `#${order._id.substring(0, 8).toUpperCase()}`;
@@ -56,7 +62,11 @@ export default async function OrderDetailsPage({
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Order Details Header with Back + Actions */}
-        <OrderDetailsHeader order={order} className="mb-6" />
+        <OrderDetailsHeader
+          order={order}
+          existingReview={existingReview}
+          className="mb-6"
+        />
 
         {/* Order Status Timeline */}
         <OrderStatusTimeline
@@ -74,6 +84,7 @@ export default async function OrderDetailsPage({
               items={order.items}
               title={`Order Items (${order.items.length})`}
               showRefundInfo
+              itemReviews={existingReview?.items}
             />
 
             {/* Order Summary */}
@@ -87,6 +98,7 @@ export default async function OrderDetailsPage({
               status={order.status}
               paymentMethod={order.payment.method}
               paymentRefId={order.payment.refId}
+              orderReview={existingReview?.order}
             />
 
             {/* Store Details */}
@@ -94,7 +106,10 @@ export default async function OrderDetailsPage({
 
             {/* Delivery Rider Details (conditional) */}
             {order.rider?.info && (
-              <DeliveryRiderDetails rider={order.rider.info} />
+              <DeliveryRiderDetails
+                rider={order.rider.info}
+                riderReview={existingReview?.order}
+              />
             )}
           </div>
         </div>

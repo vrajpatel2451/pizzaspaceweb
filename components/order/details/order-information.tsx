@@ -1,8 +1,9 @@
-import { Clock, CreditCard, Banknote, Copy, Check } from "lucide-react";
+import { Clock, CreditCard, Banknote } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { OrderStatus, PaymentType } from "@/types/order";
+import { OrderReviewResponse } from "@/types/orderReview";
 import { OrderStatusBadge } from "@/components/order/shared/order-status-badge";
+import { ReviewDisplayCard } from "@/components/order/review";
 import { cn } from "@/lib/utils";
 import { CopyButton } from "@/components/ui/copy-button";
 
@@ -10,6 +11,7 @@ interface OrderInformationProps {
   status: OrderStatus;
   paymentMethod: PaymentType;
   paymentRefId: string;
+  orderReview?: OrderReviewResponse | null;
   className?: string;
 }
 
@@ -17,6 +19,7 @@ export function OrderInformation({
   status,
   paymentMethod,
   paymentRefId,
+  orderReview,
   className,
 }: OrderInformationProps) {
   // Payment method icon and label
@@ -74,6 +77,17 @@ export function OrderInformation({
               </code>
               <CopyButton value={paymentRefId} />
             </div>
+          </div>
+        )}
+
+        {/* Order Review (if exists) */}
+        {orderReview && (
+          <div className="pt-2 border-t">
+            <ReviewDisplayCard
+              rating={orderReview.overallRatings}
+              message={orderReview.overallMessage}
+              title="Your Rating"
+            />
           </div>
         )}
       </CardContent>

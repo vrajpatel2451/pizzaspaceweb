@@ -6,19 +6,25 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { StaffResponse } from "@/types/order";
+import { OrderReviewResponse } from "@/types/orderReview";
+import { ReviewDisplayCard } from "@/components/order/review";
 import { cn } from "@/lib/utils";
 
 interface DeliveryRiderDetailsProps {
   rider: StaffResponse;
+  riderReview?: OrderReviewResponse | null;
   defaultOpen?: boolean;
   className?: string;
 }
 
 export function DeliveryRiderDetails({
   rider,
+  riderReview,
   defaultOpen = true,
   className,
 }: DeliveryRiderDetailsProps) {
+  // Check if rider review exists (deliveryBoyRatings is stored in order review)
+  const hasRiderReview = riderReview?.deliveryBoyRatings !== undefined;
   return (
     <Card className={cn("shadow-sm", className)}>
       <Collapsible defaultOpen={defaultOpen}>
@@ -51,6 +57,18 @@ export function DeliveryRiderDetails({
                 {rider.email}
               </a>
             </div>
+
+            {/* Rider Review (if exists) */}
+            {hasRiderReview && riderReview && (
+              <div className="pt-3 mt-3 border-t">
+                <ReviewDisplayCard
+                  rating={riderReview.deliveryBoyRatings!}
+                  message={riderReview.deliveryBoyMessage}
+                  title="Your Rating"
+                  compact
+                />
+              </div>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

@@ -505,28 +505,7 @@ export default function ComponentsShowcase() {
               </div>
             </div>
 
-            <div>
-              <h3 className="text-h5 mb-4">Removable</h3>
-              <div className="flex flex-wrap gap-3">
-                <Badge removable onRemove={() => toast("Badge removed!")}>
-                  Click to remove
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  removable
-                  onRemove={() => toast("Badge removed!")}
-                >
-                  Secondary
-                </Badge>
-                <Badge
-                  variant="offer"
-                  removable
-                  onRemove={() => toast("Offer removed!")}
-                >
-                  Special Offer
-                </Badge>
-              </div>
-            </div>
+            {/* Removable badges - TODO: implement removable feature */}
 
             <div>
               <h3 className="text-h5 mb-4">Real-World Usage</h3>

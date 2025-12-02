@@ -1,16 +1,20 @@
 import { Badge } from "@/components/ui/badge";
 import { OrderItemResponse } from "@/types/order";
+import { OrderItemReviewResponse } from "@/types/orderReview";
+import { ItemReviewBadge } from "@/components/order/review";
 import { cn } from "@/lib/utils";
 
 interface OrderItemCardProps {
   item: OrderItemResponse;
   showRefundInfo?: boolean;
+  itemReview?: OrderItemReviewResponse;
   className?: string;
 }
 
 export function OrderItemCard({
   item,
   showRefundInfo = false,
+  itemReview,
   className,
 }: OrderItemCardProps) {
   const hasDiscount = item.priceAfterDiscount < item.price;
@@ -83,6 +87,14 @@ export function OrderItemCard({
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">
                 {item.refundMessage}
               </p>
+            )}
+
+            {/* Item Review Badge */}
+            {itemReview && (
+              <ItemReviewBadge
+                rating={itemReview.ratings}
+                message={itemReview.message}
+              />
             )}
           </div>
         </div>

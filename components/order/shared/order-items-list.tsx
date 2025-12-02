@@ -1,4 +1,5 @@
 import { OrderItemResponse } from "@/types/order";
+import { OrderItemReviewResponse } from "@/types/orderReview";
 import { OrderItemCard } from "./order-item-card";
 import { cn } from "@/lib/utils";
 import { Package } from "lucide-react";
@@ -7,6 +8,7 @@ interface OrderItemsListProps {
   items: OrderItemResponse[];
   title?: string;
   showRefundInfo?: boolean;
+  itemReviews?: OrderItemReviewResponse[];
   className?: string;
 }
 
@@ -14,8 +16,14 @@ export function OrderItemsList({
   items,
   title = "Order Items",
   showRefundInfo = false,
+  itemReviews,
   className,
 }: OrderItemsListProps) {
+  // Create a map of item reviews by itemId for quick lookup
+  const reviewsMap = itemReviews?.reduce((acc, review) => {
+    acc[review.itemId] = review;
+    return acc;
+  }, {} as Record<string, OrderItemReviewResponse>);
   // Empty state
   if (!items || items.length === 0) {
     return (
@@ -57,6 +65,7 @@ export function OrderItemsList({
             key={`${item.itemId}-${index}`}
             item={item}
             showRefundInfo={showRefundInfo}
+            itemReview={reviewsMap?.[item.itemId]}
           />
         ))}
       </div>

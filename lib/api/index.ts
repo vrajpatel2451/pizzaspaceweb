@@ -11,3 +11,5 @@ export * from "./cart";
 export * from "./address";
 export * from "./discount";
 export * from "./order";
+export * from "./orderTicket";
+export * from "./orderReview";
