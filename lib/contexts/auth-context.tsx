@@ -1,22 +1,36 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { getProfile, loginUser, registerUser } from '@/lib/api/auth';
-import { LoginUserPayload, RegisterUserPayload } from '@/types/user';
-import { APIResponse } from '@/types/api';
-import { UserResponseWithToken } from '@/types/user';
+import { createContext, useContext, useEffect, ReactNode } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { getProfile, loginUser, registerUser } from "@/lib/api/auth";
+import { LoginUserPayload, RegisterUserPayload } from "@/types/user";
+import { APIResponse } from "@/types/api";
+import { UserResponseWithToken } from "@/types/user";
 
 interface AuthContextType {
   isInitialized: boolean;
-  loginWithCart: (email: string, password: string, cartIds?: string[]) => Promise<APIResponse<UserResponseWithToken | null>>;
-  registerWithCart: (payload: RegisterUserPayload) => Promise<APIResponse<UserResponseWithToken | null>>;
+  loginWithCart: (
+    email: string,
+    password: string,
+    cartIds?: string[]
+  ) => Promise<APIResponse<UserResponseWithToken | null>>;
+  registerWithCart: (
+    payload: RegisterUserPayload
+  ) => Promise<APIResponse<UserResponseWithToken | null>>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isInitialized: false,
-  loginWithCart: async () => ({ statusCode: 500, data: null, errorMessage: 'Not initialized' }),
-  registerWithCart: async () => ({ statusCode: 500, data: null, errorMessage: 'Not initialized' }),
+  loginWithCart: async () => ({
+    statusCode: 500,
+    data: null,
+    errorMessage: "Not initialized",
+  }),
+  registerWithCart: async () => ({
+    statusCode: 500,
+    data: null,
+    errorMessage: "Not initialized",
+  }),
 });
 
 export function useAuthContext() {
@@ -28,7 +42,8 @@ interface AuthContextProviderProps {
 }
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
-  const { token, isHydrated, setUser, setLoading, logout, login } = useAuthStore();
+  const { token, isHydrated, setUser, setLoading, logout, login } =
+    useAuthStore();
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -45,7 +60,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
             logout();
           }
         } catch (error) {
-          console.error('Failed to fetch profile:', error);
+          console.error("Failed to fetch profile:", error);
           logout();
         } finally {
           setLoading(false);
@@ -71,17 +86,17 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
       const response = await loginUser(payload);
 
-      if (response.statusCode === 200 && response.data) {
+      if (response.statusCode === 201 && response.data) {
         login(response.data.user, response.data.token);
       }
 
       return response;
     } catch (error) {
-      console.error('Login with cart failed:', error);
+      console.error("Login with cart failed:", error);
       return {
         statusCode: 500,
         data: null,
-        errorMessage: 'An unexpected error occurred',
+        errorMessage: "An unexpected error occurred",
       };
     } finally {
       setLoading(false);
@@ -95,17 +110,17 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     try {
       const response = await registerUser(payload);
 
-      if (response.statusCode === 200 && response.data) {
+      if (response.statusCode === 201 && response.data) {
         login(response.data.user, response.data.token);
       }
 
       return response;
     } catch (error) {
-      console.error('Register with cart failed:', error);
+      console.error("Register with cart failed:", error);
       return {
         statusCode: 500,
         data: null,
-        errorMessage: 'An unexpected error occurred',
+        errorMessage: "An unexpected error occurred",
       };
     } finally {
       setLoading(false);
@@ -113,7 +128,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={{ isInitialized: isHydrated, loginWithCart, registerWithCart }}>
+    <AuthContext.Provider
+      value={{ isInitialized: isHydrated, loginWithCart, registerWithCart }}
+    >
       {children}
     </AuthContext.Provider>
   );

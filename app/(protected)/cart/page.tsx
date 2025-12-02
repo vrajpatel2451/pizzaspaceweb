@@ -11,10 +11,12 @@ import {
   OrderSummary,
   DiscountSection,
 } from "@/components/cart";
+import { PaymentMethod } from "@/components/cart/order-summary";
 import { AddAddressModal } from "@/components/address";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AddressResponse, OrderDeliveryType } from "@/types";
+import { createOrder } from "@/lib/api/order";
 import {
   useCart,
   useUpdateCartItem,
@@ -93,6 +95,10 @@ export default function CartPage() {
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
 
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("online");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
   // Get store context
   const { selectedStore, isLoading: isLoadingStore } = useStore();
   const storeId = selectedStore?._id;
@@ -102,8 +108,11 @@ export default function CartPage() {
     items: cartItems,
     deliveryType,
     selectedAddressId,
+    selectedDiscountIds,
     setDeliveryType,
     setSelectedAddress,
+    getCartIds,
+    clearCart,
   } = useCartStore();
 
   // Device ID - Use centralized store for consistency
@@ -213,14 +222,56 @@ export default function CartPage() {
   };
 
   // Handle checkout
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (deliveryType === "delivery" && !selectedAddressId) {
       toast.error("Please select a delivery address");
       return;
     }
 
-    toast.info("Checkout functionality coming soon");
-    // router.push("/checkout");
+    if (!storeId) {
+      toast.error("Store not selected");
+      return;
+    }
+
+    const cartIds = getCartIds();
+    if (cartIds.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setIsPlacingOrder(true);
+
+    try {
+      const response = await createOrder({
+        cartIds,
+        discountIds: selectedDiscountIds,
+        addressId: deliveryType === "delivery" ? selectedAddressId || undefined : undefined,
+        paymentType: paymentMethod === "cod" ? "cash" : "online",
+        deliveryType,
+        storeId,
+      });
+
+      if (response.statusCode === 201 && response.data) {
+        // Clear cart after successful order
+        clearCart();
+
+        // Handle payment flow
+        if (response.data.openPaymentLink && response.data.paymentUrl) {
+          // Redirect to payment gateway
+          window.location.href = response.data.paymentUrl;
+        } else {
+          // Redirect to success page
+          router.push(`/order/${response.data.order._id}/success`);
+        }
+      } else {
+        toast.error(response.errorMessage || "Failed to place order");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   // Handle browse menu
@@ -345,6 +396,9 @@ export default function CartPage() {
                 checkoutDisabled={
                   deliveryType === "delivery" && !selectedAddressId
                 }
+                paymentMethod={paymentMethod}
+                onPaymentMethodChange={setPaymentMethod}
+                isPlacingOrder={isPlacingOrder}
               />
             </div>
           </div>

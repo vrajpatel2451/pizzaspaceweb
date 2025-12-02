@@ -96,7 +96,7 @@ export function useAddToCart(refetchOnSuccess: boolean = false) {
       try {
         const response = await addToCart(data);
 
-        if (response.statusCode === 200 && response.data) {
+        if (response.statusCode === 201 && response.data) {
           // Optimistically update the store
           addItem(response.data);
           toast.success("Item added to cart");

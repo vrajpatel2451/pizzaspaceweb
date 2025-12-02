@@ -258,7 +258,8 @@ export function CreateTicketDialog({
                       Create Support Ticket
                     </DialogTitle>
                     <DialogDescription className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                      Describe your issue and our support team will respond as soon as possible.
+                      Describe your issue and our support team will respond as
+                      soon as possible.
                     </DialogDescription>
                   </div>
                 </motion.div>
@@ -283,7 +284,10 @@ export function CreateTicketDialog({
                             Describe your issue
                             <span className="sr-only">(required)</span>
                           </FormLabel>
-                          <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium" aria-hidden="true">
+                          <span
+                            className="text-[11px] text-slate-400 dark:text-slate-500 font-medium"
+                            aria-hidden="true"
+                          >
                             Required
                           </span>
                         </div>
@@ -329,7 +333,8 @@ export function CreateTicketDialog({
                           />
                         </FormControl>
                         <FormDescription className="text-xs text-slate-500 dark:text-slate-400">
-                          Screenshots or photos help us understand your issue better
+                          Screenshots or photos help us understand your issue
+                          better
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -352,8 +357,18 @@ export function CreateTicketDialog({
                               animate={{ rotate: [0, -10, 10, 0] }}
                               transition={{ duration: 0.4 }}
                             >
-                              <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg
+                                className="w-4 h-4 text-red-500"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                             </motion.div>
                           </div>

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { getDiscounts } from '@/lib/api/discount';
-import { useDiscountStore } from '@/store/discount-store';
-import { useCartStore } from '@/store/cart-store';
-import { DiscountResponse, GetApplicableDiscountsParams } from '@/types';
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { getDiscounts } from "@/lib/api/discount";
+import { useDiscountStore } from "@/store/discount-store";
+import { useCartStore } from "@/store/cart-store";
+import { DiscountResponse, GetApplicableDiscountsParams } from "@/types";
 
 /**
  * Hook to fetch available discounts for cart items
@@ -45,18 +45,18 @@ export function useAvailableDiscounts(
 
       const response = await getDiscounts(params);
 
-      if (response.statusCode === 200 && response.data) {
+      if (response.statusCode === 201 && response.data) {
         setDiscounts(response.data);
       } else {
-        const errorMsg = response.errorMessage || 'Failed to fetch discounts';
+        const errorMsg = response.errorMessage || "Failed to fetch discounts";
         setError(errorMsg);
         setDiscounts([]);
       }
     } catch (err) {
-      const errorMsg = 'An unexpected error occurred while fetching discounts';
+      const errorMsg = "An unexpected error occurred while fetching discounts";
       setError(errorMsg);
       setDiscounts([]);
-      console.error('Fetch discounts error:', err);
+      console.error("Fetch discounts error:", err);
     } finally {
       setIsLoading(false);
       setStoreLoading(false);
@@ -92,7 +92,7 @@ export function useAvailableDiscounts(
 export function useSearchDiscounts(
   cartIds: string[],
   storeId: string,
-  search: string = '',
+  search: string = "",
   debounceMs: number = 300
 ) {
   const [isLoading, setIsLoading] = useState(false);
@@ -128,18 +128,18 @@ export function useSearchDiscounts(
 
       const response = await getDiscounts(params);
 
-      if (response.statusCode === 200 && response.data) {
+      if (response.statusCode === 201 && response.data) {
         setSearchResults(response.data);
       } else {
-        const errorMsg = response.errorMessage || 'Failed to search discounts';
+        const errorMsg = response.errorMessage || "Failed to search discounts";
         setError(errorMsg);
         setSearchResults([]);
       }
     } catch (err) {
-      const errorMsg = 'An unexpected error occurred while searching';
+      const errorMsg = "An unexpected error occurred while searching";
       setError(errorMsg);
       setSearchResults([]);
-      console.error('Search discounts error:', err);
+      console.error("Search discounts error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -176,8 +176,8 @@ export function useApplyDiscount() {
     async (discountId: string, discountCode?: string) => {
       // Check if discount is already applied
       if (selectedDiscountIds.includes(discountId)) {
-        toast.info('This discount is already applied');
-        return { success: false, error: 'Discount already applied' };
+        toast.info("This discount is already applied");
+        return { success: false, error: "Discount already applied" };
       }
 
       setIsLoading(true);
@@ -188,16 +188,16 @@ export function useApplyDiscount() {
 
         const message = discountCode
           ? `Discount "${discountCode}" applied`
-          : 'Discount applied successfully';
+          : "Discount applied successfully";
 
         toast.success(message);
         closeModal();
 
         return { success: true };
       } catch (err) {
-        const errorMsg = 'Failed to apply discount';
+        const errorMsg = "Failed to apply discount";
         toast.error(errorMsg);
-        console.error('Apply discount error:', err);
+        console.error("Apply discount error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
@@ -229,15 +229,15 @@ export function useRemoveDiscount() {
 
         const message = discountCode
           ? `Discount "${discountCode}" removed`
-          : 'Discount removed';
+          : "Discount removed";
 
         toast.success(message);
 
         return { success: true };
       } catch (err) {
-        const errorMsg = 'Failed to remove discount';
+        const errorMsg = "Failed to remove discount";
         toast.error(errorMsg);
-        console.error('Remove discount error:', err);
+        console.error("Remove discount error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);

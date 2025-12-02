@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   getAddresses,
   createAddress,
   updateAddress,
   patchAddress,
   deleteAddress,
-} from '@/lib/api/address';
-import { useAddressStore } from '@/store/address-store';
-import { AddAddressData, AddressResponse } from '@/types';
+} from "@/lib/api/address";
+import { useAddressStore } from "@/store/address-store";
+import { AddAddressData, AddressResponse } from "@/types";
 
 /**
  * Hook to fetch and manage addresses
@@ -19,8 +19,11 @@ import { AddAddressData, AddressResponse } from '@/types';
 export function useAddresses(autoFetch: boolean = true) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { addresses, setAddresses, setLoading: setStoreLoading } =
-    useAddressStore();
+  const {
+    addresses,
+    setAddresses,
+    setLoading: setStoreLoading,
+  } = useAddressStore();
 
   const fetchAddresses = useCallback(async () => {
     setIsLoading(true);
@@ -33,13 +36,13 @@ export function useAddresses(autoFetch: boolean = true) {
       if (response.statusCode === 200 && response.data) {
         setAddresses(response.data);
       } else {
-        const errorMsg = response.errorMessage || 'Failed to fetch addresses';
+        const errorMsg = response.errorMessage || "Failed to fetch addresses";
         setError(errorMsg);
       }
     } catch (err) {
-      const errorMsg = 'An unexpected error occurred while fetching addresses';
+      const errorMsg = "An unexpected error occurred while fetching addresses";
       setError(errorMsg);
-      console.error('Fetch addresses error:', err);
+      console.error("Fetch addresses error:", err);
     } finally {
       setIsLoading(false);
       setStoreLoading(false);
@@ -84,21 +87,21 @@ export function useCreateAddress() {
       try {
         const response = await createAddress(data);
 
-        if (response.statusCode === 200 && response.data) {
+        if (response.statusCode === 201 && response.data) {
           // Optimistically update the store
           addAddress(response.data);
-          toast.success('Address added successfully');
+          toast.success("Address added successfully");
           closeAddModal();
           return { success: true, data: response.data };
         } else {
-          const errorMsg = response.errorMessage || 'Failed to add address';
+          const errorMsg = response.errorMessage || "Failed to add address";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Create address error:', err);
+        console.error("Create address error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
@@ -136,18 +139,18 @@ export function useUpdateAddress() {
         if (response.statusCode === 200 && response.data) {
           // Optimistically update the store
           updateAddressInStore(addressId, response.data);
-          toast.success('Address updated successfully');
+          toast.success("Address updated successfully");
           closeEditModal();
           return { success: true, data: response.data };
         } else {
-          const errorMsg = response.errorMessage || 'Failed to update address';
+          const errorMsg = response.errorMessage || "Failed to update address";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Update address error:', err);
+        console.error("Update address error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
@@ -182,7 +185,7 @@ export function useDeleteAddress() {
         return {
           success: false,
           requiresConfirmation: true,
-          error: 'Confirmation required',
+          error: "Confirmation required",
         };
       }
 
@@ -195,18 +198,18 @@ export function useDeleteAddress() {
         if (response.statusCode === 200 && response.data) {
           // Optimistically update the store
           removeAddress(addressId);
-          toast.success('Address deleted successfully');
+          toast.success("Address deleted successfully");
           closeDeleteDialog();
           return { success: true };
         } else {
-          const errorMsg = response.errorMessage || 'Failed to delete address';
+          const errorMsg = response.errorMessage || "Failed to delete address";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Delete address error:', err);
+        console.error("Delete address error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);
@@ -227,10 +230,7 @@ export function useDeleteAddress() {
  */
 export function useSetDefaultAddress() {
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    setDefaultAddress,
-    setLoading: setStoreLoading,
-  } = useAddressStore();
+  const { setDefaultAddress, setLoading: setStoreLoading } = useAddressStore();
 
   const mutate = useCallback(
     async (addressId: string) => {
@@ -244,18 +244,18 @@ export function useSetDefaultAddress() {
         if (response.statusCode === 200 && response.data) {
           // Update all addresses in store (set only this one as default)
           setDefaultAddress(addressId);
-          toast.success('Default address updated');
+          toast.success("Default address updated");
           return { success: true, data: response.data };
         } else {
           const errorMsg =
-            response.errorMessage || 'Failed to set default address';
+            response.errorMessage || "Failed to set default address";
           toast.error(errorMsg);
           return { success: false, error: errorMsg };
         }
       } catch (err) {
-        const errorMsg = 'An unexpected error occurred';
+        const errorMsg = "An unexpected error occurred";
         toast.error(errorMsg);
-        console.error('Set default address error:', err);
+        console.error("Set default address error:", err);
         return { success: false, error: errorMsg };
       } finally {
         setIsLoading(false);

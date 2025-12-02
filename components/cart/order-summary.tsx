@@ -8,6 +8,7 @@ import {
   Sparkles,
   AlertCircle,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -40,6 +41,7 @@ interface OrderSummaryProps {
   paymentMethod?: PaymentMethod;
   onPaymentMethodChange?: (method: PaymentMethod) => void;
   showPaymentMethod?: boolean;
+  isPlacingOrder?: boolean;
 }
 
 // Delivery Fee Modal Content
@@ -181,6 +183,7 @@ export function OrderSummary({
   paymentMethod = "online",
   onPaymentMethodChange,
   showPaymentMethod = true,
+  isPlacingOrder = false,
 }: OrderSummaryProps) {
   const [deliveryFeeModalOpen, setDeliveryFeeModalOpen] = useState(false);
   const [taxModalOpen, setTaxModalOpen] = useState(false);
@@ -400,12 +403,21 @@ export function OrderSummary({
       {/* Place Order Button */}
       <Button
         onClick={onCheckout}
-        disabled={checkoutDisabled || loading}
+        disabled={checkoutDisabled || loading || isPlacingOrder}
         className="w-full min-h-[44px] h-11 sm:h-12 text-sm sm:text-base font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
         size="lg"
       >
-        <ShoppingBag className="size-4 mr-2" />
-        Place Order - {"\u00A3"}{summary.total.toFixed(2)}
+        {isPlacingOrder ? (
+          <>
+            <Loader2 className="size-4 mr-2 animate-spin" />
+            Placing Order...
+          </>
+        ) : (
+          <>
+            <ShoppingBag className="size-4 mr-2" />
+            Place Order - {"\u00A3"}{summary.total.toFixed(2)}
+          </>
+        )}
       </Button>
 
       {/* Modals */}
