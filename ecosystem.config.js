@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "pizza-web-v2",
+      name: "pizza-web-v3",
       script: "server.js",
       cwd: ".",
       instances: 1,
