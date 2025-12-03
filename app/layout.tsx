@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { CartProvider } from "@/components/providers/cart-provider";
@@ -143,6 +144,15 @@ export default function RootLayout({
         <OrganizationJsonLd />
       </head>
       <body className={`${montserrat.variable} font-sans antialiased`}>
+        <NextTopLoader
+          color="#F97316"
+          height={3}
+          showSpinner={false}
+          crawl={true}
+          crawlSpeed={200}
+          speed={200}
+          shadow="0 0 10px #F97316,0 0 5px #F97316"
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
