@@ -2,10 +2,48 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth";
 import { AuthHeader } from "@/components/auth/auth-header";
+import { LoginPageJsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Sign In - Pizza Space",
-  description: "Sign in to your Pizza Space account",
+  title: "Sign In | Pizza Space",
+  description:
+    "Sign in to your Pizza Space account to order delicious pizzas, track your orders, and manage your profile.",
+  keywords: [
+    "pizza space login",
+    "sign in",
+    "pizza account",
+    "order pizza online",
+    "pizza space account",
+  ],
+  alternates: {
+    canonical: "https://pizzaspace.co.uk/login",
+  },
+  openGraph: {
+    title: "Sign In | Pizza Space",
+    description:
+      "Sign in to your Pizza Space account to order delicious pizzas.",
+    url: "https://pizzaspace.co.uk/login",
+    siteName: "Pizza Space",
+    images: [
+      {
+        url: "https://pizzaspace.co.uk/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sign In to Pizza Space",
+      },
+    ],
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sign In | Pizza Space",
+    description:
+      "Sign in to your Pizza Space account to order delicious pizzas.",
+    images: ["https://pizzaspace.co.uk/og-image.jpg"],
+    creator: "@pizzaspace",
+    site: "@pizzaspace",
+  },
 };
 
 interface LoginPageProps {
@@ -18,8 +56,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   console.log("Redirect to made params", params, redirectTo);
 
   return (
-    <div className="w-full max-w-md">
-      {/* Skip Link for Accessibility */}
+    <>
+      <LoginPageJsonLd />
+      <div className="w-full max-w-md">
+        {/* Skip Link for Accessibility */}
       <a
         href="#login-form"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500/20"
@@ -64,6 +104,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </Link>
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

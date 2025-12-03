@@ -1,8 +1,8 @@
 "use client";
 
-import { Sparkles, BookOpen } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
-// Background gradient and decorative shapes
+// Background gradient and decorative shapes - rendered as overlay on server hero
 function BackgroundShapes() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -84,88 +84,16 @@ function FloatingElements() {
   );
 }
 
+// Background decorations component - content is now server-rendered in page.tsx
 export function AboutHeroSection() {
   return (
-    <section
-      className="relative w-full overflow-hidden pt-24 pb-16 sm:pt-28 sm:pb-20 md:pt-32 md:pb-28 lg:pt-40 lg:pb-36"
-      aria-label="About us hero section"
+    <div
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      aria-hidden="true"
     >
       {/* Background decorative elements */}
       <BackgroundShapes />
       <FloatingElements />
-
-      {/* Main content container */}
-      <div className="relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Badge */}
-          <div className="mb-4 animate-fade-in-up stagger-1 motion-reduce:animate-none">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
-              <BookOpen className="w-3.5 h-3.5" />
-              Welcome to Pizza Space
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight px-2 sm:px-0 animate-fade-in-up stagger-2 motion-reduce:animate-none"
-          >
-            Our{" "}
-            <span className="text-orange-500 relative">
-              Story
-              {/* Decorative underline */}
-              <svg
-                className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
-                viewBox="0 0 100 12"
-                preserveAspectRatio="none"
-              >
-                <path
-                  d="M0 8 Q 25 0, 50 8 T 100 8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-            , Your Experience
-          </h1>
-
-          {/* Subheadline */}
-          <p
-            className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-4 sm:px-0 animate-fade-in-up stagger-3 motion-reduce:animate-none"
-          >
-            For over two decades, we have been serving authentic Italian pizzas crafted
-            with passion, quality ingredients, and a commitment to bringing joy to every
-            table. Discover the journey that made us a beloved community favorite.
-          </p>
-
-          {/* Decorative elements */}
-          <div
-            className="flex items-center justify-center gap-3 mt-6 animate-fade-in-up stagger-4 motion-reduce:animate-none"
-          >
-            <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
-            <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
-            <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
-          </div>
-
-          {/* Decorative scroll indicator */}
-          <div
-            className="mt-8 sm:mt-12 flex justify-center animate-fade-in-up stagger-5 motion-reduce:animate-none"
-          >
-            <div className="flex flex-col items-center gap-2 animate-bounce-subtle motion-reduce:animate-none">
-              <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-                Scroll to explore
-              </span>
-              <div className="w-6 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-start justify-center p-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400 animate-scroll-indicator motion-reduce:animate-none" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom fade gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-    </section>
+    </div>
   );
 }

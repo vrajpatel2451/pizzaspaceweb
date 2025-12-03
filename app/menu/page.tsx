@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getCategories, getSubCategories, getProducts } from "@/lib/api";
 import { MenuJsonLd } from "@/components/seo/menu-json-ld";
+import { MenuPageJsonLd } from "@/components/seo/json-ld";
 import { MenuPageClient } from "@/components/menu/menu-page-client";
 import { UtensilsCrossed } from "lucide-react";
 
@@ -68,6 +69,17 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: [
+      "pizza menu",
+      "pizza space menu",
+      "Italian pizza menu",
+      "pizza delivery menu",
+      "pizza prices",
+      "pizza toppings",
+      "order pizza",
+      "pizza sides",
+      "pizza deals London",
+    ],
     openGraph: {
       title,
       description,
@@ -89,6 +101,8 @@ export async function generateMetadata({
       title,
       description,
       images: ["https://pizzaspace.co.uk/og-menu.jpg"],
+      creator: "@pizzaspace",
+      site: "@pizzaspace",
     },
     alternates: {
       canonical: canonicalUrl,
@@ -140,7 +154,10 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
 
   return (
     <>
-      {/* JSON-LD Structured Data for SEO */}
+      {/* Page-level JSON-LD structured data */}
+      <MenuPageJsonLd />
+
+      {/* Product-level JSON-LD structured data */}
       <MenuJsonLd
         products={products}
         currentCategory={params.category}

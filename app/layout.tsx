@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     template: "%s | Pizza Space",
   },
   description:
-    "Order delicious handcrafted pizzas from Pizza Space. Fresh ingredients, fast delivery across London. Experience authentic Italian flavors with our premium selection of pizzas, sides, and desserts.",
+    "Order authentic Italian pizzas from Pizza Space. Fresh ingredients, fast London delivery. Handcrafted with love.",
   keywords: [
     "pizza",
     "pizza delivery",

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ContactInfo } from './contact-info';
 import { ContactForm } from './contact-form';
 import { Mail } from 'lucide-react';
@@ -68,7 +69,7 @@ export function ContactSection() {
         </div>
 
         {/* Additional Information */}
-        <div className="mt-12 sm:mt-16 text-center">
+        <div className="mt-12 sm:mt-16 text-center space-y-6">
           <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 bg-orange-50 dark:bg-orange-500/10 px-6 py-4 rounded-full border border-orange-200 dark:border-orange-500/20">
             <p className="text-sm font-medium text-slate-900 dark:text-white">
               Need immediate assistance?
@@ -88,6 +89,29 @@ export function ContactSection() {
                 Email Us
               </a>
             </div>
+          </div>
+
+          {/* Visit Contact Page Link */}
+          <div>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
+            >
+              <span>Visit our full contact page for more ways to reach us</span>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>

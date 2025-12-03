@@ -1,9 +1,59 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
 // Force dynamic rendering since we're fetching API data
 export const dynamicParams = true;
 export const revalidate = 60; // Cache for 60 seconds
+
+// Page-level metadata for SEO
+export const metadata: Metadata = {
+  title: "Pizza Space | Authentic Italian Pizza Delivery in London",
+  description:
+    "Order authentic Italian pizzas from Pizza Space. Fresh ingredients, fast London delivery. Handcrafted with love.",
+  keywords: [
+    "pizza delivery London",
+    "Italian pizza",
+    "authentic pizza",
+    "pizza takeaway",
+    "best pizza London",
+    "pizza near me",
+    "handcrafted pizza",
+    "fresh pizza delivery",
+    "Pizza Space",
+    "pizza restaurant London",
+    "order pizza online",
+  ],
+  alternates: {
+    canonical: "https://pizzaspace.co.uk",
+  },
+  openGraph: {
+    title: "Pizza Space | Authentic Italian Pizza Delivery in London",
+    description:
+      "Order delicious handcrafted pizzas from Pizza Space. Fresh ingredients, fast delivery across London. Experience authentic Italian flavors.",
+    url: "https://pizzaspace.co.uk",
+    siteName: "Pizza Space",
+    images: [
+      {
+        url: "https://pizzaspace.co.uk/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Pizza Space - Authentic Italian Pizza delivered fresh to your door",
+      },
+    ],
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pizza Space | Authentic Italian Pizza Delivery in London",
+    description:
+      "Order delicious handcrafted pizzas from Pizza Space. Fresh ingredients, fast delivery across London.",
+    images: ["https://pizzaspace.co.uk/og-image.jpg"],
+    creator: "@pizzaspace",
+    site: "@pizzaspace",
+  },
+};
 
 // Above-the-fold sections (loaded immediately)
 import { HeroSection } from "@/components/home/hero-section";
@@ -13,6 +63,9 @@ import { CategoriesSection } from "@/components/home/categories-section";
 import { CategoriesContentSkeleton } from "@/components/home/categories-section/categories-content";
 import { MenuSkeleton } from "@/components/home/menu-section/menu-skeleton";
 import { StoresSkeleton } from "@/components/home/stores-section/stores-skeleton";
+
+// Page-specific JSON-LD
+import { HomePageJsonLd } from "@/components/seo/json-ld";
 
 // Below-the-fold sections (lazy loaded for better initial performance)
 const MenuSection = dynamic(
@@ -62,6 +115,9 @@ const ContactSection = dynamic(() =>
 export default function Home() {
   return (
     <>
+      {/* Page-specific JSON-LD structured data */}
+      <HomePageJsonLd />
+
       {/* Section 1: Hero Section - Critical above-the-fold content */}
       <HeroSection />
 

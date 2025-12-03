@@ -17,11 +17,6 @@ export async function CategoriesSection() {
     categories = [];
   }
 
-  // Don't render section if no categories
-  if (categories.length === 0) {
-    return null;
-  }
-
   return (
     <section
       className="relative bg-amber-50 dark:bg-slate-900 py-16 md:py-24 overflow-hidden"
@@ -45,7 +40,7 @@ export async function CategoriesSection() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header */}
+        {/* Section Header - Always rendered for SEO */}
         <div className="text-center mb-10 md:mb-14">
           {/* Badge */}
           <div className="mb-4">
@@ -55,7 +50,7 @@ export async function CategoriesSection() {
             </span>
           </div>
 
-          {/* Headline */}
+          {/* Headline - H2 for SEO */}
           <h2
             id="categories-heading"
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4"
@@ -94,10 +89,21 @@ export async function CategoriesSection() {
           </div>
         </div>
 
-        {/* Categories Content with Interactive Pills, Filters, and Cards */}
-        <Suspense fallback={<CategoriesContentSkeleton />}>
-          <CategoriesContent categories={categories} />
-        </Suspense>
+        {/* Categories Content - Shows categories or empty state */}
+        {categories.length > 0 ? (
+          <Suspense fallback={<CategoriesContentSkeleton />}>
+            <CategoriesContent categories={categories} />
+          </Suspense>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-slate-600 dark:text-slate-400 text-lg">
+              Our menu categories are loading. Please check back shortly or{" "}
+              <a href="/menu" className="text-orange-500 hover:text-orange-600 underline">
+                view our full menu
+              </a>.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
