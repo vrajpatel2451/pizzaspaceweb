@@ -20,8 +20,9 @@ import {
 export function ProductInfoSection({
   product,
   className,
-}: ProductInfoSectionProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  defaultExpanded = false,
+}: ProductInfoSectionProps & { defaultExpanded?: boolean }) {
+  const [isOpen, setIsOpen] = React.useState(defaultExpanded);
 
   const hasNutritionalInfo =
     (product.protein !== undefined && product.protein > 0) ||

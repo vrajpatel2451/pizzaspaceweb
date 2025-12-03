@@ -85,7 +85,10 @@ export function ProductDetailsContent({
 
           {/* Product Info */}
           <motion.div variants={sectionVariants}>
-            <ProductInfoSection product={data.product} />
+            <ProductInfoSection
+              product={data.product}
+              defaultExpanded={!hasVariants && !hasAddons}
+            />
           </motion.div>
 
           {/* Variant Groups */}
