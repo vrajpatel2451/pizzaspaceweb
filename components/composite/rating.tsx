@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface RatingProps {
   value: number;
@@ -119,22 +118,13 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       );
 
       return (
-        <motion.span
+        <span
           key={index}
-          className="relative inline-block"
-          initial={false}
-          animate={{
-            scale: wasJustSelected ? [1, 1.3, 1] : isHovered ? 1.15 : 1,
-            rotate: wasJustSelected ? [0, -10, 10, 0] : 0,
-          }}
-          transition={{
-            scale: wasJustSelected
-              ? { duration: 0.4, ease: "easeOut" }
-              : { duration: 0.15, ease: "easeOut" },
-            rotate: wasJustSelected
-              ? { duration: 0.4, ease: "easeOut" }
-              : { duration: 0.1 },
-          }}
+          className={cn(
+            "relative inline-block transition-transform duration-150 ease-out",
+            wasJustSelected && "animate-star-pop",
+            isHovered && !wasJustSelected && "scale-115"
+          )}
         >
           {interactive && !disabled ? (
             <button
@@ -161,7 +151,7 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
           ) : (
             starContent
           )}
-        </motion.span>
+        </span>
       );
     };
 
@@ -191,31 +181,25 @@ const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
           {Array.from({ length: max }, (_, i) => renderStar(i))}
         </div>
         {showValue && (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={value}
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 5 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center gap-1.5 ml-2"
-            >
-              <span
-                className={cn(
-                  "font-semibold tabular-nums",
-                  textSizes[size],
-                  value > 0 ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {value.toFixed(1)}
-              </span>
-              {interactive && size === "lg" && (
-                <span className="text-sm text-muted-foreground">
-                  {getRatingLabel(displayValue)}
-                </span>
+          <div
+            key={value}
+            className="flex items-center gap-1.5 ml-2 animate-fade-in-up motion-reduce:animate-none"
+          >
+            <span
+              className={cn(
+                "font-semibold tabular-nums",
+                textSizes[size],
+                value > 0 ? "text-foreground" : "text-muted-foreground"
               )}
-            </motion.div>
-          </AnimatePresence>
+            >
+              {value.toFixed(1)}
+            </span>
+            {interactive && size === "lg" && (
+              <span className="text-sm text-muted-foreground">
+                {getRatingLabel(displayValue)}
+              </span>
+            )}
+          </div>
         )}
       </div>
     );

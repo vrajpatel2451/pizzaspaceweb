@@ -3,7 +3,6 @@
 /* eslint-disable react-hooks/preserve-manual-memoization */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { CategoryResponse } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +26,7 @@ export function MenuTabs({
   const [activeTabRect, setActiveTabRect] = useState<DOMRect | null>(null);
   const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   // Create tabs array with "all" first
@@ -81,6 +81,7 @@ export function MenuTabs({
   // Mark as mounted after hydration
   useEffect(() => {
     setIsMounted(true);
+    requestAnimationFrame(() => setIsVisible(true));
   }, []);
 
   // Use useLayoutEffect to calculate position before paint (prevents flash)
@@ -124,46 +125,27 @@ export function MenuTabs({
         aria-label="Menu categories"
       >
         {/* Animated background indicator */}
-        <AnimatePresence>
-          {isMounted && activeTabRect && containerRect && (
-            <motion.div
-              layoutId="activeTab"
-              className="absolute bg-orange-500 rounded-full shadow-lg shadow-orange-500/25 dark:shadow-orange-500/15 hidden sm:block pointer-events-none"
-              initial={{
-                left: activeTabRect.left - containerRect.left,
-                top: activeTabRect.top - containerRect.top,
-                width: activeTabRect.width,
-                height: activeTabRect.height,
-                opacity: 1,
-              }}
-              animate={{
-                left: activeTabRect.left - containerRect.left,
-                top: activeTabRect.top - containerRect.top,
-                width: activeTabRect.width,
-                height: activeTabRect.height,
-                opacity: 1,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 30,
-              }}
-            />
-          )}
-        </AnimatePresence>
+        {isMounted && activeTabRect && containerRect && (
+          <div
+            className="absolute bg-orange-500 rounded-full shadow-lg shadow-orange-500/25 dark:shadow-orange-500/15 hidden sm:block pointer-events-none transition-all duration-300 ease-out motion-reduce:transition-none"
+            style={{
+              left: activeTabRect.left - containerRect.left,
+              top: activeTabRect.top - containerRect.top,
+              width: activeTabRect.width,
+              height: activeTabRect.height,
+            }}
+          />
+        )}
 
         {tabs.map((tab, index) => {
           const isActive = activeCategory === tab.id;
 
           return (
-            <motion.button
+            <button
               key={tab.id}
               ref={setTabRef(tab.id)}
               onClick={() => onCategoryChange(tab.id)}
               onKeyDown={(e) => handleKeyDown(e, index)}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
               role="tab"
               aria-selected={isActive}
               aria-controls="menu-panel"
@@ -171,25 +153,28 @@ export function MenuTabs({
               tabIndex={isActive ? 0 : -1}
               className={cn(
                 "relative px-5 sm:px-7 py-2.5 sm:py-3 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 min-h-[44px] flex items-center justify-center z-10 touch-manipulation",
+                "motion-reduce:transition-none",
                 // Mobile: show active state directly
                 "sm:text-slate-600 sm:dark:text-slate-300 sm:hover:text-slate-900 sm:dark:hover:text-white",
                 // Mobile active state
                 isActive
                   ? "bg-orange-500 text-white shadow-lg shadow-orange-500/25 sm:bg-transparent sm:text-white sm:shadow-none"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 sm:bg-transparent sm:dark:bg-transparent"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 sm:bg-transparent sm:dark:bg-transparent",
+                // Entrance animation
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"
               )}
+              style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}
             >
               <span className="relative">
                 {tab.name}
                 {/* Active dot indicator for mobile */}
                 {isActive && (
-                  <motion.span
-                    layoutId="activeDot"
+                  <span
                     className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-white rounded-full sm:hidden"
                   />
                 )}
               </span>
-            </motion.button>
+            </button>
           );
         })}
       </div>

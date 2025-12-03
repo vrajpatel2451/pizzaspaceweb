@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Drawer } from "@/components/ui/drawer";
 import { ProductDetailsContent } from "./product-details-content";
 import type { ProductDetailsModalProps } from "@/types/product-details";
-import { bottomsheetVariants } from "@/lib/animations";
+import { cn } from "@/lib/utils";
 
 export function ProductDetailsBottomsheet({
   isOpen,
@@ -13,16 +13,18 @@ export function ProductDetailsBottomsheet({
   isProcessing,
   ...contentProps
 }: Omit<ProductDetailsModalProps, 'productId' | 'children'> & React.ComponentProps<typeof ProductDetailsContent> & { isProcessing?: boolean }) {
-  const shouldReduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
+  const prefersReducedMotion = typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
 
-  // Simplified variants for reduced motion
-  const variants = shouldReduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 },
-        exit: { opacity: 0 },
-      }
-    : bottomsheetVariants;
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => setIsVisible(true));
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   return (
     <Drawer
@@ -40,24 +42,21 @@ export function ProductDetailsBottomsheet({
 
       {/* Animated Product Details Content with safe area support - maximized for mobile */}
       <div className="h-[calc(100vh-56px)] overflow-y-auto overscroll-contain scrollbar-hide pb-[env(safe-area-inset-bottom)]">
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <motion.div
-              key="bottomsheet-content"
-              variants={variants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="h-full"
-            >
-              <ProductDetailsContent
-                {...contentProps}
-                onClose={onClose}
-                isProcessing={isProcessing}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isOpen && (
+          <div
+            className={cn(
+              "h-full transition-all motion-reduce:transition-none",
+              prefersReducedMotion ? "" : "duration-300",
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            )}
+          >
+            <ProductDetailsContent
+              {...contentProps}
+              onClose={onClose}
+              isProcessing={isProcessing}
+            />
+          </div>
+        )}
       </div>
     </Drawer>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Flame, TrendingUp, Star, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -67,12 +67,19 @@ export function PopularityBadge({
   size = "default",
   animate = true,
 }: PopularityBadgeProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
   const config = popularityConfig[type];
   const sizes = sizeConfig[size];
   const Icon = config.icon;
+  const shouldPulse = type === "most-ordered" || type === "trending";
 
-  const badgeContent = (
+  useEffect(() => {
+    if (animate) {
+      requestAnimationFrame(() => setIsVisible(true));
+    }
+  }, [animate]);
+
+  return (
     <span
       className={cn(
         // Base styles
@@ -83,61 +90,21 @@ export function PopularityBadge({
         config.colors,
         // Size
         sizes.container,
+        // Animation
+        animate && "transition-all duration-300 motion-reduce:transition-none",
+        animate && (isVisible ? "opacity-100 scale-100" : "opacity-0 scale-80"),
+        animate && "hover:scale-105 motion-reduce:hover:scale-100",
         className
       )}
     >
-      <Icon className={cn(sizes.icon, "shrink-0")} />
-      <span className="whitespace-nowrap">{config.label}</span>
-    </span>
-  );
-
-  if (!animate || shouldReduceMotion) {
-    return badgeContent;
-  }
-
-  return (
-    <motion.span
-      className={cn(
-        // Base styles
-        "inline-flex items-center rounded-full font-semibold",
-        // Shadow and glow
-        "shadow-sm",
-        // Colors
-        config.colors,
-        // Size
-        sizes.container,
-        className
-      )}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 20,
-      }}
-      whileHover={{
-        scale: 1.05,
-        transition: { duration: 0.2 },
-      }}
-    >
-      <motion.span
-        animate={
-          type === "most-ordered" || type === "trending"
-            ? {
-                scale: [1, 1.2, 1],
-              }
-            : undefined
-        }
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          repeatType: "loop",
-          ease: "easeInOut",
-        }}
+      <span
+        className={cn(
+          shouldPulse && animate && "animate-pulse motion-reduce:animate-none"
+        )}
       >
         <Icon className={cn(sizes.icon, "shrink-0")} />
-      </motion.span>
+      </span>
       <span className="whitespace-nowrap">{config.label}</span>
-    </motion.span>
+    </span>
   );
 }

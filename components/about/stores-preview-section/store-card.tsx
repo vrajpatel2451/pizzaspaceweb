@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { MapPin, Phone, Clock, ExternalLink } from "lucide-react";
 import { StoreResponse } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface StoreCardProps {
   store: StoreResponse;
@@ -52,17 +52,21 @@ export function StoreCard({ store }: StoreCardProps) {
 
       {/* Action button */}
       <div className="p-6 pt-0">
-        <motion.a
+        <a
           href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full inline-flex items-center justify-center gap-2 h-11 px-5 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 dark:from-orange-600 dark:to-orange-700 dark:hover:from-orange-700 dark:hover:to-orange-800 text-white font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg"
+          className={cn(
+            "w-full inline-flex items-center justify-center gap-2 h-11 px-5 py-2 rounded-lg",
+            "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700",
+            "dark:from-orange-600 dark:to-orange-700 dark:hover:from-orange-700 dark:hover:to-orange-800",
+            "text-white font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg",
+            "hover:scale-[1.02] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
+          )}
         >
           Get Directions
           <ExternalLink className="w-4 h-4" />
-        </motion.a>
+        </a>
       </div>
     </div>
   );

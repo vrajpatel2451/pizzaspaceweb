@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import { CustomImage } from "@/components/ui/custom-image";
-import { motion } from "framer-motion";
 import { Star, MessageSquareQuote } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const customerAvatars = [
   {
@@ -33,29 +34,48 @@ const customerAvatars = [
 ];
 
 export function TestimonialsHeader() {
+  const [isVisible, setIsVisible] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-50px" }
+    );
+
+    if (headerRef.current) {
+      observer.observe(headerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="text-center mb-12 md:mb-16">
+    <div ref={headerRef} className="text-center mb-12 md:mb-16">
       {/* Badge */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        className="mb-4"
+      <div
+        className={cn(
+          "mb-4 transition-all duration-500",
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+        )}
       >
         <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
           <MessageSquareQuote className="w-3.5 h-3.5" />
           Testimonials
         </span>
-      </motion.div>
+      </div>
 
       {/* Headline */}
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4"
+      <h2
+        className={cn(
+          "text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 transition-all duration-500 delay-100",
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+        )}
       >
         What Our Customers{" "}
         <span className="text-orange-500 relative">
@@ -75,40 +95,37 @@ export function TestimonialsHeader() {
             />
           </svg>
         </span>
-      </motion.h2>
+      </h2>
 
       {/* Subheadline */}
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed"
+      <p
+        className={cn(
+          "text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed transition-all duration-500 delay-200",
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+        )}
       >
         Join thousands of satisfied customers who have made Pizza Space their
         go-to destination for authentic, delicious pizza.
-      </motion.p>
+      </p>
 
       {/* Decorative elements */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="flex items-center justify-center gap-3 mt-6"
+      <div
+        className={cn(
+          "flex items-center justify-center gap-3 mt-6 transition-all duration-500 delay-300",
+          isVisible ? "opacity-100" : "opacity-0"
+        )}
       >
         <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
         <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
         <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
-      </motion.div>
+      </div>
 
       {/* Rating and Avatars Row */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8"
+      <div
+        className={cn(
+          "flex flex-col sm:flex-row items-center justify-center gap-6 mt-8 transition-all duration-500 delay-300",
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+        )}
       >
         {/* Rating Display */}
         <div className="flex items-center gap-3 bg-white dark:bg-slate-800 px-5 py-3 rounded-2xl shadow-lg shadow-orange-500/10 border border-orange-100 dark:border-slate-700">
@@ -142,13 +159,13 @@ export function TestimonialsHeader() {
         <div className="flex items-center gap-3">
           <div className="flex -space-x-3">
             {customerAvatars.map((avatar, index) => (
-              <motion.div
+              <div
                 key={avatar.id}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: 0.4 + index * 0.05 }}
-                className="relative"
+                className={cn(
+                  "relative transition-all duration-300",
+                  isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"
+                )}
+                style={{ transitionDelay: isVisible ? `${400 + index * 50}ms` : "0ms" }}
               >
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border-3 border-white dark:border-slate-800 overflow-hidden shadow-md hover:scale-110 hover:z-10 transition-transform duration-200">
                   <CustomImage
@@ -159,20 +176,20 @@ export function TestimonialsHeader() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              </motion.div>
+              </div>
             ))}
             {/* More customers indicator */}
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: 0.65 }}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full border-3 border-white dark:border-slate-800 bg-orange-500 flex items-center justify-center shadow-md"
+            <div
+              className={cn(
+                "w-10 h-10 md:w-12 md:h-12 rounded-full border-3 border-white dark:border-slate-800 bg-orange-500 flex items-center justify-center shadow-md transition-all duration-300",
+                isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-3"
+              )}
+              style={{ transitionDelay: isVisible ? "650ms" : "0ms" }}
             >
               <span className="text-white text-xs md:text-sm font-semibold">
                 +2K
               </span>
-            </motion.div>
+            </div>
           </div>
           <div className="text-left">
             <p className="text-slate-900 dark:text-white font-semibold text-sm md:text-base">
@@ -183,7 +200,7 @@ export function TestimonialsHeader() {
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

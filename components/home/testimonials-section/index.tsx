@@ -1,24 +1,46 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { TestimonialsHeader } from "./testimonials-header";
 import { TestimonialsCarousel } from "./testimonials-carousel";
+import { cn } from "@/lib/utils";
 
 export function TestimonialsSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px" }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
+      ref={ref}
       className="relative py-16 md:py-24 lg:py-32 overflow-hidden bg-amber-50 dark:bg-slate-900"
       aria-labelledby="testimonials-heading"
     >
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Large Quote Mark - Left */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 0.03 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="absolute -left-20 top-20 text-orange-500 dark:text-orange-400"
+        <div
+          className={cn(
+            "absolute -left-20 top-20 text-orange-500 dark:text-orange-400 transition-all duration-1000 motion-reduce:transition-none",
+            isVisible ? "opacity-[0.03] translate-x-0" : "opacity-0 -translate-x-12"
+          )}
         >
           <svg
             className="w-80 h-80 md:w-96 md:h-96"
@@ -27,15 +49,14 @@ export function TestimonialsSection() {
           >
             <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
           </svg>
-        </motion.div>
+        </div>
 
         {/* Large Quote Mark - Right */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 0.03 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="absolute -right-20 bottom-20 text-orange-500 dark:text-orange-400 rotate-180"
+        <div
+          className={cn(
+            "absolute -right-20 bottom-20 text-orange-500 dark:text-orange-400 rotate-180 transition-all duration-1000 motion-reduce:transition-none",
+            isVisible ? "opacity-[0.03] translate-x-0" : "opacity-0 translate-x-12"
+          )}
         >
           <svg
             className="w-80 h-80 md:w-96 md:h-96"
@@ -44,7 +65,7 @@ export function TestimonialsSection() {
           >
             <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
           </svg>
-        </motion.div>
+        </div>
 
         {/* Gradient Orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-200/30 dark:bg-orange-500/10 rounded-full blur-3xl" />
@@ -65,31 +86,30 @@ export function TestimonialsSection() {
         <TestimonialsHeader />
 
         {/* Testimonials Carousel */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+        <div
+          className={cn(
+            "transition-all duration-600 motion-reduce:transition-none",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
+          style={{ transitionDelay: "400ms" }}
         >
           <TestimonialsCarousel />
-        </motion.div>
+        </div>
 
         {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-center mt-12 md:mt-16"
+        <div
+          className={cn(
+            "text-center mt-12 md:mt-16 transition-all duration-500 motion-reduce:transition-none",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
+          style={{ transitionDelay: "600ms" }}
         >
           <p className="text-slate-600 dark:text-slate-400 mb-4">
             Join our growing community of pizza lovers
           </p>
-          <motion.a
+          <a
             href="#"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-98 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
           >
             <span>Leave Your Review</span>
             <svg
@@ -105,8 +125,8 @@ export function TestimonialsSection() {
                 d="M17 8l4 4m0 0l-4 4m4-4H3"
               />
             </svg>
-          </motion.a>
-        </motion.div>
+          </a>
+        </div>
       </div>
 
       {/* Bottom Wave Decoration */}

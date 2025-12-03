@@ -1,9 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ItemReviewCard } from "../cards/item-review-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { ItemsReviewSectionProps } from "../types";
 
 export function ItemsReviewSection({
@@ -11,6 +12,13 @@ export function ItemsReviewSection({
   control,
   errors,
 }: ItemsReviewSectionProps) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after mount
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
+
   if (items.length === 0) {
     return (
       <Card>
@@ -28,23 +36,20 @@ export function ItemsReviewSection({
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px] pr-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ staggerChildren: 0.08, delayChildren: 0.1 }}
-            className="space-y-4"
+          <div
+            className={cn(
+              "space-y-4 transition-opacity duration-300",
+              isVisible ? "opacity-100" : "opacity-0"
+            )}
           >
             {items.map((item, index) => (
-              <motion.div
+              <div
                 key={item.itemId}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 24,
-                  delay: index * 0.08 + 0.1,
-                }}
+                className={cn(
+                  "transition-all duration-300",
+                  isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-5 scale-95"
+                )}
+                style={{ transitionDelay: isVisible ? `${index * 80 + 100}ms` : "0ms" }}
               >
                 <ItemReviewCard
                   item={item}
@@ -52,9 +57,9 @@ export function ItemsReviewSection({
                   control={control}
                   errors={errors}
                 />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </ScrollArea>
       </CardContent>
     </Card>

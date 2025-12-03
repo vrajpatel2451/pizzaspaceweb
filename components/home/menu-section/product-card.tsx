@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { Star, Flame, Sparkles, TrendingUp, Plus } from "lucide-react";
 import { ProductResponse } from "@/types";
 import { ProductDetailsContainer } from "@/components/product-details";
@@ -33,7 +33,7 @@ function getBadgeType(product: ProductResponse): BadgeType {
   return null;
 }
 
-function ProductBadge({ type }: { type: BadgeType }) {
+function ProductBadge({ type, isVisible }: { type: BadgeType; isVisible: boolean }) {
   if (!type) return null;
 
   const badgeConfig = {
@@ -58,19 +58,18 @@ function ProductBadge({ type }: { type: BadgeType }) {
   const Icon = config.icon;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
+    <div
       className={cn(
-        "absolute top-3 left-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg",
-        config.className
+        "absolute top-3 left-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg transition-all duration-300",
+        config.className,
+        isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2.5"
       )}
       role="status"
       aria-label={`${config.label} item`}
     >
       <Icon className="w-3 h-3" aria-hidden="true" />
       <span>{config.label}</span>
-    </motion.div>
+    </div>
   );
 }
 
@@ -117,6 +116,10 @@ export function ProductCard({
   priority = false,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
 }: ProductCardProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLElement>(null);
+
   const imageUrl = product.photoList[0] || "/placeholder.jpg";
   const badgeType = getBadgeType(product);
 
@@ -130,24 +133,50 @@ export function ProductCard({
     ? `${product.weight}g`
     : null;
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Add delay based on index for staggered animation
+          setTimeout(() => {
+            setIsVisible(true);
+          }, index * 50);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "50px" }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [index]);
+
   // Card content to be wrapped by ProductDetailsContainer
   const cardContent = (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      whileHover={{ y: -8 }}
-      className="group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-slate-900/50 transition-all duration-500 border border-slate-100 dark:border-slate-800 cursor-pointer"
+    <article
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={cn(
+        "group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-slate-900/50 transition-all duration-500 border border-slate-100 dark:border-slate-800 cursor-pointer",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5",
+        isHovered && "-translate-y-2"
+      )}
+      style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}
     >
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
-        <ProductBadge type={badgeType} />
+        <ProductBadge type={badgeType} isVisible={isVisible} />
 
         {/* Product Image */}
-        <motion.div
-          className="relative w-full h-full"
-          whileHover={{ scale: 1.08 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+        <div
+          className={cn(
+            "relative w-full h-full transition-transform duration-600 ease-out",
+            isHovered && "scale-108"
+          )}
         >
           <CustomImage
             src={imageUrl}
@@ -158,25 +187,26 @@ export function ProductCard({
             priority={priority}
             loading={priority ? undefined : "lazy"}
           />
-        </motion.div>
+        </div>
 
         {/* Gradient Overlay on Hover */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-          className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"
+        <div
+          className={cn(
+            "absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none transition-opacity duration-300",
+            isHovered ? "opacity-100" : "opacity-0"
+          )}
           aria-hidden="true"
         />
 
         {/* Quick Add Indicator - Shows + on hover */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileHover={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-          className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg"
+        <div
+          className={cn(
+            "absolute bottom-3 right-3 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg transition-all duration-300",
+            isHovered ? "opacity-100 scale-100" : "opacity-0 scale-80"
+          )}
         >
           <Plus className="w-5 h-5" />
-        </motion.div>
+        </div>
       </div>
 
       {/* Content */}
@@ -224,16 +254,16 @@ export function ProductCard({
       </div>
 
       {/* Subtle border glow on hover */}
-      <motion.div
-        className="absolute inset-0 rounded-2xl pointer-events-none"
-        initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+      <div
+        className={cn(
+          "absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300",
+          isHovered ? "opacity-100" : "opacity-0"
+        )}
         style={{
           boxShadow: "inset 0 0 0 2px rgba(249, 115, 22, 0.3)",
         }}
       />
-    </motion.article>
+    </article>
   );
 
   return (

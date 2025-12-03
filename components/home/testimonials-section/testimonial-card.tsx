@@ -1,8 +1,8 @@
 "use client";
 
 import { CustomImage } from "@/components/ui/custom-image";
-import { motion } from "framer-motion";
 import { Quote, Star, BadgeCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface Testimonial {
   id: number;
@@ -25,21 +25,15 @@ export function TestimonialCard({
   isActive = false,
 }: TestimonialCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{
-        opacity: isActive ? 1 : 0.7,
-        scale: isActive ? 1 : 0.95,
-      }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`
-        relative bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 md:p-10
-        shadow-xl shadow-orange-500/5 dark:shadow-black/20
-        border border-slate-100 dark:border-slate-700
-        mx-2 sm:mx-4 h-full
-        transition-all duration-300
-        ${isActive ? "ring-2 ring-orange-500/20" : ""}
-      `}
+    <div
+      className={cn(
+        "relative bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 md:p-10",
+        "shadow-xl shadow-orange-500/5 dark:shadow-black/20",
+        "border border-slate-100 dark:border-slate-700",
+        "mx-2 sm:mx-4 h-full",
+        "transition-all duration-400 ease-out motion-reduce:transition-none",
+        isActive ? "opacity-100 scale-100 ring-2 ring-orange-500/20" : "opacity-70 scale-95"
+      )}
     >
       {/* Decorative Quote Background */}
       <div className="absolute top-4 right-4 md:top-6 md:right-6 opacity-5">
@@ -47,23 +41,20 @@ export function TestimonialCard({
       </div>
 
       {/* Quote Icon */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg shadow-orange-500/30 mb-6"
+      <div
+        className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg shadow-orange-500/30 mb-6 animate-in zoom-in-0 duration-300 motion-reduce:animate-none"
+        style={{ animationDelay: "200ms" }}
       >
         <Quote className="w-6 h-6 md:w-7 md:h-7 text-white fill-current" />
-      </motion.div>
+      </div>
 
       {/* Star Rating */}
       <div className="flex items-center gap-1.5 mb-4">
         {[...Array(5)].map((_, i) => (
-          <motion.div
+          <div
             key={i}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2, delay: 0.3 + i * 0.05 }}
+            className="animate-in zoom-in-0 duration-200 motion-reduce:animate-none"
+            style={{ animationDelay: `${300 + i * 50}ms` }}
           >
             <Star
               className={`w-5 h-5 ${
@@ -72,7 +63,7 @@ export function TestimonialCard({
                   : "fill-slate-200 text-slate-200 dark:fill-slate-600 dark:text-slate-600"
               }`}
             />
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -133,6 +124,6 @@ export function TestimonialCard({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

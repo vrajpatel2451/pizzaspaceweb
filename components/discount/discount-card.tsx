@@ -10,7 +10,6 @@ import { DiscountTypeBadge } from "./discount-type-badge";
 import { DiscountAmount } from "./discount-amount";
 import { DiscountValidity } from "./discount-validity";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/utils/format";
 
@@ -40,7 +39,7 @@ export function DiscountCard({
       setIsCopied(true);
       toast.success("Coupon code copied to clipboard");
       setTimeout(() => setIsCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy code");
     }
   };
@@ -159,51 +158,48 @@ export function DiscountCard({
         </div>
 
         {/* Expandable Details */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-3 border-t pt-3"
-            >
-              {discount.description && (
-                <div>
-                  <h4 className="text-sm font-semibold mb-1">Description</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {discount.description}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <h4 className="text-sm font-semibold mb-1">Applicable Items</h4>
-                <p className="text-sm text-muted-foreground">
-                  {getConditionText()}
-                </p>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-semibold mb-1">Customer Type</h4>
-                <p className="text-sm text-muted-foreground">
-                  {discount.customerType === "allCustomers"
-                    ? "Available for all customers"
-                    : "New customers only"}
-                </p>
-              </div>
-
-              {discount.customerIds && discount.customerIds.length > 0 && (
-                <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/20 rounded-md">
-                  <Info className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
-                  <p className="text-xs text-blue-700 dark:text-blue-400">
-                    This discount is available for specific customers only
-                  </p>
-                </div>
-              )}
-            </motion.div>
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-200",
+            isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           )}
-        </AnimatePresence>
+        >
+          <div className="space-y-3 border-t pt-3">
+            {discount.description && (
+              <div>
+                <h4 className="text-sm font-semibold mb-1">Description</h4>
+                <p className="text-sm text-muted-foreground">
+                  {discount.description}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <h4 className="text-sm font-semibold mb-1">Applicable Items</h4>
+              <p className="text-sm text-muted-foreground">
+                {getConditionText()}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold mb-1">Customer Type</h4>
+              <p className="text-sm text-muted-foreground">
+                {discount.customerType === "allCustomers"
+                  ? "Available for all customers"
+                  : "New customers only"}
+              </p>
+            </div>
+
+            {discount.customerIds && discount.customerIds.length > 0 && (
+              <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/20 rounded-md">
+                <Info className="size-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                <p className="text-xs text-blue-700 dark:text-blue-400">
+                  This discount is available for specific customers only
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Expand/Collapse Button */}
         <button

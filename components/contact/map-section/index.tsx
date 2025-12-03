@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { MapPin, Navigation } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
 import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
 import { Button } from "@/components/ui/button";
 import { getStores } from "@/lib/api/stores";
@@ -17,10 +16,11 @@ const HQ_LOCATION = {
 };
 
 export function MapSection() {
-  const shouldReduceMotion = useReducedMotion();
   const [stores, setStores] = useState<StoreResponse[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -39,6 +39,25 @@ export function MapSection() {
     }
 
     fetchStores();
+  }, []);
+
+  // Intersection Observer for entrance animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-50px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
   }, []);
 
   const handleGetDirections = () => {
@@ -65,31 +84,28 @@ export function MapSection() {
 
   return (
     <section
+      ref={sectionRef}
       className="relative w-full py-10 sm:py-12 md:py-16 lg:py-20 bg-gray-50 dark:bg-slate-900/50"
       aria-labelledby="map-section-heading"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
-          className="text-center mb-6 sm:mb-8 md:mb-12"
+        <div
+          className={`text-center mb-6 sm:mb-8 md:mb-12 transition-all duration-500 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0`}
         >
           {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: shouldReduceMotion ? 0 : 0.1 }}
-            className="mb-4"
+          <div
+            className={`mb-4 transition-all duration-500 delay-100 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+            } motion-reduce:transition-none`}
           >
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
               <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
               Our Locations
             </span>
-          </motion.div>
+          </div>
 
           {/* Headline */}
           <h2 id="map-section-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-50 mb-4">
@@ -119,30 +135,22 @@ export function MapSection() {
           </p>
 
           {/* Decorative elements */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: shouldReduceMotion ? 0 : 0.4 }}
-            className="flex items-center justify-center gap-3 mt-6"
+          <div
+            className={`flex items-center justify-center gap-3 mt-6 transition-all duration-500 delay-400 ${
+              isVisible ? "opacity-100" : "opacity-0"
+            } motion-reduce:transition-none`}
           >
             <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
             <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
             <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Map Container */}
-        <motion.div
-          initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{
-            duration: shouldReduceMotion ? 0 : 0.6,
-            delay: shouldReduceMotion ? 0 : 0.2,
-            ease: "easeOut",
-          }}
-          className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg dark:shadow-2xl mb-6 sm:mb-8"
+        <div
+          className={`relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg dark:shadow-2xl mb-6 sm:mb-8 transition-all duration-600 delay-200 ${
+            isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:scale-100`}
         >
           <div className="relative w-full h-[300px] md:h-[400px]">
             <APIProvider apiKey={apiKey}>
@@ -253,18 +261,13 @@ export function MapSection() {
               </Map>
             </APIProvider>
           </div>
-        </motion.div>
+        </div>
 
         {/* Find Nearest Store Button */}
-        <motion.div
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{
-            duration: shouldReduceMotion ? 0 : 0.5,
-            delay: shouldReduceMotion ? 0 : 0.3,
-          }}
-          className="text-center"
+        <div
+          className={`text-center transition-all duration-500 delay-300 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0`}
         >
           <Button
             asChild
@@ -276,7 +279,7 @@ export function MapSection() {
               Find Nearest Store
             </Link>
           </Button>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

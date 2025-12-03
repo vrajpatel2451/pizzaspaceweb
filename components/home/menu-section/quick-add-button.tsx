@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Check, ShoppingBag } from "lucide-react";
 import { useAddToCart } from "@/lib/hooks/use-cart";
 import { useDeviceId } from "@/store/device-store";
@@ -78,120 +77,66 @@ export function QuickAddButton({
 
   if (variant === "full") {
     return (
-      <motion.button
+      <button
         onClick={handleAdd}
         disabled={isAdding}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
         className={cn(
           "relative flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 overflow-hidden",
           isAdded
             ? "bg-green-500 text-white"
-            : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/25",
+            : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/25 hover:scale-[1.02] active:scale-[0.98]",
           "dark:hover:shadow-orange-500/15",
           className
         )}
         aria-label={`Add ${productName} to cart`}
       >
-        <AnimatePresence mode="wait">
-          {isAdding ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-2"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <ShoppingBag className="w-4 h-4" />
-              </motion.div>
-              <span>Adding...</span>
-            </motion.div>
-          ) : isAdded ? (
-            <motion.div
-              key="added"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" />
-              <span>Added!</span>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="add"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add to Cart</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+        {isAdding ? (
+          <div className="flex items-center gap-2 animate-in fade-in-0 zoom-in-95 duration-300">
+            <ShoppingBag className="w-4 h-4 animate-spin" />
+            <span>Adding...</span>
+          </div>
+        ) : isAdded ? (
+          <div className="flex items-center gap-2 animate-in fade-in-0 zoom-in-95 duration-300">
+            <Check className="w-4 h-4" />
+            <span>Added!</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 animate-in fade-in-0 zoom-in-95 duration-300">
+            <Plus className="w-4 h-4" />
+            <span>Add to Cart</span>
+          </div>
+        )}
+      </button>
     );
   }
 
   return (
-    <motion.button
+    <button
       onClick={handleAdd}
       disabled={isAdding}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
       className={cn(
         "relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 shadow-md",
         isAdded
           ? "bg-green-500 text-white"
-          : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30",
+          : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 hover:scale-110 active:scale-90",
         "dark:hover:shadow-orange-500/20",
         className
       )}
       aria-label={`Add ${productName} to cart`}
     >
-      <AnimatePresence mode="wait">
-        {isAdding ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0, rotate: -180 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0, rotate: 180 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            >
-              <ShoppingBag className="w-4 h-4" />
-            </motion.div>
-          </motion.div>
-        ) : isAdded ? (
-          <motion.div
-            key="added"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          >
-            <Check className="w-5 h-5" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="add"
-            initial={{ opacity: 0, rotate: -90 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            exit={{ opacity: 0, rotate: 90 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Plus className="w-5 h-5" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.button>
+      {isAdding ? (
+        <div className="animate-in fade-in-0 spin-in-180 duration-300">
+          <ShoppingBag className="w-4 h-4 animate-spin" />
+        </div>
+      ) : isAdded ? (
+        <div className="animate-in fade-in-0 zoom-in-0 duration-300">
+          <Check className="w-5 h-5" />
+        </div>
+      ) : (
+        <div className="animate-in fade-in-0 spin-in-90 duration-200">
+          <Plus className="w-5 h-5" />
+        </div>
+      )}
+    </button>
   );
 }

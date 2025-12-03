@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, memo } from "react";
-import { motion } from "framer-motion";
 import {
   Accordion,
   AccordionContent,
@@ -13,7 +12,6 @@ import { CustomImage } from "@/components/ui/custom-image";
 import { CategoryResponse, SubCategoryResponse } from "@/types";
 import { cn } from "@/lib/utils";
 import { SubcategoryList } from "./subcategory-list";
-import { categoryHover, prefersReducedMotion } from "../animations";
 
 interface CategoryAccordionProps {
   categories: CategoryResponse[];
@@ -119,8 +117,6 @@ export const CategoryAccordion = memo(function CategoryAccordion({
     }
   }, [router, pathname, startTransition]);
 
-  const shouldAnimate = !prefersReducedMotion();
-
   return (
     <nav aria-label="Category navigation" className="space-y-2">
       <Accordion
@@ -140,10 +136,11 @@ export const CategoryAccordion = memo(function CategoryAccordion({
               value={category._id}
               className="border-b border-border last:border-b-0"
             >
-              <motion.div
-                variants={shouldAnimate ? categoryHover : undefined}
-                initial={shouldAnimate ? "rest" : false}
-                whileHover={shouldAnimate ? "hover" : undefined}
+              <div
+                className={cn(
+                  "transition-transform duration-150 motion-reduce:transition-none",
+                  "hover:scale-[1.01] motion-reduce:hover:scale-100"
+                )}
               >
                 <AccordionTrigger
                   className={cn(
@@ -172,7 +169,7 @@ export const CategoryAccordion = memo(function CategoryAccordion({
                     )}
                   </div>
                 </AccordionTrigger>
-              </motion.div>
+              </div>
 
               <AccordionContent className="pb-2">
                 {subcategories.length > 0 ? (
@@ -196,21 +193,20 @@ export const CategoryAccordion = memo(function CategoryAccordion({
 
       {/* Clear Filters Button */}
       {(activeCategory || activeSubcategory) && (
-        <motion.button
+        <button
           onClick={handleClearFilters}
           disabled={isPending}
           className={cn(
-            "w-full min-h-[44px] px-4 py-2 text-sm rounded-lg transition-colors font-medium",
+            "w-full min-h-[44px] px-4 py-2 text-sm rounded-lg transition-all duration-200 font-medium motion-reduce:transition-none",
+            "active:scale-[0.99] motion-reduce:active:scale-100",
             isPending
               ? "text-orange-400 dark:text-orange-600 bg-orange-50/50 dark:bg-orange-950/20 cursor-not-allowed opacity-60"
-              : "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+              : "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:scale-[1.01]"
           )}
           aria-label="Clear all category filters"
-          whileHover={shouldAnimate && !isPending ? { scale: 1.01 } : undefined}
-          whileTap={shouldAnimate && !isPending ? { scale: 0.99 } : undefined}
         >
           Clear Filters
-        </motion.button>
+        </button>
       )}
     </nav>
   );

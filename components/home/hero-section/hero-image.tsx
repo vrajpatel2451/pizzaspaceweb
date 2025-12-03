@@ -1,57 +1,30 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 export function HeroImage() {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95, x: 50 }}
-      animate={{ opacity: 1, scale: 1, x: 0 }}
-      transition={{
-        duration: 0.8,
-        delay: 0.3,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      className="relative hidden lg:flex items-center justify-center min-h-[600px]"
+    <div
+      className="relative hidden lg:flex items-center justify-center min-h-[600px] animate-fade-in-right animation-delay-300 motion-reduce:animate-none"
     >
       {/* Main circular backdrop */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="w-[450px] h-[450px] xl:w-[550px] xl:h-[550px] rounded-full bg-gradient-to-br from-primary-100/60 via-amber-100/40 to-orange-100/30 dark:from-primary-500/20 dark:via-amber-500/10 dark:to-orange-500/5"
+        <div
+          className="w-[450px] h-[450px] xl:w-[550px] xl:h-[550px] rounded-full bg-gradient-to-br from-primary-100/60 via-amber-100/40 to-orange-100/30 dark:from-primary-500/20 dark:via-amber-500/10 dark:to-orange-500/5 animate-scale-in-center animation-delay-500 motion-reduce:animate-none"
         />
       </div>
 
       {/* Inner circle */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.6 }}
-          className="w-[350px] h-[350px] xl:w-[420px] xl:h-[420px] rounded-full bg-gradient-to-tr from-primary-200/50 via-amber-100/30 to-transparent dark:from-primary-600/20 dark:via-amber-500/10 dark:to-transparent"
+        <div
+          className="w-[350px] h-[350px] xl:w-[420px] xl:h-[420px] rounded-full bg-gradient-to-tr from-primary-200/50 via-amber-100/30 to-transparent dark:from-primary-600/20 dark:via-amber-500/10 dark:to-transparent animate-scale-in-center animation-delay-600 motion-reduce:animate-none"
         />
       </div>
 
       {/* Main Hero Image */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="relative z-10"
+      <div
+        className="relative z-10 animate-fade-in-up animation-delay-400 motion-reduce:animate-none"
       >
         {/* Floating animation on the image */}
-        <motion.div
-          animate={{
-            y: [0, -15, 0],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
+        <div className="animate-float motion-reduce:animate-none">
           <div className="relative w-[380px] h-[380px] xl:w-[480px] xl:h-[480px]">
             {/* Glow effect behind image */}
             <div className="absolute inset-4 rounded-full bg-gradient-to-b from-primary/20 to-amber-500/10 blur-2xl dark:from-primary/15 dark:to-amber-500/5" />
@@ -79,95 +52,56 @@ export function HeroImage() {
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/10 dark:bg-black/20 blur-xl rounded-full" />
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Decorative elements around the pizza */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 1 }}
-        className="absolute top-20 left-10"
+      <div
+        className="absolute top-20 left-10 animate-pop-in animation-delay-1000 motion-reduce:animate-none"
       >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        >
+        <div className="animate-spin-slow motion-reduce:animate-none">
           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-400 to-red-500 shadow-lg flex items-center justify-center">
             <span className="text-2xl">🍅</span>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 1.1 }}
-        className="absolute bottom-32 left-8"
+      <div
+        className="absolute bottom-32 left-8 animate-pop-in animation-delay-1100 motion-reduce:animate-none"
       >
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        >
+        <div className="animate-spin-reverse motion-reduce:animate-none">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-500 shadow-lg flex items-center justify-center">
             <span className="text-xl">🌿</span>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 1.2 }}
-        className="absolute top-40 right-8"
+      <div
+        className="absolute top-40 right-8 animate-pop-in animation-delay-1200 motion-reduce:animate-none"
       >
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        >
+        <div className="animate-spin-slow animation-delay-1000 motion-reduce:animate-none">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg flex items-center justify-center">
             <span className="text-lg">🧀</span>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 1.3 }}
-        className="absolute bottom-24 right-16"
+      <div
+        className="absolute bottom-24 right-16 animate-pop-in animation-delay-1300 motion-reduce:animate-none"
       >
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-        >
+        <div className="animate-spin-reverse animation-delay-500 motion-reduce:animate-none">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-orange-500 shadow-lg flex items-center justify-center">
             <span className="text-xl">🌶️</span>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Steam/heat waves effect */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 flex gap-2">
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0, 0.6, 0],
-              y: [-10, -40],
-              scale: [1, 1.2, 0.8],
-            }}
-            transition={{
-              duration: 2,
-              delay: i * 0.3,
-              repeat: Infinity,
-              ease: "easeOut",
-            }}
-            className="w-1.5 h-8 bg-gradient-to-t from-transparent via-white/40 to-white/10 dark:via-white/20 dark:to-white/5 rounded-full blur-sm"
-          />
-        ))}
+        <div className="w-1.5 h-8 bg-gradient-to-t from-transparent via-white/40 to-white/10 dark:via-white/20 dark:to-white/5 rounded-full blur-sm animate-steam motion-reduce:animate-none" />
+        <div className="w-1.5 h-8 bg-gradient-to-t from-transparent via-white/40 to-white/10 dark:via-white/20 dark:to-white/5 rounded-full blur-sm animate-steam animation-delay-300 motion-reduce:animate-none" />
+        <div className="w-1.5 h-8 bg-gradient-to-t from-transparent via-white/40 to-white/10 dark:via-white/20 dark:to-white/5 rounded-full blur-sm animate-steam animation-delay-600 motion-reduce:animate-none" />
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { CategoryResponse } from "@/types";
 import { CategoryCard, CategoryCardSkeleton } from "./category-card";
 
@@ -9,28 +9,22 @@ interface CategoriesContentProps {
 }
 
 export function CategoriesContent({ categories }: CategoriesContentProps) {
+  const [isVisible, setIsVisible] = useState(false);
+
   // Ensure categories is always an array
   const safeCategories = Array.isArray(categories) ? categories : [];
 
-  // Animation variants
-  const gridVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   return (
     <div className="space-y-8 md:space-y-10">
       {/* Category Cards Grid - 2 columns on mobile, responsive scaling */}
-      <motion.div
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6"
-        variants={gridVariants}
-        initial="hidden"
-        animate="visible"
+      <div
+        className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6 transition-opacity duration-1000 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
       >
         {safeCategories.length > 0 ? (
           safeCategories.map((category, index) => (
@@ -47,22 +41,20 @@ export function CategoriesContent({ categories }: CategoriesContentProps) {
             </p>
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* View All Button */}
-      <motion.div
-        className="flex justify-center pt-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+      <div
+        className="flex justify-center pt-4 animate-in fade-in-0 slide-in-from-bottom-2 duration-500 motion-reduce:animate-none"
+        style={{ animationDelay: "500ms" }}
       >
         <a
           href="/menu"
-          className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+          className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 motion-reduce:transition-none"
         >
           <span>View Full Menu</span>
           <svg
-            className="w-5 h-5 transform group-hover:translate-x-1 transition-transform"
+            className="w-5 h-5 transform group-hover:translate-x-1 transition-transform motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -75,7 +67,7 @@ export function CategoriesContent({ categories }: CategoriesContentProps) {
             />
           </svg>
         </a>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
 import {
   User,
   Mail,
@@ -13,9 +13,7 @@ import {
   MapPin,
   ChevronRight,
   Edit3,
-  Shield,
   Crown,
-  Gift,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,43 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useUser, useAuthStore } from "@/store";
 import { clearAuthCookie } from "@/lib/actions/auth";
-
-// Animation variants
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
-
-const badgeVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8, y: -10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.34, 1.56, 0.64, 1],
-    },
-  },
-};
 
 interface QuickAction {
   label: string;
@@ -87,6 +48,26 @@ export default function ProfilePage() {
   const router = useRouter();
   const user = useUser();
   const { logout } = useAuthStore();
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "0px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -126,6 +107,7 @@ export default function ProfilePage() {
 
   return (
     <section
+      ref={sectionRef}
       className="relative bg-white dark:bg-slate-950 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 min-h-screen overflow-hidden"
       aria-labelledby="profile-heading"
     >
@@ -143,20 +125,24 @@ export default function ProfilePage() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl relative z-10">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div>
           {/* Premium Header Section */}
-          <motion.div variants={itemVariants} className="text-center mb-10">
+          <div
+            className={`text-center mb-10 transition-all duration-500 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0`}
+          >
             {/* Badge */}
-            <motion.div variants={badgeVariants} className="mb-5">
+            <div
+              className={`mb-5 transition-all duration-500 delay-100 ${
+                isVisible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-90 translate-y-3"
+              } motion-reduce:transition-none`}
+            >
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
                 <User className="w-3.5 h-3.5" />
                 My Account
               </span>
-            </motion.div>
+            </div>
 
             {/* Headline */}
             <h1
@@ -194,10 +180,14 @@ export default function ProfilePage() {
               <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
               <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
             </div>
-          </motion.div>
+          </div>
 
           {/* Profile Card */}
-          <motion.div variants={itemVariants}>
+          <div
+            className={`transition-all duration-500 delay-200 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0`}
+          >
             <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 rounded-2xl overflow-hidden mb-6">
               {/* Profile Header with Avatar */}
               <div className="relative bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 px-6 py-8 sm:px-8 sm:py-10">
@@ -300,10 +290,14 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Quick Actions */}
-          <motion.div variants={itemVariants}>
+          <div
+            className={`transition-all duration-500 delay-300 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0`}
+          >
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-orange-500" />
               Quick Actions
@@ -331,10 +325,14 @@ export default function ProfilePage() {
                 </Link>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Sign Out Section */}
-          <motion.div variants={itemVariants}>
+          <div
+            className={`transition-all duration-500 delay-400 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            } motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0`}
+          >
             <Separator className="my-6" />
 
             <Card className="bg-red-50/50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-500/20 rounded-xl">
@@ -358,8 +356,8 @@ export default function ProfilePage() {
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

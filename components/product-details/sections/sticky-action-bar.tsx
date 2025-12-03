@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { ShoppingBag, AlertCircle, Check } from "lucide-react";
 import { QuantityIncrementor } from "@/components/composite/quantity-incrementor";
 import { Button } from "@/components/ui/button";
@@ -45,8 +45,9 @@ export function StickyActionBar({
   className,
   editMode = "add",
 }: StickyActionBarProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const [prevPrice, setPrevPrice] = React.useState(totalPrice);
+  const [isVisible, setIsVisible] = useState(false);
+  const [prevPrice, setPrevPrice] = useState(totalPrice);
+  const [priceKey, setPriceKey] = useState(0);
 
   const hasDiscount = originalPrice && originalPrice > totalPrice;
   const discountPercentage = hasDiscount
@@ -56,54 +57,25 @@ export function StickyActionBar({
   // Track price changes for animation direction
   const priceDirection = totalPrice > prevPrice ? "up" : "down";
 
-  React.useEffect(() => {
-    setPrevPrice(totalPrice);
-  }, [totalPrice]);
+  useEffect(() => {
+    if (totalPrice !== prevPrice) {
+      setPriceKey((k) => k + 1);
+      setPrevPrice(totalPrice);
+    }
+  }, [totalPrice, prevPrice]);
+
+  // Trigger entrance animation
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
 
   const handleAddToCart = async () => {
     if (!isValid || isLoading) return;
     await onAddToCart();
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { y: 100, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring" as const,
-        stiffness: 400,
-        damping: 30,
-      },
-    },
-  };
-
-  const priceVariants = {
-    enter: (direction: string) => ({
-      y: direction === "up" ? 20 : -20,
-      opacity: 0,
-    }),
-    center: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring" as const,
-        stiffness: 500,
-        damping: 30,
-      },
-    },
-    exit: (direction: string) => ({
-      y: direction === "up" ? -20 : 20,
-      opacity: 0,
-      transition: {
-        duration: 0.15,
-      },
-    }),
-  };
-
   return (
-    <motion.div
+    <div
       className={cn(
         // Positioning
         "sticky bottom-[5%] lg:bottom-0 left-0 right-0 z-50",
@@ -113,11 +85,11 @@ export function StickyActionBar({
         "pb-[env(safe-area-inset-bottom)]",
         // Shadow
         "shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)]",
+        // Animation
+        "transition-all duration-300 motion-reduce:transition-none",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0",
         className
       )}
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
     >
       {/* Main Content */}
       <div className="px-3 py-2.5 sm:px-6 sm:py-3">
@@ -163,19 +135,15 @@ export function StickyActionBar({
                 <span>{editMode === "edit" ? "Update cart" : "Add item"}</span>
                 <span className="mx-1 opacity-60">-</span>
                 <div className="flex flex-col items-end leading-tight">
-                  <AnimatePresence mode="popLayout" custom={priceDirection}>
-                    <motion.span
-                      key={totalPrice}
-                      custom={priceDirection}
-                      variants={shouldReduceMotion ? undefined : priceVariants}
-                      initial={shouldReduceMotion ? undefined : "enter"}
-                      animate="center"
-                      exit={shouldReduceMotion ? undefined : "exit"}
-                      className="font-bold"
-                    >
-                      {formatPrice(totalPrice)}
-                    </motion.span>
-                  </AnimatePresence>
+                  <span
+                    key={priceKey}
+                    className={cn(
+                      "font-bold transition-all duration-200 motion-reduce:transition-none",
+                      priceKey > 0 && "animate-in fade-in-0 slide-in-from-bottom-2"
+                    )}
+                  >
+                    {formatPrice(totalPrice)}
+                  </span>
                   {hasDiscount && (
                     <span className="text-[10px] line-through opacity-70">
                       {formatPrice(originalPrice)}
@@ -188,50 +156,45 @@ export function StickyActionBar({
         </div>
 
         {/* Discount Badge */}
-        <AnimatePresence>
-          {hasDiscount && discountPercentage > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="mt-2 text-center"
-            >
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                <Check className="size-3" />
-                You save {discountPercentage}% on this order
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {hasDiscount && discountPercentage > 0 && (
+          <div
+            className={cn(
+              "mt-2 text-center overflow-hidden transition-all duration-200 motion-reduce:transition-none",
+              hasDiscount ? "max-h-10 opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <Check className="size-3" />
+              You save {discountPercentage}% on this order
+            </span>
+          </div>
+        )}
 
         {/* Validation Errors */}
-        <AnimatePresence>
-          {!isValid && validationErrors.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="mt-2 space-y-1"
-              role="alert"
-            >
-              {validationErrors.map((error, index) => (
-                <motion.p
-                  key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="text-xs sm:text-sm text-destructive text-center flex items-center justify-center gap-1"
-                >
-                  <AlertCircle className="size-3 shrink-0" />
-                  {error}
-                </motion.p>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {!isValid && validationErrors.length > 0 && (
+          <div
+            className={cn(
+              "mt-2 space-y-1 overflow-hidden transition-all duration-200 motion-reduce:transition-none",
+              validationErrors.length > 0 ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+            )}
+            role="alert"
+          >
+            {validationErrors.map((error, index) => (
+              <p
+                key={index}
+                className={cn(
+                  "text-xs sm:text-sm text-destructive text-center flex items-center justify-center gap-1",
+                  "animate-in fade-in-0 slide-in-from-left-2 duration-200"
+                )}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <AlertCircle className="size-3 shrink-0" />
+                {error}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface ConfettiPiece {
@@ -17,6 +16,7 @@ interface ConfettiPiece {
 
 export function Confetti() {
   const [pieces, setPieces] = useState<ConfettiPiece[]>([]);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     // Brand-aligned colors with the PizzaSpace design system
@@ -43,6 +43,9 @@ export function Confetti() {
       shape: shapes[Math.floor(Math.random() * shapes.length)],
     }));
     setPieces(confettiPieces);
+
+    // Trigger animation after pieces are set
+    requestAnimationFrame(() => setIsAnimating(true));
   }, []);
 
   const getShapeClasses = (shape: "circle" | "square" | "rectangle") => {
@@ -60,44 +63,70 @@ export function Confetti() {
 
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+      <style jsx>{`
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(0vh);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          20% {
+            transform: translateY(-30vh);
+          }
+          70% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(60vh);
+            opacity: 0;
+          }
+        }
+        @keyframes confetti-spin {
+          0% {
+            transform: rotateY(0deg);
+          }
+          100% {
+            transform: rotateY(720deg);
+          }
+        }
+        .confetti-piece {
+          animation: confetti-fall 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .confetti-inner {
+          animation: confetti-spin 1s linear 2;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .confetti-piece,
+          .confetti-inner {
+            animation: none;
+            opacity: 0;
+          }
+        }
+      `}</style>
       {pieces.map((piece) => (
-        <motion.div
+        <div
           key={piece.id}
-          className="absolute top-1/3 left-1/2"
-          initial={{
-            x: piece.startX,
-            y: 0,
-            rotate: 0,
-            scale: 0,
-            opacity: 0,
-          }}
-          animate={{
-            x: piece.x,
-            y: ["0vh", "-30vh", "60vh"],
-            rotate: piece.rotation,
-            scale: [0, piece.scale, piece.scale, 0],
-            opacity: [0, 1, 1, 0],
-          }}
-          transition={{
-            duration: 2.2,
-            delay: piece.delay,
-            ease: [0.22, 1, 0.36, 1],
-            times: [0, 0.2, 0.7, 1],
+          className="absolute top-1/3 left-1/2 confetti-piece"
+          style={{
+            transform: `translateX(${piece.startX}px)`,
+            animationDelay: `${piece.delay}s`,
+            opacity: isAnimating ? undefined : 0,
           }}
         >
-          <motion.div
-            className={getShapeClasses(piece.shape)}
-            style={{ backgroundColor: piece.color }}
-            animate={{
-              rotateY: [0, 180, 360],
+          <div
+            className="confetti-inner"
+            style={{
+              transform: `translateX(${piece.x}px) rotate(${piece.rotation}deg) scale(${piece.scale})`,
             }}
-            transition={{
-              duration: 1,
-              repeat: 2,
-              ease: "linear",
-            }}
-          />
-        </motion.div>
+          >
+            <div
+              className={getShapeClasses(piece.shape)}
+              style={{ backgroundColor: piece.color }}
+            />
+          </div>
+        </div>
       ))}
     </div>
   );

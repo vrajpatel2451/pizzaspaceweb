@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { ProductDetailsSkeleton } from "./product-details-skeleton";
 import { ProductImageSection } from "./sections/product-image-section";
 import { ProductInfoSection } from "./sections/product-info-section";
@@ -10,10 +9,6 @@ import { AddonGroupsSection } from "./sections/addon-groups-section";
 import { StickyActionBar } from "./sections/sticky-action-bar";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import type { ProductDetailsContentProps } from "@/types/product-details";
-import {
-  productDetailsContainerVariants,
-  productDetailsSectionVariants,
-} from "@/lib/animations";
 
 export function ProductDetailsContent({
   data,
@@ -23,17 +18,7 @@ export function ProductDetailsContent({
   editMode = "add",
   isProcessing = false,
 }: ProductDetailsContentProps & { editMode?: "add" | "edit"; isProcessing?: boolean }) {
-  const shouldReduceMotion = useReducedMotion();
   const context = useProductDetailsContext();
-
-  // Simplified variants for reduced motion
-  const containerVariants = shouldReduceMotion
-    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
-    : productDetailsContainerVariants;
-
-  const sectionVariants = shouldReduceMotion
-    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
-    : productDetailsSectionVariants;
 
   // Loading state - only show skeleton when actually loading data (not processing)
   if (isLoading && !data) {
@@ -68,49 +53,44 @@ export function ProductDetailsContent({
     <div className="flex flex-col flex-1 min-h-0">
       {/* Scrollable Content */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hide">
-        <motion.div
-          className="space-y-3 sm:space-y-5 p-3 sm:p-5 pb-24 sm:pb-28"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="space-y-3 sm:space-y-5 p-3 sm:p-5 pb-24 sm:pb-28">
           {/* Product Image */}
-          <motion.div variants={sectionVariants}>
+          <div className="animate-fade-in-up stagger-1 motion-reduce:animate-none">
             <ProductImageSection
               images={data.product.photoList ?? []}
               productName={data.product.name}
               productType={data.product.type}
             />
-          </motion.div>
+          </div>
 
           {/* Product Info */}
-          <motion.div variants={sectionVariants}>
+          <div className="animate-fade-in-up stagger-2 motion-reduce:animate-none">
             <ProductInfoSection
               product={data.product}
               defaultExpanded={!hasVariants && !hasAddons}
             />
-          </motion.div>
+          </div>
 
           {/* Variant Groups */}
           {hasVariants && (
-            <motion.div variants={sectionVariants}>
+            <div className="animate-fade-in-up stagger-3 motion-reduce:animate-none">
               <VariantGroupsSection
                 variantGroupList={data.variantGroupList}
                 variantList={data.variantList}
               />
-            </motion.div>
+            </div>
           )}
 
           {/* Addon Groups */}
           {hasAddons && (
-            <motion.div variants={sectionVariants}>
+            <div className="animate-fade-in-up stagger-4 motion-reduce:animate-none">
               <AddonGroupsSection
                 addonGroupList={data.addonGroupList}
                 addonList={data.addonList}
               />
-            </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Sticky Action Bar */}

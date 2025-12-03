@@ -1,7 +1,6 @@
 "use client";
 
 import { MapPin } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
 import { StoreResponse } from "@/types";
 import { GoogleMap } from "../google-map";
 
@@ -10,55 +9,21 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ stores }: HeroSectionProps) {
-  const shouldReduceMotion = useReducedMotion();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.1,
-        delayChildren: shouldReduceMotion ? 0 : 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: shouldReduceMotion ? 0 : 0.5,
-        ease: [0, 0, 0.2, 1] as [number, number, number, number],
-      },
-    },
-  };
-
   return (
     <section className="relative bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-24" aria-label="Store locator hero section">
       <div className="container mx-auto px-4 lg:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
           {/* Left Content */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-4 sm:space-y-6"
-          >
-            <motion.div
-              variants={itemVariants}
-              className="mb-4"
-            >
+          <div className="space-y-4 sm:space-y-6">
+            <div className="mb-4 animate-fade-in-up stagger-1 motion-reduce:animate-none">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
                 <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
                 Find Your Nearest Store
               </span>
-            </motion.div>
+            </div>
 
-            <motion.h1
-              variants={itemVariants}
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 leading-tight"
+            <h1
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4 leading-tight animate-fade-in-up stagger-2 motion-reduce:animate-none"
             >
               Visit Us{" "}
               <span className="text-orange-500 relative">
@@ -78,25 +43,23 @@ export function HeroSection({ stores }: HeroSectionProps) {
                   />
                 </svg>
               </span>
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              variants={itemVariants}
-              className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl"
+            <p
+              className="text-slate-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl animate-fade-in-up stagger-3 motion-reduce:animate-none"
             >
               Discover our locations across the UK. Fresh pizza, warm atmosphere,
               and exceptional service await you at every Pizza Space restaurant.
-            </motion.p>
+            </p>
 
             {/* Decorative elements */}
-            <motion.div
-              variants={itemVariants}
-              className="flex items-center gap-3 mt-2"
+            <div
+              className="flex items-center gap-3 mt-2 animate-fade-in-up stagger-4 motion-reduce:animate-none"
             >
               <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
               <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
               <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
-            </motion.div>
+            </div>
 
             <div className="flex items-center gap-4 sm:gap-6 pt-3 sm:pt-4" role="list" aria-label="Store statistics">
               <div className="flex items-center gap-2" role="listitem">
@@ -132,12 +95,9 @@ export function HeroSection({ stores }: HeroSectionProps) {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
           {/* Right Content - Google Maps */}
-          <motion.div
-            variants={itemVariants}
-            className="relative"
-          >
+          <div className="relative animate-fade-in-up stagger-3 motion-reduce:animate-none">
             <div className="relative w-full h-[350px] sm:h-[450px] lg:h-[550px] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white dark:border-slate-700">
               <GoogleMap
                 stores={stores}
@@ -145,19 +105,13 @@ export function HeroSection({ stores }: HeroSectionProps) {
               />
             </div>
             {/* Decorative Elements */}
-            <motion.div
-              initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 1, delay: shouldReduceMotion ? 0 : 0.5 }}
-              className="absolute -top-4 -right-4 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl"
+            <div
+              className="absolute -top-4 -right-4 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl animate-scale-in-center animation-delay-500 motion-reduce:animate-none"
             />
-            <motion.div
-              initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 1, delay: shouldReduceMotion ? 0 : 0.7 }}
-              className="absolute -bottom-4 -left-4 w-32 h-32 bg-orange-600/20 rounded-full blur-2xl"
+            <div
+              className="absolute -bottom-4 -left-4 w-32 h-32 bg-orange-600/20 rounded-full blur-2xl animate-scale-in-center animation-delay-700 motion-reduce:animate-none"
             />
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

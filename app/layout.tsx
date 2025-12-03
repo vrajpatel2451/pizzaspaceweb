@@ -19,8 +19,10 @@ import { Toaster } from "@/components/ui";
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "600", "700"], // Reduced from 6 to 3 weights
   display: "swap",
+  preload: true,
+  fallback: ['system-ui', 'arial'],
 });
 
 export const metadata: Metadata = {
@@ -148,10 +150,8 @@ export default function RootLayout({
           color="#F97316"
           height={3}
           showSpinner={false}
-          crawl={true}
-          crawlSpeed={200}
-          speed={200}
-          shadow="0 0 10px #F97316,0 0 5px #F97316"
+          crawl={false}
+          speed={300}
         />
         <ThemeProvider
           attribute="class"

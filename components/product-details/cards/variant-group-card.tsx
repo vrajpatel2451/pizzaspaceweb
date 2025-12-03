@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import { formatPrice } from "@/lib/utils/currency";
@@ -35,14 +35,19 @@ export function VariantGroupCard({
   className,
 }: VariantGroupCardProps) {
   const context = useProductDetailsContext();
-  const shouldReduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Trigger entrance animation
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
 
   /**
    * Calculate variant price
    * - For primary variants: use variant.price directly
    * - For sub-variants: lookup in pricing array
    */
-  const calculateVariantPrice = React.useCallback(
+  const calculateVariantPrice = useCallback(
     (variantId: string): number => {
       if (!context.productData) return 0;
 
@@ -66,44 +71,19 @@ export function VariantGroupCard({
     [context.productData, context.selectedVariantId, group.isPrimary, variants]
   );
 
-  // Animation variants
-  const cardVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.35,
-        ease: [0.25, 0.46, 0.45, 0.94] as const,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0 },
-    visible: (i: number) => ({
-      opacity: 1,
-      transition: {
-        delay: shouldReduceMotion ? 0 : i * 0.04,
-        duration: 0.25,
-        ease: [0.25, 0.46, 0.45, 0.94] as const,
-      },
-    }),
-  };
-
   return (
-    <motion.div
+    <div
       className={cn(
         // Card container
         "rounded-2xl border border-border/50 bg-card overflow-hidden",
         // Premium shadow and dark mode
         "shadow-sm shadow-black/5 dark:shadow-black/20",
         "dark:border-border/30 dark:bg-card/95",
+        // Animation
+        "transition-all duration-300 motion-reduce:transition-none",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3",
         className
       )}
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
     >
       {/* Card Header */}
       <div className="px-4 py-3.5 bg-gradient-to-r from-muted/40 to-muted/20 dark:from-muted/20 dark:to-transparent border-b border-border/40">
@@ -136,12 +116,13 @@ export function VariantGroupCard({
           const price = calculateVariantPrice(variant._id);
 
           return (
-            <motion.div
+            <div
               key={variant._id}
-              custom={index}
-              variants={itemVariants}
-              initial="hidden"
-              animate="visible"
+              className={cn(
+                "transition-all duration-200 motion-reduce:transition-none",
+                isVisible ? "opacity-100" : "opacity-0"
+              )}
+              style={{ transitionDelay: isVisible ? `${index * 40}ms` : "0ms" }}
             >
               <VariantOptionRow
                 variant={variant}
@@ -150,11 +131,11 @@ export function VariantGroupCard({
                 isPrimary={group.isPrimary}
                 onSelect={() => onSelect(variant._id)}
               />
-            </motion.div>
+            </div>
           );
         })}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -176,10 +157,8 @@ function VariantOptionRow({
   isPrimary,
   onSelect,
 }: VariantOptionRowProps) {
-  const shouldReduceMotion = useReducedMotion();
-
   return (
-    <motion.button
+    <button
       type="button"
       role="radio"
       aria-checked={isSelected}
@@ -190,9 +169,9 @@ function VariantOptionRow({
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50",
         isSelected
           ? "bg-primary/5 dark:bg-primary/10"
-          : "hover:bg-muted/40 dark:hover:bg-muted/20 active:bg-muted/60"
+          : "hover:bg-muted/40 dark:hover:bg-muted/20 active:bg-muted/60",
+        "active:scale-[0.995]"
       )}
-      whileTap={shouldReduceMotion ? undefined : { scale: 0.995 }}
     >
       {/* Left Content */}
       <div className="flex-1 min-w-0">
@@ -228,41 +207,22 @@ function VariantOptionRow({
 
       {/* Premium Radio Indicator */}
       <div className="shrink-0">
-        <motion.div
+        <div
           className={cn(
             "size-[22px] rounded-full border-2 flex items-center justify-center transition-all duration-200",
             isSelected
-              ? "border-primary bg-primary shadow-md shadow-primary/30"
+              ? "border-primary bg-primary shadow-md shadow-primary/30 scale-110"
               : "border-border/80 bg-background dark:border-border/60"
           )}
-          animate={
-            shouldReduceMotion
-              ? undefined
-              : {
-                  scale: isSelected ? [1, 1.15, 1] : 1,
-                }
-          }
-          transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
         >
-          <AnimatePresence mode="wait">
-            {isSelected && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 500,
-                  damping: 25,
-                }}
-              >
-                <Check className="size-3.5 text-primary-foreground" strokeWidth={3} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+          {isSelected && (
+            <div className="animate-in fade-in-0 zoom-in-50 duration-200">
+              <Check className="size-3.5 text-primary-foreground" strokeWidth={3} />
+            </div>
+          )}
+        </div>
       </div>
-    </motion.button>
+    </button>
   );
 }
 
@@ -286,12 +246,11 @@ export function HorizontalVariantSelector({
   className,
 }: HorizontalVariantSelectorProps) {
   const context = useProductDetailsContext();
-  const shouldReduceMotion = useReducedMotion();
 
   /**
    * Calculate variant price
    */
-  const calculateVariantPrice = React.useCallback(
+  const calculateVariantPrice = useCallback(
     (variantId: string): number => {
       if (!context.productData) return 0;
 
@@ -338,7 +297,7 @@ export function HorizontalVariantSelector({
           const price = calculateVariantPrice(variant._id);
 
           return (
-            <motion.button
+            <button
               key={variant._id}
               type="button"
               role="radio"
@@ -349,19 +308,11 @@ export function HorizontalVariantSelector({
                 "text-sm font-medium transition-all duration-200",
                 "min-h-[44px] touch-manipulation",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                "active:scale-95",
                 isSelected
-                  ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
+                  ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
                   : "bg-muted/40 text-foreground hover:bg-muted/70 border border-border/40 dark:bg-muted/30"
               )}
-              whileTap={shouldReduceMotion ? undefined : { scale: 0.95 }}
-              animate={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      scale: isSelected ? [1, 1.02, 1] : 1,
-                    }
-              }
-              transition={{ duration: 0.2 }}
             >
               <span>{variant.label}</span>
               {price > 0 && (
@@ -372,7 +323,7 @@ export function HorizontalVariantSelector({
                   +{formatPrice(price, { showCurrency: false })}
                 </span>
               )}
-            </motion.button>
+            </button>
           );
         })}
       </div>

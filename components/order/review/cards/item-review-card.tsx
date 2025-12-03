@@ -10,7 +10,6 @@ import {
 import { Rating } from "@/components/composite/rating";
 import { Card, CardContent } from "@/components/ui/card";
 import { TextArea } from "@/components/ui/textarea";
-import { motion } from "framer-motion";
 import type { ItemReviewCardProps } from "../types";
 
 export function ItemReviewCard({
@@ -21,10 +20,7 @@ export function ItemReviewCard({
 }: ItemReviewCardProps) {
 
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-    >
+    <div className="transition-transform duration-200 hover:-translate-y-0.5">
       <Card
         className="transition-shadow duration-200 hover:shadow-md"
       >
@@ -96,6 +92,6 @@ export function ItemReviewCard({
           />
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

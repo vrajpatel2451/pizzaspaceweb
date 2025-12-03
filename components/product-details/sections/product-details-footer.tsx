@@ -1,16 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { QuantityIncrementor } from "@/components/composite/quantity-incrementor";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import type { AddToCartSectionProps } from "@/types/product-details";
 import { cn } from "@/lib/utils";
-import {
-  priceChangeVariants,
-  addToCartButtonVariants,
-} from "@/lib/animations";
 import { formatPrice } from "@/lib/utils/currency";
 
 export function ProductDetailsFooter({
@@ -18,8 +14,17 @@ export function ProductDetailsFooter({
   className,
 }: Omit<AddToCartSectionProps, 'onAddToCart'>) {
   const context = useProductDetailsContext();
-  const shouldReduceMotion = useReducedMotion();
-  const [buttonState, setButtonState] = React.useState<"idle" | "loading" | "success">("idle");
+  const [buttonState, setButtonState] = useState<"idle" | "loading" | "success">("idle");
+  const [priceKey, setPriceKey] = useState(0);
+  const [prevPrice, setPrevPrice] = useState(context.totalPrice);
+
+  // Track price changes for animation
+  useEffect(() => {
+    if (context.totalPrice !== prevPrice) {
+      setPriceKey((k) => k + 1);
+      setPrevPrice(context.totalPrice);
+    }
+  }, [context.totalPrice, prevPrice]);
 
   // Handle button click with animation states
   const handleAddToCart = async () => {
@@ -39,15 +44,6 @@ export function ProductDetailsFooter({
       setButtonState("idle");
     }
   };
-
-  // Simplified variants for reduced motion
-  const priceAnimationVariants = shouldReduceMotion
-    ? { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1 } }
-    : priceChangeVariants;
-
-  const buttonAnimationVariants = shouldReduceMotion
-    ? { idle: { scale: 1 }, hover: { scale: 1 }, tap: { scale: 1 }, loading: { scale: 1 }, success: { scale: 1 } }
-    : addToCartButtonVariants;
 
   return (
     <div
@@ -81,30 +77,27 @@ export function ProductDetailsFooter({
             aria-live="polite"
             aria-atomic="true"
           >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={context.totalPrice}
-                variants={priceAnimationVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="text-xl sm:text-2xl font-bold text-primary truncate"
-              >
-                <span className="sr-only">Total price: </span>
-                {formatPrice(context.totalPrice)}
-              </motion.span>
-            </AnimatePresence>
+            <span
+              key={priceKey}
+              className={cn(
+                "text-xl sm:text-2xl font-bold text-primary truncate block",
+                "transition-all duration-200 motion-reduce:transition-none",
+                priceKey > 0 && "animate-in fade-in-0 slide-in-from-top-2"
+              )}
+            >
+              <span className="sr-only">Total price: </span>
+              {formatPrice(context.totalPrice)}
+            </span>
           </div>
         </div>
 
-        {/* Animated Add to Cart Button - Responsive sizing */}
-        <motion.div
-          className="shrink-0"
-          variants={buttonAnimationVariants}
-          initial="idle"
-          animate={buttonState}
-          whileHover={!context.isValid || isLoading ? undefined : "hover"}
-          whileTap={!context.isValid || isLoading ? undefined : "tap"}
+        {/* Add to Cart Button - Responsive sizing */}
+        <div
+          className={cn(
+            "shrink-0 transition-transform duration-200 motion-reduce:transition-none",
+            "hover:scale-[1.02] hover:-translate-y-0.5 active:scale-[0.98]",
+            "motion-reduce:hover:scale-100 motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100"
+          )}
         >
           <Button
             onClick={handleAddToCart}
@@ -122,95 +115,87 @@ export function ProductDetailsFooter({
               "shrink-0 min-h-[44px] sm:min-h-[48px]",
               "text-sm sm:text-base",
               "px-4 sm:px-6",
+              "transition-colors duration-300",
               buttonState === "success" && "bg-green-500 hover:bg-green-600"
             )}
             size="lg"
           >
-            <AnimatePresence mode="wait">
-              {buttonState === "loading" ? (
-                <motion.span
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2"
+            {buttonState === "loading" ? (
+              <span className="flex items-center gap-2 animate-in fade-in-0 duration-200">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="hidden sm:inline">Adding...</span>
+              </span>
+            ) : buttonState === "success" ? (
+              <span className="flex items-center gap-2 animate-in fade-in-0 zoom-in-95 duration-200">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <motion.div
-                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                    className="animate-draw-check"
                   />
-                  <span className="hidden sm:inline">Adding...</span>
-                </motion.span>
-              ) : buttonState === "success" ? (
-                <motion.span
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <motion.path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </svg>
-                  <span className="hidden sm:inline">Added!</span>
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="idle"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <span className="hidden sm:inline">Add to Cart</span>
-                  <span className="sm:hidden">Add</span>
-                </motion.span>
-              )}
-            </AnimatePresence>
+                </svg>
+                <span className="hidden sm:inline">Added!</span>
+              </span>
+            ) : (
+              <span className="animate-in fade-in-0 duration-200">
+                <span className="hidden sm:inline">Add to Cart</span>
+                <span className="sm:hidden">Add</span>
+              </span>
+            )}
           </Button>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Animated Validation Error Messages */}
-      <AnimatePresence>
-        {!context.isValid && context.validationErrors.length > 0 && (
-          <motion.div
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="mt-2 space-y-1 overflow-hidden"
-          >
-            {context.validationErrors.map((error, index) => (
-              <motion.p
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="text-xs sm:text-sm text-destructive text-center"
-              >
-                {error}
-              </motion.p>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Validation Error Messages */}
+      {!context.isValid && context.validationErrors.length > 0 && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          className="mt-2 space-y-1 overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-200"
+        >
+          {context.validationErrors.map((error, index) => (
+            <p
+              key={index}
+              className="text-xs sm:text-sm text-destructive text-center animate-in fade-in-0 slide-in-from-left-2"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* CSS for checkmark animation */}
+      <style jsx>{`
+        @keyframes draw-check {
+          from {
+            stroke-dasharray: 24;
+            stroke-dashoffset: 24;
+          }
+          to {
+            stroke-dasharray: 24;
+            stroke-dashoffset: 0;
+          }
+        }
+        .animate-draw-check {
+          animation: draw-check 0.3s ease-out forwards;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-draw-check {
+            animation: none;
+            stroke-dasharray: none;
+            stroke-dashoffset: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }

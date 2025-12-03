@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { ProductDetailsContent } from "./product-details-content";
 import type { ProductDetailsModalProps } from "@/types/product-details";
-import { dialogVariants } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
 export function ProductDetailsDialog({
@@ -18,16 +17,18 @@ export function ProductDetailsDialog({
   isProcessing,
   ...contentProps
 }: Omit<ProductDetailsModalProps, 'productId' | 'children'> & React.ComponentProps<typeof ProductDetailsContent> & { isProcessing?: boolean }) {
-  const shouldReduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
+  const prefersReducedMotion = typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
 
-  // Simplified variants for reduced motion
-  const variants = shouldReduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 },
-        exit: { opacity: 0 },
-      }
-    : dialogVariants;
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => setIsVisible(true));
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -62,24 +63,21 @@ export function ProductDetailsDialog({
         </p>
 
         {/* Animated Product Details Content */}
-        <AnimatePresence mode="wait">
-          {isOpen && (
-            <motion.div
-              key="dialog-content"
-              variants={variants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="flex-1 min-h-0 flex flex-col"
-            >
-              <ProductDetailsContent
-                {...contentProps}
-                onClose={onClose}
-                isProcessing={isProcessing}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isOpen && (
+          <div
+            className={cn(
+              "flex-1 min-h-0 flex flex-col transition-all motion-reduce:transition-none",
+              prefersReducedMotion ? "" : "duration-300",
+              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            )}
+          >
+            <ProductDetailsContent
+              {...contentProps}
+              onClose={onClose}
+              isProcessing={isProcessing}
+            />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

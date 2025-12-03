@@ -13,11 +13,81 @@ import { useCartStore } from "@/store/cart-store";
 import { useStore } from "@/lib/contexts/store-context";
 import { getDiscounts } from "@/lib/api/discount";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 interface DiscountSectionProps {
   className?: string;
+}
+
+// Simple CSS confetti component
+function SuccessConfetti({ show }: { show: boolean }) {
+  const [pieces, setPieces] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    color: string;
+    delay: number;
+  }>>([]);
+
+  useEffect(() => {
+    if (show) {
+      const colors = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
+      const newPieces = Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        delay: i * 0.02,
+      }));
+      setPieces(newPieces);
+    } else {
+      setPieces([]);
+    }
+  }, [show]);
+
+  if (!show || pieces.length === 0) return null;
+
+  return (
+    <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+      <style jsx>{`
+        @keyframes confetti-burst {
+          0% {
+            transform: translate(50%, 50%) scale(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot));
+            opacity: 0;
+          }
+        }
+        .confetti-piece {
+          animation: confetti-burst 1s ease-out forwards;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .confetti-piece {
+            animation: none;
+            opacity: 0;
+          }
+        }
+      `}</style>
+      <div className="absolute inset-0 bg-green-500/10" />
+      {pieces.map((piece) => (
+        <div
+          key={piece.id}
+          className="confetti-piece absolute size-2 rounded-full"
+          style={{
+            left: "50%",
+            top: "50%",
+            backgroundColor: piece.color,
+            animationDelay: `${piece.delay}s`,
+            "--tx": `${(piece.x - 50) * 3}%`,
+            "--ty": `${(piece.y - 50) * 3}%`,
+            "--rot": `${Math.random() * 360}deg`,
+          } as React.CSSProperties}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function DiscountSection({ className }: DiscountSectionProps) {
@@ -249,49 +319,7 @@ export function DiscountSection({ className }: DiscountSectionProps) {
     <>
       <Card className={cn("relative overflow-hidden", className)}>
         {/* Success Confetti Animation */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-10 pointer-events-none"
-            >
-              <div className="absolute inset-0 bg-green-500/10" />
-              {[...Array(20)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{
-                    x: "50%",
-                    y: "50%",
-                    scale: 0,
-                    rotate: 0,
-                  }}
-                  animate={{
-                    x: `${Math.random() * 100}%`,
-                    y: `${Math.random() * 100}%`,
-                    scale: [0, 1, 0],
-                    rotate: Math.random() * 360,
-                  }}
-                  transition={{
-                    duration: 1,
-                    delay: i * 0.02,
-                  }}
-                  className="absolute size-2 rounded-full"
-                  style={{
-                    backgroundColor: [
-                      "#10b981",
-                      "#3b82f6",
-                      "#f59e0b",
-                      "#ef4444",
-                      "#8b5cf6",
-                    ][Math.floor(Math.random() * 5)],
-                  }}
-                />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <SuccessConfetti show={showSuccess} />
 
         <CardHeader>
           <div className="flex items-center justify-between">

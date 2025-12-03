@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { shimmerVariants } from "@/lib/animations";
 
 interface ProductDetailsSkeletonProps {
   className?: string;
@@ -14,10 +12,11 @@ interface ProductDetailsSkeletonProps {
  */
 function AnimatedSkeleton({ className }: { className?: string }) {
   return (
-    <motion.div
-      className={cn("relative overflow-hidden rounded-lg bg-muted", className)}
-      animate="shimmer"
-      variants={shimmerVariants}
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-lg bg-muted animate-shimmer motion-reduce:animate-none",
+        className
+      )}
       style={{
         background: "linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--muted-foreground) / 0.1) 50%, hsl(var(--muted)) 100%)",
         backgroundSize: "200% 100%",

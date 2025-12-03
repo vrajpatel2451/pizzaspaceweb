@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,14 +76,15 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
     },
     ref
   ) => {
-    const shouldReduceMotion = useReducedMotion();
-    const [direction, setDirection] = React.useState<"up" | "down">("up");
+    const [direction, setDirection] = useState<"up" | "down">("up");
+    const [valueKey, setValueKey] = useState(0);
     const sizes = sizeConfig[size];
     const variants = variantConfig[variant];
 
     const handleDecrement = () => {
       if (value > min && !disabled) {
         setDirection("down");
+        setValueKey((k) => k + 1);
         onChange(value - 1);
       }
     };
@@ -91,41 +92,13 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
     const handleIncrement = () => {
       if (value < max && !disabled) {
         setDirection("up");
+        setValueKey((k) => k + 1);
         onChange(value + 1);
       }
     };
 
     const canDecrement = value > min && !disabled;
     const canIncrement = value < max && !disabled;
-
-    // Number animation variants - simplified for cleaner feel
-    const numberVariants = {
-      enter: (dir: "up" | "down") => ({
-        y: dir === "up" ? 8 : -8,
-        opacity: 0,
-      }),
-      center: {
-        y: 0,
-        opacity: 1,
-        transition: {
-          duration: 0.2,
-          ease: [0.4, 0.0, 0.2, 1] as const,
-        },
-      },
-      exit: (dir: "up" | "down") => ({
-        y: dir === "up" ? -8 : 8,
-        opacity: 0,
-        transition: {
-          duration: 0.15,
-          ease: [0.4, 0.0, 1, 1] as const,
-        },
-      }),
-    };
-
-    // Button press animation - more subtle
-    const buttonVariants = {
-      tap: { scale: 0.92 },
-    };
 
     return (
       <div
@@ -142,15 +115,14 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
         aria-label="Quantity selector"
       >
         {/* Decrement Button */}
-        <motion.button
+        <button
           type="button"
           onClick={handleDecrement}
           disabled={!canDecrement}
-          variants={shouldReduceMotion ? undefined : buttonVariants}
-          whileTap={canDecrement ? "tap" : undefined}
           className={cn(
-            "flex items-center justify-center rounded-full transition-colors",
+            "flex items-center justify-center rounded-full transition-all duration-150",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+            "active:scale-[0.92] motion-reduce:active:scale-100",
             sizes.button,
             variants.button,
             !canDecrement && variants.buttonDisabled
@@ -159,7 +131,7 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
           aria-disabled={!canDecrement}
         >
           <Minus className={sizes.icon} strokeWidth={2.5} aria-hidden="true" />
-        </motion.button>
+        </button>
 
         {/* Value Display with Animation */}
         <div
@@ -171,19 +143,18 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
           aria-live="polite"
           aria-atomic="true"
         >
-          <AnimatePresence mode="popLayout" custom={direction} initial={false}>
-            <motion.span
-              key={value}
-              custom={direction}
-              variants={shouldReduceMotion ? undefined : numberVariants}
-              initial={shouldReduceMotion ? undefined : "enter"}
-              animate="center"
-              exit={shouldReduceMotion ? undefined : "exit"}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              {value}
-            </motion.span>
-          </AnimatePresence>
+          <span
+            key={valueKey}
+            className={cn(
+              "absolute inset-0 flex items-center justify-center",
+              "transition-all duration-200 motion-reduce:transition-none",
+              valueKey > 0 && (direction === "up"
+                ? "animate-in fade-in-0 slide-in-from-bottom-2"
+                : "animate-in fade-in-0 slide-in-from-top-2")
+            )}
+          >
+            {value}
+          </span>
           {/* Invisible spacer for consistent width */}
           <span className="invisible" aria-hidden="true">
             {value}
@@ -191,15 +162,14 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
         </div>
 
         {/* Increment Button */}
-        <motion.button
+        <button
           type="button"
           onClick={handleIncrement}
           disabled={!canIncrement}
-          variants={shouldReduceMotion ? undefined : buttonVariants}
-          whileTap={canIncrement ? "tap" : undefined}
           className={cn(
-            "flex items-center justify-center rounded-full transition-colors",
+            "flex items-center justify-center rounded-full transition-all duration-150",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-0",
+            "active:scale-[0.92] motion-reduce:active:scale-100",
             sizes.button,
             variants.button,
             !canIncrement && variants.buttonDisabled
@@ -208,7 +178,7 @@ export const QuantityPill = React.forwardRef<HTMLDivElement, QuantityPillProps>(
           aria-disabled={!canIncrement}
         >
           <Plus className={sizes.icon} strokeWidth={2.5} aria-hidden="true" />
-        </motion.button>
+        </button>
       </div>
     );
   }

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface MenuSkeletonProps {
@@ -9,89 +8,45 @@ interface MenuSkeletonProps {
 
 function SkeletonCard({ index }: { index: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm"
+    <div
+      className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm animate-in fade-in-0 slide-in-from-bottom-2 duration-400 motion-reduce:animate-none"
+      style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Image skeleton */}
       <div className="relative aspect-square bg-slate-100 dark:bg-slate-800 overflow-hidden">
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/5 to-transparent"
-          animate={{
-            x: ["-100%", "100%"],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-white/5 to-transparent animate-shimmer" />
       </div>
 
       {/* Content skeleton */}
       <div className="p-4 sm:p-5 space-y-3">
         {/* Size info */}
         <div className="h-3 w-16 bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden">
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent"
-            animate={{
-              x: ["-100%", "100%"],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.1,
-            }}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent animate-shimmer"
+            style={{ animationDelay: "100ms" }}
           />
         </div>
 
         {/* Title */}
         <div className="h-5 w-3/4 bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden">
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent"
-            animate={{
-              x: ["-100%", "100%"],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.2,
-            }}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent animate-shimmer"
+            style={{ animationDelay: "200ms" }}
           />
         </div>
 
         {/* Description lines */}
         <div className="space-y-2">
           <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden">
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent"
-              animate={{
-                x: ["-100%", "100%"],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.3,
-              }}
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent animate-shimmer"
+              style={{ animationDelay: "300ms" }}
             />
           </div>
           <div className="h-3 w-5/6 bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden">
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent"
-              animate={{
-                x: ["-100%", "100%"],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.4,
-              }}
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent animate-shimmer"
+              style={{ animationDelay: "400ms" }}
             />
           </div>
         </div>
@@ -109,23 +64,30 @@ function SkeletonCard({ index }: { index: number }) {
         {/* Price and button */}
         <div className="flex items-center justify-between pt-2">
           <div className="h-7 w-20 bg-orange-100 dark:bg-orange-500/10 rounded-full relative overflow-hidden">
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-200/50 dark:via-orange-500/10 to-transparent"
-              animate={{
-                x: ["-100%", "100%"],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-orange-200/50 dark:via-orange-500/10 to-transparent animate-shimmer"
+              style={{ animationDelay: "500ms" }}
             />
           </div>
           <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full" />
         </div>
       </div>
-    </motion.div>
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-shimmer {
+            animation: none;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -154,27 +116,29 @@ export function TabsSkeleton() {
   return (
     <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10 sm:mb-14">
       {TAB_WIDTHS.map((width, i) => (
-        <motion.div
+        <div
           key={i}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-          className="h-11 px-7 py-3 bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden"
-          style={{ width: `${width}px` }}
+          className="h-11 px-7 py-3 bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-300 motion-reduce:animate-none"
+          style={{ width: `${width}px`, animationDelay: `${i * 50}ms` }}
         >
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent"
-            animate={{
-              x: ["-100%", "100%"],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/5 to-transparent animate-shimmer" />
+        </div>
       ))}
+
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-shimmer {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }

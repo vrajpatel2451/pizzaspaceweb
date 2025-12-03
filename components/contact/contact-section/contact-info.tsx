@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ContactInfoCardProps {
   icon: React.ReactNode;
@@ -13,50 +14,57 @@ interface ContactInfoCardProps {
 
 function ContactInfoCard({ icon, title, content, ariaLabel, delay = 0 }: ContactInfoCardProps) {
   const contentArray = Array.isArray(content) ? content : [content];
-  const shouldReduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => setIsVisible(true), delay * 1000);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-50px" }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [delay]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -30 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{
-        duration: shouldReduceMotion ? 0 : 0.5,
-        delay: shouldReduceMotion ? 0 : delay,
-        ease: "easeOut",
-      }}
-      whileHover={shouldReduceMotion ? {} : { x: 4 }}
-      className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-md dark:shadow-2xl border border-gray-100 dark:border-slate-700 hover:shadow-xl dark:hover:shadow-2xl hover:border-orange-200 dark:hover:border-orange-800/50 transition-all duration-300"
+    <div
+      ref={cardRef}
+      className={cn(
+        "bg-white dark:bg-slate-800 rounded-xl p-6 shadow-md dark:shadow-2xl border border-gray-100 dark:border-slate-700 hover:shadow-xl dark:hover:shadow-2xl hover:border-orange-200 dark:hover:border-orange-800/50 transition-all duration-300",
+        "hover:translate-x-1 motion-reduce:hover:translate-x-0",
+        isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-7.5"
+      )}
+      style={{ transitionDuration: "500ms" }}
       aria-label={ariaLabel}
     >
       <div className="flex items-start gap-4">
-        <motion.div
-          initial={{ scale: shouldReduceMotion ? 1 : 0 }}
-          whileInView={{ scale: 1 }}
-          viewport={{ once: true }}
-          transition={{
-            duration: shouldReduceMotion ? 0 : 0.4,
-            delay: shouldReduceMotion ? 0 : delay + 0.1,
-            type: "spring",
-            stiffness: 260,
-            damping: 20,
-          }}
-          whileHover={shouldReduceMotion ? {} : { scale: 1.1, rotate: 5 }}
-          className="flex-shrink-0 w-12 h-12 bg-orange-100 dark:bg-orange-950/30 rounded-lg flex items-center justify-center transition-colors duration-300 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/40"
+        <div
+          className={cn(
+            "flex-shrink-0 w-12 h-12 bg-orange-100 dark:bg-orange-950/30 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/40",
+            "hover:scale-110 hover:rotate-[5deg] motion-reduce:hover:scale-100 motion-reduce:hover:rotate-0",
+            isVisible ? "scale-100" : "scale-0"
+          )}
+          style={{ transitionDelay: isVisible ? `${delay * 1000 + 100}ms` : "0ms" }}
         >
           <div className="text-orange-500 dark:text-orange-400">
             {icon}
           </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{
-            duration: shouldReduceMotion ? 0 : 0.4,
-            delay: shouldReduceMotion ? 0 : delay + 0.2,
-          }}
-          className="flex-1 min-w-0"
+        </div>
+        <div
+          className={cn(
+            "flex-1 min-w-0 transition-all duration-400 motion-reduce:transition-none",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"
+          )}
+          style={{ transitionDelay: isVisible ? `${delay * 1000 + 200}ms` : "0ms" }}
         >
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-2">
             {title}
@@ -69,9 +77,9 @@ function ContactInfoCard({ icon, title, content, ariaLabel, delay = 0 }: Contact
               {line}
             </p>
           ))}
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

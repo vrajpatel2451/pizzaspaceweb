@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { CustomImage } from "@/components/ui/custom-image";
 import type { ProductImageSectionProps } from "@/types/product-details";
 import type { ProductType } from "@/types/product";
 import { cn } from "@/lib/utils";
-import { imageLoadVariants } from "@/lib/animations";
 import {
   Carousel,
   CarouselContent,
@@ -17,10 +16,10 @@ import {
 // Product Type Badge Component
 function ProductTypeBadge({
   productType,
-  shouldReduceMotion,
+  isVisible,
 }: {
   productType: ProductType;
-  shouldReduceMotion: boolean;
+  isVisible: boolean;
 }) {
   const badgeColor =
     productType === "veg"
@@ -33,17 +32,12 @@ function ProductTypeBadge({
     productType === "veg" ? "Veg" : productType === "vegan" ? "Vegan" : "Non-Veg";
 
   return (
-    <motion.div
-      className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10"
-      initial={{ opacity: 0, scale: 0.8, y: -10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{
-        delay: shouldReduceMotion ? 0 : 0.2,
-        duration: shouldReduceMotion ? 0 : 0.3,
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-      }}
+    <div
+      className={cn(
+        "absolute top-2 left-2 sm:top-3 sm:left-3 z-10 transition-all duration-300 motion-reduce:transition-none",
+        isVisible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-80 -translate-y-2.5"
+      )}
+      style={{ transitionDelay: "200ms" }}
     >
       <div
         className={cn(
@@ -51,20 +45,10 @@ function ProductTypeBadge({
           badgeColor
         )}
       >
-        <motion.div
-          className="size-1.5 rounded-full bg-white"
-          animate={{
-            scale: shouldReduceMotion ? 1 : [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            repeatDelay: 2,
-          }}
-        />
+        <div className="size-1.5 rounded-full bg-white animate-pulse motion-reduce:animate-none" />
         <span>{badgeText}</span>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -74,11 +58,11 @@ export function ProductImageSection({
   productType,
   className,
 }: ProductImageSectionProps) {
-  const shouldReduceMotion = useReducedMotion();
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-  const [carouselApi, setCarouselApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Use first image or empty string
   const primaryImage = images?.[0] || "";
@@ -86,13 +70,8 @@ export function ProductImageSection({
   // Check if product has multiple images
   const hasMultipleImages = images && images.length > 1;
 
-  // Simplified variants for reduced motion
-  const animationVariants = shouldReduceMotion
-    ? { loading: { opacity: 1 }, loaded: { opacity: 1 } }
-    : imageLoadVariants;
-
   // Effect to update carousel pagination
-  React.useEffect(() => {
+  useEffect(() => {
     if (!carouselApi) return;
 
     setCount(carouselApi.scrollSnapList().length);
@@ -102,6 +81,11 @@ export function ProductImageSection({
       setCurrent(carouselApi.selectedScrollSnap());
     });
   }, [carouselApi]);
+
+  // Trigger visibility after mount
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
 
   return (
     <div className={cn("relative w-full", className)}>
@@ -121,27 +105,16 @@ export function ProductImageSection({
                     <div className="relative aspect-[4/3] sm:aspect-video w-full">
                       {/* Loading skeleton background for each image */}
                       {!imageLoaded && index === current && (
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-br from-muted via-muted-foreground/10 to-muted"
-                          animate={{
-                            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                          style={{
-                            backgroundSize: "200% 200%",
-                          }}
+                        <div
+                          className="absolute inset-0 bg-gradient-to-br from-muted via-muted-foreground/10 to-muted animate-pulse"
                         />
                       )}
 
-                      <motion.div
-                        variants={animationVariants}
-                        initial="loading"
-                        animate={imageLoaded ? "loaded" : "loading"}
-                        className="relative w-full h-full"
+                      <div
+                        className={cn(
+                          "relative w-full h-full transition-opacity duration-300 motion-reduce:transition-none",
+                          imageLoaded ? "opacity-100" : "opacity-0"
+                        )}
                       >
                         <CustomImage
                           src={image}
@@ -152,13 +125,13 @@ export function ProductImageSection({
                           priority={index === 0}
                           onLoad={() => index === 0 && setImageLoaded(true)}
                         />
-                      </motion.div>
+                      </div>
 
                       {/* Show badge only on first image */}
                       {index === 0 && (
                         <ProductTypeBadge
                           productType={productType}
-                          shouldReduceMotion={shouldReduceMotion}
+                          isVisible={isVisible}
                         />
                       )}
                     </div>
@@ -189,28 +162,17 @@ export function ProductImageSection({
           <>
             {/* Loading skeleton background */}
             {!imageLoaded && (
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-muted via-muted-foreground/10 to-muted"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                style={{
-                  backgroundSize: "200% 200%",
-                }}
+              <div
+                className="absolute inset-0 bg-gradient-to-br from-muted via-muted-foreground/10 to-muted animate-pulse"
               />
             )}
 
             {/* Animated Image */}
-            <motion.div
-              variants={animationVariants}
-              initial="loading"
-              animate={imageLoaded ? "loaded" : "loading"}
-              className="relative w-full h-full"
+            <div
+              className={cn(
+                "relative w-full h-full transition-opacity duration-300 motion-reduce:transition-none",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
             >
               <CustomImage
                 src={primaryImage}
@@ -221,12 +183,12 @@ export function ProductImageSection({
                 priority
                 onLoad={() => setImageLoaded(true)}
               />
-            </motion.div>
+            </div>
 
             {/* Veg/Non-veg Badge Overlay */}
             <ProductTypeBadge
               productType={productType}
-              shouldReduceMotion={shouldReduceMotion}
+              isVisible={isVisible}
             />
           </>
         )}

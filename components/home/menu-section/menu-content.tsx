@@ -1,31 +1,36 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ProductResponse, CategoryResponse, PaginationMeta } from "@/types";
 import { MenuTabs } from "./menu-tabs";
 import { ProductGrid } from "./product-grid";
 import { MenuSkeleton } from "./menu-skeleton";
+import { cn } from "@/lib/utils";
 
 interface MenuContentProps {
   initialProducts: ProductResponse[];
-  categories: CategoryResponse[];
   initialMeta: PaginationMeta;
+  categories: CategoryResponse[];
+  initialCategoryId?: string;
 }
 
 export function MenuContent({
   initialProducts,
-  categories,
   initialMeta,
+  categories,
+  initialCategoryId,
 }: MenuContentProps) {
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState(
+    initialCategoryId || "all"
+  );
   const [products, setProducts] = useState(initialProducts);
   const [meta, setMeta] = useState(initialMeta);
   const [loading, setLoading] = useState(false);
-  const [isInitialRender, setIsInitialRender] = useState(true);
 
-  const fetchProducts = useCallback(async (categoryId: string) => {
+  const handleCategoryChange = useCallback(async (categoryId: string) => {
+    setActiveCategory(categoryId);
     setLoading(true);
+
     try {
       const params = new URLSearchParams({
         page: "1",
@@ -37,13 +42,9 @@ export function MenuContent({
       }
 
       const res = await fetch(`/api/products?${params.toString()}`);
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch products");
-      }
+      if (!res.ok) throw new Error("Failed to fetch products");
 
       const data = await res.json();
-
       setProducts(data.data.data);
       setMeta(data.data.meta);
     } catch (error) {
@@ -54,22 +55,13 @@ export function MenuContent({
   }, []);
 
   useEffect(() => {
-    // Skip initial fetch since we already have data from server
-    if (isInitialRender) {
-      setIsInitialRender(false);
-      return;
+    if (initialCategoryId && initialCategoryId !== activeCategory) {
+      handleCategoryChange(initialCategoryId);
     }
-
-    fetchProducts(activeCategory);
-  }, [activeCategory, fetchProducts, isInitialRender]);
-
-  const handleCategoryChange = (categoryId: string) => {
-    if (categoryId === activeCategory) return;
-    setActiveCategory(categoryId);
-  };
+  }, [initialCategoryId, activeCategory, handleCategoryChange]);
 
   return (
-    <div className="relative">
+    <div className="space-y-10 sm:space-y-14">
       {/* Category Tabs */}
       <MenuTabs
         categories={categories}
@@ -78,33 +70,27 @@ export function MenuContent({
       />
 
       {/* Products Grid */}
-      <AnimatePresence mode="wait">
+      <div className="relative">
         {loading ? (
-          <motion.div
+          <div
             key="skeleton"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            className="animate-in fade-in-0 duration-200 motion-reduce:animate-none"
           >
             <MenuSkeleton />
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
+          <div
             key={`products-${activeCategory}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+            className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300 motion-reduce:animate-none"
           >
             <ProductGrid
               initialProducts={products}
               initialMeta={meta}
               categoryId={activeCategory === "all" ? undefined : activeCategory}
             />
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -3,14 +3,12 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useScroll } from "@/hooks/use-scroll";
 import { useAuthStore } from "@/store/auth-store";
 import { useDeviceId, useIsDeviceHydrated } from "@/store/device-store";
 import { useStore } from "@/lib/contexts/store-context";
 import { useCart } from "@/lib/hooks/use-cart";
 import { cn } from "@/lib/utils";
-import { Package } from "lucide-react";
 import { Logo } from "./logo";
 import { SearchCommand } from "./search-command";
 import { ThemeToggle } from "./theme-toggle";
@@ -35,19 +33,6 @@ const navLinks: NavLink[] = [
 interface HeaderClientProps {
   className?: string;
 }
-
-// Navigation link hover animation
-const linkUnderlineVariants: Variants = {
-  rest: { scaleX: 0, opacity: 0 },
-  hover: {
-    scaleX: 1,
-    opacity: 1,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  },
-};
 
 export function HeaderClient({ className }: HeaderClientProps) {
   const pathname = usePathname();
@@ -113,7 +98,7 @@ export function HeaderClient({ className }: HeaderClientProps) {
   const isHomePage = pathname === "/";
 
   return (
-    <motion.header
+    <header
       className={cn(
         "fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300 ease-in-out",
         // Base styles
@@ -122,17 +107,10 @@ export function HeaderClient({ className }: HeaderClientProps) {
         scrolled || !isHomePage
           ? "bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-sm"
           : "bg-white/20 dark:bg-transparent border-slate-200/50 dark:border-transparent backdrop-blur-sm",
+        // Entry animation
+        "animate-slide-in-top",
         className
       )}
-      initial={{ y: -100, opacity: 0 }}
-      animate={{
-        y: 0,
-        opacity: 1,
-        transition: {
-          duration: 0.5,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        },
-      }}
       role="banner"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,13 +128,7 @@ export function HeaderClient({ className }: HeaderClientProps) {
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
-                <motion.div
-                  key={link.href}
-                  initial="rest"
-                  whileHover="hover"
-                  animate="rest"
-                  className="relative"
-                >
+                <div key={link.href} className="relative group">
                   <Link
                     href={link.href}
                     className={cn(
@@ -181,46 +153,26 @@ export function HeaderClient({ className }: HeaderClientProps) {
 
                     {/* Animated underline for non-active links on hover */}
                     {!isActive && (
-                      <motion.span
-                        variants={linkUnderlineVariants}
-                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 rounded-full bg-current origin-center"
+                      <span
+                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 rounded-full bg-current origin-center scale-x-0 opacity-0 transition-all duration-300 group-hover:scale-x-100 group-hover:opacity-100"
                       />
                     )}
                   </Link>
 
                   {/* Active indicator dot */}
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.span
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        transition={{
-                          duration: 0.2,
-                          ease: "easeOut",
-                        }}
-                      />
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                  {isActive && (
+                    <span
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary animate-pop-in"
+                    />
+                  )}
+                </div>
               );
             })}
           </nav>
 
           {/* Right Side Actions */}
-          <motion.div
-            className="flex items-center gap-1 sm:gap-2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{
-              opacity: 1,
-              x: 0,
-              transition: {
-                duration: 0.5,
-                delay: 0.2,
-                ease: "easeOut",
-              },
-            }}
+          <div
+            className="flex items-center gap-1 sm:gap-2 animate-fade-in-right animation-delay-200"
           >
             {/* Search */}
             <SearchCommand
@@ -289,9 +241,9 @@ export function HeaderClient({ className }: HeaderClientProps) {
                   : ""
               )}
             />
-          </motion.div>
+          </div>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }

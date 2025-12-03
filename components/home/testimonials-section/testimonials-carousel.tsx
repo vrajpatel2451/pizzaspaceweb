@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { motion, AnimatePresence } from "framer-motion";
 import { TestimonialCard, type Testimonial } from "./testimonial-card";
 import { CarouselControls } from "./carousel-controls";
 
@@ -166,23 +165,21 @@ export function TestimonialsCarousel() {
         aria-label="Customer testimonials"
       >
         <div className="flex">
-          <AnimatePresence mode="wait">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                className="flex-[0_0_100%] min-w-0 md:flex-[0_0_80%] lg:flex-[0_0_60%] px-2 md:px-4"
-                role="group"
-                aria-roledescription="slide"
-                aria-label={`${index + 1} of ${testimonials.length}`}
-                aria-hidden={index !== selectedIndex}
-              >
-                <TestimonialCard
-                  testimonial={testimonial}
-                  isActive={index === selectedIndex}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {testimonials.map((testimonial, index) => (
+            <div
+              key={testimonial.id}
+              className="flex-[0_0_100%] min-w-0 md:flex-[0_0_80%] lg:flex-[0_0_60%] px-2 md:px-4"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${index + 1} of ${testimonials.length}`}
+              aria-hidden={index !== selectedIndex}
+            >
+              <TestimonialCard
+                testimonial={testimonial}
+                isActive={index === selectedIndex}
+              />
+            </div>
+          ))}
         </div>
       </div>
 

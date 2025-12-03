@@ -2,7 +2,6 @@
 
 import React, { useCallback, useState, useEffect } from "react";
 import { Upload, X, ImageIcon, Check, CloudUpload, Sparkles } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CustomImage } from "@/components/ui/custom-image";
@@ -31,7 +30,6 @@ export function ImageUpload({
   const [isDragging, setIsDragging] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const shouldReduceMotion = useReducedMotion();
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -160,58 +158,38 @@ export function ImageUpload({
     <div className={cn("space-y-3", className)}>
       {/* Upload Area */}
       {!isMaxReached && (
-        <motion.div
+        <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={cn(
-            "relative rounded-xl border-2 border-dashed transition-all overflow-hidden",
+            "relative rounded-xl border-2 border-dashed transition-all overflow-hidden duration-200",
             isDragging
-              ? "border-orange-500 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/10"
+              ? "border-orange-500 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/10 scale-[1.02]"
               : error
               ? "border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/20"
               : "border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30",
             disabled && "opacity-50 cursor-not-allowed",
             !disabled && "hover:border-orange-400 dark:hover:border-orange-600 hover:bg-orange-50/50 dark:hover:bg-orange-500/5"
           )}
-          animate={
-            isDragging && !shouldReduceMotion
-              ? {
-                  scale: 1.02,
-                }
-              : {}
-          }
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
           {/* Background decoration when dragging */}
-          <AnimatePresence>
-            {isDragging && (
-              <motion.div
-                className="absolute inset-0 pointer-events-none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+          {isDragging && (
+            <div className="absolute inset-0 pointer-events-none">
+              {/* Animated gradient border effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 via-amber-400/20 to-orange-400/20 animate-pulse" />
+              {/* Corner sparkles */}
+              <div className="absolute top-3 left-3 animate-spin-slow motion-reduce:animate-none">
+                <Sparkles className="w-4 h-4 text-orange-400/60" />
+              </div>
+              <div
+                className="absolute top-3 right-3 animate-spin-slow motion-reduce:animate-none"
+                style={{ animationDelay: "0.5s", animationDirection: "reverse" }}
               >
-                {/* Animated gradient border effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 via-amber-400/20 to-orange-400/20 animate-pulse" />
-                {/* Corner sparkles */}
-                <motion.div
-                  className="absolute top-3 left-3"
-                  animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Sparkles className="w-4 h-4 text-orange-400/60" />
-                </motion.div>
-                <motion.div
-                  className="absolute top-3 right-3"
-                  animate={{ rotate: -360, scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                >
-                  <Sparkles className="w-4 h-4 text-amber-400/60" />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <Sparkles className="w-4 h-4 text-amber-400/60" />
+              </div>
+            </div>
+          )}
 
           <label
             htmlFor="image-upload"
@@ -221,34 +199,31 @@ export function ImageUpload({
             )}
             aria-label="Upload images - Click or drag and drop to add files"
           >
-            <motion.div
+            <div
               className={cn(
-                "rounded-full p-4 mb-4 transition-colors duration-300",
+                "rounded-full p-4 mb-4 transition-all duration-300",
                 isDragging
-                  ? "bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-500/20 dark:to-amber-500/20 shadow-lg shadow-orange-200/50 dark:shadow-orange-500/10"
+                  ? "bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-500/20 dark:to-amber-500/20 shadow-lg shadow-orange-200/50 dark:shadow-orange-500/10 -translate-y-1"
                   : "bg-slate-100 dark:bg-slate-800"
               )}
-              animate={isDragging ? { y: [0, -4, 0] } : {}}
-              transition={{ duration: 0.5, repeat: isDragging ? Infinity : 0 }}
             >
               {isDragging ? (
                 <CloudUpload className="w-8 h-8 text-orange-500" />
               ) : (
                 <Upload className="w-8 h-8 text-slate-500 dark:text-slate-400" />
               )}
-            </motion.div>
+            </div>
 
-            <motion.p
+            <p
               className={cn(
-                "text-sm font-semibold mb-1.5 transition-colors duration-300",
+                "text-sm font-semibold mb-1.5 transition-all duration-300",
                 isDragging
-                  ? "text-orange-600 dark:text-orange-400"
+                  ? "text-orange-600 dark:text-orange-400 scale-105"
                   : "text-slate-700 dark:text-slate-300"
               )}
-              animate={isDragging ? { scale: 1.05 } : { scale: 1 }}
             >
               {isDragging ? "Drop your images here!" : "Click to upload or drag and drop"}
-            </motion.p>
+            </p>
 
             <p className="text-xs text-slate-500 dark:text-slate-400">
               PNG, JPG, GIF up to {maxSizeMB}MB
@@ -287,98 +262,69 @@ export function ImageUpload({
           </label>
 
           {/* Upload Progress Indicator */}
-          <AnimatePresence>
-            {uploadingFiles.length > 0 && (
-              <motion.div
-                className="absolute inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-xl flex items-center justify-center z-20"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                <motion.div
-                  className="flex flex-col items-center gap-4 w-48"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                >
-                  {/* Progress circle */}
-                  <div className="relative w-16 h-16">
-                    {/* Background circle */}
-                    <svg className="w-full h-full -rotate-90">
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r="28"
-                        fill="none"
-                        strokeWidth="4"
-                        className="stroke-slate-200 dark:stroke-slate-700"
-                      />
-                      <motion.circle
-                        cx="32"
-                        cy="32"
-                        r="28"
-                        fill="none"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        className="stroke-orange-500"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: uploadProgress / 100 }}
-                        transition={{ duration: 0.1 }}
-                        style={{
-                          strokeDasharray: "175.93",
-                          strokeDashoffset: 0,
-                        }}
-                      />
-                    </svg>
-                    {/* Center content */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <AnimatePresence mode="wait">
-                        {uploadProgress < 100 ? (
-                          <motion.span
-                            key="progress"
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.5 }}
-                            className="text-sm font-bold text-orange-500"
-                          >
-                            {uploadProgress}%
-                          </motion.span>
-                        ) : (
-                          <motion.div
-                            key="check"
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: [0, 1.2, 1] }}
-                            className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center"
-                          >
-                            <Check className="w-5 h-5 text-white" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+          {uploadingFiles.length > 0 && (
+            <div
+              className={cn(
+                "absolute inset-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-xl flex items-center justify-center z-20 transition-opacity duration-200",
+                uploadingFiles.length > 0 ? "opacity-100" : "opacity-0"
+              )}
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <div className="flex flex-col items-center gap-4 w-48 transition-all duration-200">
+                {/* Progress circle */}
+                <div className="relative w-16 h-16">
+                  {/* Background circle */}
+                  <svg className="w-full h-full -rotate-90">
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      fill="none"
+                      strokeWidth="4"
+                      className="stroke-slate-200 dark:stroke-slate-700"
+                    />
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      fill="none"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      className="stroke-orange-500 transition-all duration-100"
+                      style={{
+                        strokeDasharray: "175.93",
+                        strokeDashoffset: 175.93 - (175.93 * uploadProgress / 100),
+                      }}
+                    />
+                  </svg>
+                  {/* Center content */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    {uploadProgress < 100 ? (
+                      <span className="text-sm font-bold text-orange-500 transition-all duration-150">
+                        {uploadProgress}%
+                      </span>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center transition-all duration-200 scale-100">
+                        <Check className="w-5 h-5 text-white" />
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  <motion.div
-                    className="text-center"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      {uploadProgress < 100 ? "Uploading..." : "Done!"}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {uploadingFiles.length} {uploadingFiles.length === 1 ? "file" : "files"}
-                    </p>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    {uploadProgress < 100 ? "Uploading..." : "Done!"}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {uploadingFiles.length} {uploadingFiles.length === 1 ? "file" : "files"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Error Message */}
@@ -387,55 +333,42 @@ export function ImageUpload({
       )}
 
       {/* File Count Info */}
-      <AnimatePresence>
-        {value.length > 0 && (
-          <motion.p
-            className="text-xs text-slate-600 dark:text-slate-400"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {value.length} of {maxFiles} files selected
-          </motion.p>
-        )}
-      </AnimatePresence>
+      {value.length > 0 && (
+        <p
+          className={cn(
+            "text-xs text-slate-600 dark:text-slate-400 transition-all duration-200",
+            value.length > 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"
+          )}
+        >
+          {value.length} of {maxFiles} files selected
+        </p>
+      )}
 
       {/* Preview Grid */}
-      <AnimatePresence mode="popLayout">
-        {value.length > 0 && (
-          <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            role="list"
-            aria-label="Uploaded images"
-          >
-            {value.map((file, index) => (
-              <motion.div
-                key={`${file.name}-${index}`}
-                layout
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                }}
-              >
-                <ImagePreview
-                  file={file}
-                  onRemove={() => removeFile(index)}
-                  disabled={disabled}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {value.length > 0 && (
+        <div
+          className={cn(
+            "grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 transition-opacity duration-200",
+            value.length > 0 ? "opacity-100" : "opacity-0"
+          )}
+          role="list"
+          aria-label="Uploaded images"
+        >
+          {value.map((file, index) => (
+            <div
+              key={`${file.name}-${index}`}
+              className="transition-all duration-200"
+              style={{ transitionDelay: `${index * 50}ms` }}
+            >
+              <ImagePreview
+                file={file}
+                onRemove={() => removeFile(index)}
+                disabled={disabled}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -466,19 +399,17 @@ function ImagePreview({ file, onRemove, disabled }: ImagePreviewProps) {
   }, [file]);
 
   return (
-    <motion.div
-      className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800"
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    <div
+      className="relative group aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 transition-transform duration-200 hover:scale-105"
       role="listitem"
     >
       {/* Image Preview */}
       {preview ? (
-        <motion.div
-          className="w-full h-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
+        <div
+          className={cn(
+            "w-full h-full transition-opacity duration-300",
+            isLoaded ? "opacity-100" : "opacity-0"
+          )}
         >
           <CustomImage
             src={preview}
@@ -487,16 +418,11 @@ function ImagePreview({ file, onRemove, disabled }: ImagePreviewProps) {
             className="object-cover"
             onLoad={() => setIsLoaded(true)}
           />
-        </motion.div>
+        </div>
       ) : (
-        <motion.div
-          className="w-full h-full flex items-center justify-center"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="w-full h-full flex items-center justify-center transition-all duration-300">
           <ImageIcon className="w-8 h-8 text-slate-400" />
-        </motion.div>
+        </div>
       )}
 
       {/* Remove Button - Minimum 44x44px touch target */}
@@ -513,14 +439,15 @@ function ImagePreview({ file, onRemove, disabled }: ImagePreviewProps) {
       </Button>
 
       {/* File Name Overlay */}
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.3 }}
+      <div
+        className={cn(
+          "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 transition-all duration-300",
+          isLoaded ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+        )}
+        style={{ transitionDelay: "200ms" }}
       >
         <p className="text-xs text-white truncate">{file.name}</p>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

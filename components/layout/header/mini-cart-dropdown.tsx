@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { ShoppingBag, X, Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Popover,
   PopoverContent,
@@ -20,7 +19,6 @@ import {
 } from "@/store/cart-store";
 import { CartBadge } from "./cart-badge";
 import { formatNumber } from "@/lib/utils/format";
-// import { formatCurrency } from "@/lib/utils/format";
 
 export interface MiniCartDropdownProps {
   className?: string;
@@ -60,7 +58,8 @@ export function MiniCartDropdown({ className }: MiniCartDropdownProps) {
         sideOffset={8}
         className={cn(
           "w-[360px] sm:w-[400px] p-0 overflow-hidden",
-          "bg-background border shadow-xl rounded-xl"
+          "bg-background border shadow-xl rounded-xl",
+          "animate-modal-in"
         )}
       >
         {/* Header */}
@@ -209,34 +208,26 @@ function CartItemsList({
 }: CartItemsListProps) {
   return (
     <div className="divide-y">
-      <AnimatePresence mode="popLayout">
-        {items.map((item, index) => (
-          <motion.div
-            key={item._id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2, delay: index * 0.05 }}
-          >
-            <CartItemPreview item={item} />
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      {items.map((item, index) => (
+        <div
+          key={item._id}
+          className="animate-fade-in-up"
+          style={{ animationDelay: `${index * 50}ms` }}
+        >
+          <CartItemPreview item={item} />
+        </div>
+      ))}
 
       {/* Show more items indicator */}
       {hasMoreItems && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="py-3 px-4 bg-muted/30 text-center"
-        >
+        <div className="py-3 px-4 bg-muted/30 text-center animate-fade-in">
           <Link
             href="/cart"
             className="text-sm text-primary hover:underline font-medium"
           >
             + {remainingCount} more {remainingCount === 1 ? "item" : "items"}
           </Link>
-        </motion.div>
+        </div>
       )}
     </div>
   );
@@ -253,10 +244,6 @@ interface CartItemPreviewProps {
 }
 
 function CartItemPreview({ item }: CartItemPreviewProps) {
-  // In a real implementation, you would fetch item details (name, price, image)
-  // For now, we'll use placeholder data
-  // TODO: Integrate with product API to fetch item details
-
   return (
     <div className="flex items-start gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
       {/* Item Image Placeholder */}

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MapPin, Search, X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { StoreResponse, PaginationMeta } from "@/types";
 import { StoreCard } from "@/components/home/stores-section/store-card";
 import { StoresSkeleton } from "@/components/home/stores-section/stores-skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
 interface StoresGridSectionProps {
   stores: StoreResponse[];
@@ -29,7 +29,29 @@ export function StoresGridSection({
 }: StoresGridSectionProps) {
   const [inputValue, setInputValue] = useState(searchQuery);
   const [isFocused, setIsFocused] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [showClearButton, setShowClearButton] = useState(!!inputValue);
+  const sectionRef = useRef<HTMLElement>(null);
   const debouncedSearch = useDebounce(inputValue, 400);
+
+  // Intersection observer for visibility
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-50px" }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   // Trigger search when debounced value changes
   useEffect(() => {
@@ -37,6 +59,16 @@ export function StoresGridSection({
       onSearchChange(debouncedSearch);
     }
   }, [debouncedSearch, searchQuery, onSearchChange]);
+
+  // Update clear button visibility with slight delay for animation
+  useEffect(() => {
+    if (inputValue) {
+      setShowClearButton(true);
+    } else {
+      const timer = setTimeout(() => setShowClearButton(false), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [inputValue]);
 
   // Handle input change
   const handleInputChange = useCallback((value: string) => {
@@ -94,17 +126,17 @@ export function StoresGridSection({
 
   return (
     <section
+      ref={sectionRef}
       className="py-12 sm:py-16 lg:py-24 bg-gradient-to-b from-white to-orange-50/30 dark:from-slate-900 dark:to-slate-900"
       aria-labelledby="stores-grid-heading"
     >
       <div className="container mx-auto px-4 lg:px-6">
         {/* Section Header */}
-        <motion.div
-          className="text-center mb-10 sm:mb-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+        <div
+          className={cn(
+            "text-center mb-10 sm:mb-14 transition-all duration-500",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
         >
           {/* Badge */}
           <div className="mb-4">
@@ -150,15 +182,14 @@ export function StoresGridSection({
             <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
             <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
           </div>
-        </motion.div>
+        </div>
 
         {/* Search Bar */}
-        <motion.div
-          className="max-w-xl mx-auto mb-10 sm:mb-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+        <div
+          className={cn(
+            "max-w-xl mx-auto mb-10 sm:mb-14 transition-all duration-500 delay-100",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          )}
         >
           <div
             className={`
@@ -200,29 +231,19 @@ export function StoresGridSection({
               "
               aria-label="Search stores"
             />
-            <AnimatePresence>
-              {inputValue && (
-                <motion.button
-                  type="button"
-                  onClick={handleClearSearch}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
-                  className="
-                    mr-3 p-2
-                    rounded-full
-                    bg-gray-100 dark:bg-slate-700
-                    hover:bg-gray-200 dark:hover:bg-slate-600
-                    text-gray-500 dark:text-gray-400
-                    transition-colors
-                  "
-                  aria-label="Clear search"
-                >
-                  <X className="w-4 h-4" aria-hidden="true" />
-                </motion.button>
-              )}
-            </AnimatePresence>
+            {showClearButton && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className={cn(
+                  "mr-3 p-2 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-400 transition-all duration-150",
+                  inputValue ? "opacity-100 scale-100" : "opacity-0 scale-80"
+                )}
+                aria-label="Clear search"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            )}
           </div>
 
           {/* Results Count */}
@@ -239,168 +260,167 @@ export function StoresGridSection({
               )}
             </span>
           </div>
-        </motion.div>
+        </div>
 
         {/* Stores Grid */}
-        <AnimatePresence mode="wait">
-          {stores.length > 0 ? (
-            <motion.div
-              key="grid"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 ${isLoading ? 'opacity-50' : ''}`}>
-                {stores.map((store, index) => (
-                  <motion.div
-                    key={store._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                  >
-                    <StoreCard store={store} />
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {meta.totalPages > 1 && (
-                <motion.nav
-                  className="mt-12 flex justify-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  aria-label="Stores pagination"
+        {stores.length > 0 ? (
+          <div
+            className={cn(
+              "transition-opacity duration-300",
+              isVisible ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <div className={cn(
+              "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8",
+              isLoading && "opacity-50"
+            )}>
+              {stores.map((store, index) => (
+                <div
+                  key={store._id}
+                  className={cn(
+                    "transition-all duration-400",
+                    isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                  )}
+                  style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}
                 >
-                  <div className="flex items-center gap-2">
-                    {/* Previous Button */}
-                    <button
-                      type="button"
-                      onClick={() => onPageChange(currentPage - 1)}
-                      disabled={!meta.hasPrevPage || isLoading}
-                      className={`
-                        flex items-center gap-1 px-4 py-2.5
-                        rounded-xl font-medium text-sm
-                        transition-all duration-200
-                        ${meta.hasPrevPage && !isLoading
-                          ? 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:text-orange-600 dark:hover:text-orange-400 shadow-sm'
-                          : 'bg-gray-100 dark:bg-slate-800/50 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                        }
-                      `}
-                      aria-label="Previous page"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      <span className="hidden sm:inline">Previous</span>
-                    </button>
+                  <StoreCard store={store} />
+                </div>
+              ))}
+            </div>
 
-                    {/* Page Numbers */}
-                    <div className="flex items-center gap-1">
-                      {getPageNumbers().map((page, index) => (
-                        page === "ellipsis" ? (
-                          <span
-                            key={`ellipsis-${index}`}
-                            className="px-2 text-gray-400 dark:text-gray-500"
-                          >
-                            ...
-                          </span>
-                        ) : (
-                          <button
-                            key={page}
-                            type="button"
-                            onClick={() => onPageChange(page)}
-                            disabled={isLoading}
-                            className={`
-                              w-10 h-10 rounded-xl font-medium text-sm
-                              transition-all duration-200
-                              ${page === currentPage
-                                ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30'
-                                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:text-orange-600 dark:hover:text-orange-400 shadow-sm'
-                              }
-                              ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
-                            `}
-                            aria-label={`Page ${page}`}
-                            aria-current={page === currentPage ? "page" : undefined}
-                          >
-                            {page}
-                          </button>
-                        )
-                      ))}
-                    </div>
+            {/* Pagination */}
+            {meta.totalPages > 1 && (
+              <nav
+                className={cn(
+                  "mt-12 flex justify-center transition-all duration-500 delay-200",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                )}
+                aria-label="Stores pagination"
+              >
+                <div className="flex items-center gap-2">
+                  {/* Previous Button */}
+                  <button
+                    type="button"
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={!meta.hasPrevPage || isLoading}
+                    className={`
+                      flex items-center gap-1 px-4 py-2.5
+                      rounded-xl font-medium text-sm
+                      transition-all duration-200
+                      ${meta.hasPrevPage && !isLoading
+                        ? 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:text-orange-600 dark:hover:text-orange-400 shadow-sm'
+                        : 'bg-gray-100 dark:bg-slate-800/50 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                      }
+                    `}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
 
-                    {/* Next Button */}
-                    <button
-                      type="button"
-                      onClick={() => onPageChange(currentPage + 1)}
-                      disabled={!meta.hasNextPage || isLoading}
-                      className={`
-                        flex items-center gap-1 px-4 py-2.5
-                        rounded-xl font-medium text-sm
-                        transition-all duration-200
-                        ${meta.hasNextPage && !isLoading
-                          ? 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:text-orange-600 dark:hover:text-orange-400 shadow-sm'
-                          : 'bg-gray-100 dark:bg-slate-800/50 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                        }
-                      `}
-                      aria-label="Next page"
-                    >
-                      <span className="hidden sm:inline">Next</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                  {/* Page Numbers */}
+                  <div className="flex items-center gap-1">
+                    {getPageNumbers().map((page, index) => (
+                      page === "ellipsis" ? (
+                        <span
+                          key={`ellipsis-${index}`}
+                          className="px-2 text-gray-400 dark:text-gray-500"
+                        >
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => onPageChange(page)}
+                          disabled={isLoading}
+                          className={`
+                            w-10 h-10 rounded-xl font-medium text-sm
+                            transition-all duration-200
+                            ${page === currentPage
+                              ? 'bg-orange-500 text-white shadow-md shadow-orange-500/30'
+                              : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:text-orange-600 dark:hover:text-orange-400 shadow-sm'
+                            }
+                            ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                          `}
+                          aria-label={`Page ${page}`}
+                          aria-current={page === currentPage ? "page" : undefined}
+                        >
+                          {page}
+                        </button>
+                      )
+                    ))}
                   </div>
-                </motion.nav>
-              )}
 
-              {/* Page Info */}
-              {meta.totalPages > 1 && (
-                <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  Page {meta.currentPage} of {meta.totalPages} ({meta.totalItems} total stores)
-                </p>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              className="text-center py-16"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              role="status"
-              aria-live="polite"
-            >
-              <div
-                className="w-24 h-24 bg-orange-100 dark:bg-orange-950/30 rounded-full flex items-center justify-center mx-auto mb-6"
-                aria-hidden="true"
-              >
-                <Search className="w-10 h-10 text-orange-400 dark:text-orange-500" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-3">
-                No Stores Found
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                We couldn&apos;t find any stores matching &quot;{searchQuery}&quot;. Try a different search term.
+                  {/* Next Button */}
+                  <button
+                    type="button"
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={!meta.hasNextPage || isLoading}
+                    className={`
+                      flex items-center gap-1 px-4 py-2.5
+                      rounded-xl font-medium text-sm
+                      transition-all duration-200
+                      ${meta.hasNextPage && !isLoading
+                        ? 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:text-orange-600 dark:hover:text-orange-400 shadow-sm'
+                        : 'bg-gray-100 dark:bg-slate-800/50 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                      }
+                    `}
+                    aria-label="Next page"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </nav>
+            )}
+
+            {/* Page Info */}
+            {meta.totalPages > 1 && (
+              <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                Page {meta.currentPage} of {meta.totalPages} ({meta.totalItems} total stores)
               </p>
-              <button
-                onClick={handleClearSearch}
-                className="
-                  inline-flex items-center gap-2
-                  px-6 py-3
-                  bg-orange-500 hover:bg-orange-600
-                  text-white font-medium
-                  rounded-xl
-                  transition-colors
-                "
-                type="button"
-                aria-label="Clear search and show all stores"
-              >
-                <X className="w-4 h-4" />
-                Clear Search
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "text-center py-16 transition-all duration-300",
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+            role="status"
+            aria-live="polite"
+          >
+            <div
+              className="w-24 h-24 bg-orange-100 dark:bg-orange-950/30 rounded-full flex items-center justify-center mx-auto mb-6"
+              aria-hidden="true"
+            >
+              <Search className="w-10 h-10 text-orange-400 dark:text-orange-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-50 mb-3">
+              No Stores Found
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+              We couldn&apos;t find any stores matching &quot;{searchQuery}&quot;. Try a different search term.
+            </p>
+            <button
+              onClick={handleClearSearch}
+              className="
+                inline-flex items-center gap-2
+                px-6 py-3
+                bg-orange-500 hover:bg-orange-600
+                text-white font-medium
+                rounded-xl
+                transition-colors
+              "
+              type="button"
+              aria-label="Clear search and show all stores"
+            >
+              <X className="w-4 h-4" />
+              Clear Search
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

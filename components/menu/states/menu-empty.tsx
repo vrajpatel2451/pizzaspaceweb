@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -12,11 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Pizza, SearchX, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  emptyStateContainer,
-  emptyStateIcon,
-  prefersReducedMotion,
-} from "../animations";
 
 interface MenuEmptyProps {
   hasActiveFilters: boolean;
@@ -40,7 +35,11 @@ export function MenuEmpty({
   filterContext = "No products found",
 }: MenuEmptyProps) {
   const router = useRouter();
-  const shouldAnimate = !prefersReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setIsVisible(true));
+  }, []);
 
   /**
    * Clear all filters and navigate to base menu page
@@ -70,11 +69,11 @@ export function MenuEmpty({
       aria-live="polite"
       aria-atomic="true"
     >
-      <motion.div
-        variants={shouldAnimate ? emptyStateContainer : undefined}
-        initial={shouldAnimate ? "hidden" : false}
-        animate={shouldAnimate ? "visible" : false}
-        className="w-full"
+      <div
+        className={cn(
+          "w-full transition-all duration-400 motion-reduce:transition-none",
+          isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        )}
       >
         <Card
           className={cn(
@@ -85,19 +84,20 @@ export function MenuEmpty({
         >
           <CardHeader className="px-4 sm:px-6">
             {/* Illustration Circle with floating animation */}
-            <motion.div
+            <div
               className={cn(
                 "mx-auto mb-3 sm:mb-4 rounded-full flex items-center justify-center",
                 "w-20 h-20 sm:w-24 sm:h-24",
-                iconBgColor
+                iconBgColor,
+                "transition-all duration-300 motion-reduce:transition-none",
+                isVisible ? "scale-100 rotate-0" : "scale-0 -rotate-10",
+                "animate-float motion-reduce:animate-none"
               )}
               aria-hidden="true"
-              variants={shouldAnimate ? emptyStateIcon : undefined}
-              initial={shouldAnimate ? "initial" : false}
-              animate={shouldAnimate ? ["animate", "float"] : false}
+              style={{ transitionDelay: "100ms" }}
             >
               <EmptyIcon className={cn("w-10 h-10 sm:w-12 sm:h-12", iconColor)} />
-            </motion.div>
+            </div>
 
             {/* Title */}
             <CardTitle
@@ -134,17 +134,19 @@ export function MenuEmpty({
 
             {/* Additional help for filter context */}
             {hasActiveFilters && (
-              <motion.div
-                className="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-orange-50 dark:bg-orange-950 rounded-lg"
-                initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
-                animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-                transition={shouldAnimate ? { delay: 0.3 } : undefined}
+              <div
+                className={cn(
+                  "mt-3 sm:mt-4 p-2.5 sm:p-3 bg-orange-50 dark:bg-orange-950 rounded-lg",
+                  "transition-all duration-300 motion-reduce:transition-none",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"
+                )}
+                style={{ transitionDelay: "300ms" }}
               >
                 <p className="text-xs text-orange-700 dark:text-orange-400 flex items-center justify-center gap-1.5 sm:gap-2">
                   <Filter className="w-3 h-3" />
                   Active filters applied
                 </p>
-              </motion.div>
+              </div>
             )}
           </CardContent>
 
@@ -152,11 +154,12 @@ export function MenuEmpty({
             {hasActiveFilters ? (
               <>
                 {/* Clear Filters Button */}
-                <motion.div
-                  initial={shouldAnimate ? { opacity: 0, x: -10 } : false}
-                  animate={shouldAnimate ? { opacity: 1, x: 0 } : false}
-                  transition={shouldAnimate ? { delay: 0.4 } : undefined}
-                  className="w-full sm:w-auto"
+                <div
+                  className={cn(
+                    "w-full sm:w-auto transition-all duration-300 motion-reduce:transition-none",
+                    isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2.5"
+                  )}
+                  style={{ transitionDelay: "400ms" }}
                 >
                   <Button
                     onClick={handleClearFilters}
@@ -166,14 +169,15 @@ export function MenuEmpty({
                   >
                     Clear Filters
                   </Button>
-                </motion.div>
+                </div>
 
                 {/* Browse All Button */}
-                <motion.div
-                  initial={shouldAnimate ? { opacity: 0, x: 10 } : false}
-                  animate={shouldAnimate ? { opacity: 1, x: 0 } : false}
-                  transition={shouldAnimate ? { delay: 0.5 } : undefined}
-                  className="w-full sm:w-auto"
+                <div
+                  className={cn(
+                    "w-full sm:w-auto transition-all duration-300 motion-reduce:transition-none",
+                    isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2.5"
+                  )}
+                  style={{ transitionDelay: "500ms" }}
                 >
                   <Button
                     onClick={handleBrowseAll}
@@ -182,14 +186,15 @@ export function MenuEmpty({
                   >
                     Browse All Products
                   </Button>
-                </motion.div>
+                </div>
               </>
             ) : (
-              <motion.div
-                initial={shouldAnimate ? { opacity: 0, y: 10 } : false}
-                animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-                transition={shouldAnimate ? { delay: 0.4 } : undefined}
-                className="w-full sm:w-auto"
+              <div
+                className={cn(
+                  "w-full sm:w-auto transition-all duration-300 motion-reduce:transition-none",
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2.5"
+                )}
+                style={{ transitionDelay: "400ms" }}
               >
                 <Button
                   onClick={handleBrowseAll}
@@ -198,11 +203,27 @@ export function MenuEmpty({
                 >
                   View Menu
                 </Button>
-              </motion.div>
+              </div>
             )}
           </CardFooter>
         </Card>
-      </motion.div>
+      </div>
+
+      {/* Floating animation keyframes */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-float {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }

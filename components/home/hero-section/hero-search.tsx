@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryResponse } from "@/types/category";
@@ -40,17 +39,12 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.5 }}
-      className="w-full"
-    >
+    <div className="w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-600 motion-reduce:animate-none" style={{ animationDelay: "500ms" }}>
       <div className="relative">
         {/* Main Search Container */}
-        <motion.div
+        <div
           className={cn(
-            "relative flex items-center gap-2 bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl transition-all duration-300",
+            "relative flex items-center gap-2 bg-white dark:bg-navy-800 rounded-xl sm:rounded-2xl transition-all duration-300 motion-reduce:transition-none",
             "shadow-lg dark:shadow-2xl shadow-black/5 dark:shadow-black/20",
             "border-2",
             isFocused
@@ -95,100 +89,87 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
             />
 
             {/* Clear Button */}
-            <AnimatePresence>
-              {searchValue && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  onClick={handleClear}
-                  className="p-1.5 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-navy-700 transition-colors min-w-[28px] min-h-[28px] flex items-center justify-center touch-manipulation"
-                  aria-label="Clear search input"
-                >
-                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" aria-hidden="true" />
-                </motion.button>
-              )}
-            </AnimatePresence>
+            {searchValue && (
+              <button
+                onClick={handleClear}
+                className={cn(
+                  "p-1.5 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-navy-700 transition-all duration-200 min-w-[28px] min-h-[28px] flex items-center justify-center touch-manipulation motion-reduce:transition-none",
+                  "animate-in zoom-in-0 duration-200"
+                )}
+                aria-label="Clear search input"
+              >
+                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" aria-hidden="true" />
+              </button>
+            )}
           </div>
 
           {/* Search Button */}
-          <motion.button
+          <button
             type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-600 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 m-1 sm:m-1.5 rounded-lg sm:rounded-xl transition-colors min-h-[40px] touch-manipulation"
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-600 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 m-1 sm:m-1.5 rounded-lg sm:rounded-xl transition-all duration-200 min-h-[40px] touch-manipulation hover:scale-[1.02] active:scale-95 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
             aria-label="Search for menu items"
           >
             <Search className="w-4 h-4" aria-hidden="true" />
             <span className="hidden sm:inline">Search</span>
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
 
         {/* Suggestions Dropdown */}
-        <AnimatePresence>
-          {isFocused && !searchValue && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-navy-800 rounded-xl shadow-xl dark:shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-100 dark:border-navy-700 overflow-hidden z-50"
-              id="search-suggestions"
-              role="listbox"
-              aria-label="Popular search suggestions"
-            >
-              <div className="p-3">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-2">
-                  Popular Searches
-                </p>
-                <div className="flex flex-wrap gap-2" role="list">
-                  {popularSearches.map((suggestion, idx) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="px-3 py-1.5 bg-gray-100 dark:bg-navy-700 hover:bg-primary/10 dark:hover:bg-primary/20 text-sm text-foreground rounded-lg transition-colors min-h-[36px] touch-manipulation"
-                      role="option"
-                      aria-selected={idx === 0}
-                      aria-label={`Search for ${suggestion}`}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
+        {isFocused && !searchValue && (
+          <div
+            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-navy-800 rounded-xl shadow-xl dark:shadow-2xl shadow-black/10 dark:shadow-black/30 border border-gray-100 dark:border-navy-700 overflow-hidden z-50 animate-in fade-in-0 slide-in-from-top-2 duration-200 motion-reduce:animate-none"
+            id="search-suggestions"
+            role="listbox"
+            aria-label="Popular search suggestions"
+          >
+            <div className="p-3">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 px-2">
+                Popular Searches
+              </p>
+              <div className="flex flex-wrap gap-2" role="list">
+                {popularSearches.map((suggestion, idx) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="px-3 py-1.5 bg-gray-100 dark:bg-navy-700 hover:bg-primary/10 dark:hover:bg-primary/20 text-sm text-foreground rounded-lg transition-colors duration-200 min-h-[36px] touch-manipulation motion-reduce:transition-none"
+                    role="option"
+                    aria-selected={idx === 0}
+                    aria-label={`Search for ${suggestion}`}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Trending categories below search */}
       {trendingCategories.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm"
+        <div
+          className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm animate-in fade-in-0 duration-500 motion-reduce:animate-none"
+          style={{ animationDelay: "700ms" }}
         >
           <span className="text-muted-foreground">Trending:</span>
           {trendingCategories.slice(0, 3).map((category, index) => (
-            <motion.div
+            <div
               key={category._id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: 0.8 + index * 0.1 }}
+              className="animate-in fade-in-0 slide-in-from-left-2 duration-300 motion-reduce:animate-none"
+              style={{ animationDelay: `${800 + index * 100}ms` }}
             >
               <Link href={`/menu?category=${category._id}`}>
                 <Badge
                   variant="secondary"
-                  className="cursor-pointer hover:bg-primary/20 transition-colors min-h-[28px] px-3 py-1"
+                  className="cursor-pointer hover:bg-primary/20 transition-colors duration-200 min-h-[28px] px-3 py-1 motion-reduce:transition-none"
                 >
                   {category.name}
                 </Badge>
               </Link>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }

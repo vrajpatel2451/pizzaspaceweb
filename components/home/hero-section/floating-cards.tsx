@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import { Users, Star, Truck, Award } from "lucide-react";
 
 interface StatItem {
@@ -17,7 +16,7 @@ interface StatItem {
     right: string;
   };
   floatDelay: number;
-  floatDuration: number;
+  staggerClass: string;
 }
 
 const stats: StatItem[] = [
@@ -30,7 +29,7 @@ const stats: StatItem[] = [
     bgColor: "bg-blue-100 dark:bg-blue-500/20",
     position: { top: "8%", right: "3%" },
     floatDelay: 0,
-    floatDuration: 5,
+    staggerClass: "stagger-1",
   },
   {
     icon: Truck,
@@ -41,7 +40,7 @@ const stats: StatItem[] = [
     bgColor: "bg-green-100 dark:bg-green-500/20",
     position: { top: "28%", right: "15%" },
     floatDelay: 1.2,
-    floatDuration: 4.5,
+    staggerClass: "stagger-2",
   },
   {
     icon: Star,
@@ -52,7 +51,7 @@ const stats: StatItem[] = [
     bgColor: "bg-amber-100 dark:bg-amber-500/20",
     position: { bottom: "35%", right: "5%" },
     floatDelay: 0.6,
-    floatDuration: 5.5,
+    staggerClass: "stagger-3",
   },
   {
     icon: Award,
@@ -63,24 +62,24 @@ const stats: StatItem[] = [
     bgColor: "bg-primary/10 dark:bg-primary/20",
     position: { bottom: "15%", right: "18%" },
     floatDelay: 1.8,
-    floatDuration: 4,
+    staggerClass: "stagger-4",
   },
 ];
 
 function AnimatedCounter({
   value,
   suffix,
-  isInView,
+  isVisible,
 }: {
   value: number;
   suffix: string;
-  isInView: boolean;
+  isVisible: boolean;
 }) {
   const [count, setCount] = useState(0);
   const isDecimal = value % 1 !== 0;
 
   useEffect(() => {
-    if (!isInView) return;
+    if (!isVisible) return;
 
     const duration = 2000;
     const steps = 60;
@@ -99,7 +98,7 @@ function AnimatedCounter({
     }, stepDuration);
 
     return () => clearInterval(timer);
-  }, [value, isInView]);
+  }, [value, isVisible]);
 
   return (
     <span className="tabular-nums">
@@ -111,50 +110,29 @@ function AnimatedCounter({
 
 function FloatingStatBadge({
   stat,
-  index,
-  isInView,
+  isVisible,
 }: {
   stat: StatItem;
-  index: number;
-  isInView: boolean;
+  isVisible: boolean;
 }) {
   const Icon = stat.icon;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.9 }}
-      animate={
-        isInView
-          ? { opacity: 1, y: 0, scale: 1 }
-          : { opacity: 0, y: 30, scale: 0.9 }
-      }
-      transition={{
-        duration: 0.6,
-        delay: 0.8 + index * 0.15,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
+    <div
       style={{
         position: "absolute",
         top: stat.position.top,
         bottom: stat.position.bottom,
         right: stat.position.right,
+        animationDelay: `${stat.floatDelay}s`,
       }}
-      className="pointer-events-auto"
+      className={`pointer-events-auto animate-fade-in-up ${stat.staggerClass} animation-delay-800 motion-reduce:animate-none`}
     >
-      <motion.div
-        animate={{
-          y: [0, -8, 0],
-        }}
-        transition={{
-          duration: stat.floatDuration,
-          delay: stat.floatDelay,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        whileHover={{ scale: 1.05 }}
-        className="group relative"
+      <div
+        className="group relative animate-float motion-reduce:animate-none"
+        style={{ animationDelay: `${stat.floatDelay}s` }}
       >
-        <div className="flex items-center gap-3 bg-white/95 dark:bg-navy-800/95 backdrop-blur-md rounded-2xl px-4 py-3 border border-gray-100/80 dark:border-navy-700/80 shadow-xl shadow-black/10 dark:shadow-black/30 transition-all duration-300 hover:shadow-2xl hover:bg-white dark:hover:bg-navy-800">
+        <div className="flex items-center gap-3 bg-white/95 dark:bg-navy-800/95 backdrop-blur-md rounded-2xl px-4 py-3 border border-gray-100/80 dark:border-navy-700/80 shadow-xl shadow-black/10 dark:shadow-black/30 transition-all duration-300 hover:shadow-2xl hover:bg-white dark:hover:bg-navy-800 hover-scale">
           {/* Icon */}
           <div
             className={`flex items-center justify-center w-11 h-11 rounded-full ${stat.bgColor} ${stat.color} transition-transform duration-300 group-hover:scale-110`}
@@ -168,7 +146,7 @@ function FloatingStatBadge({
               <AnimatedCounter
                 value={stat.value}
                 suffix={stat.suffix}
-                isInView={isInView}
+                isVisible={isVisible}
               />
             </span>
             <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -176,26 +154,43 @@ function FloatingStatBadge({
             </span>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
 export function FloatingCards() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-100px" }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
       ref={ref}
       className="absolute inset-0 pointer-events-none hidden lg:block z-10"
     >
-      {stats.map((stat, index) => (
+      {stats.map((stat) => (
         <FloatingStatBadge
           key={stat.label}
           stat={stat}
-          index={index}
-          isInView={isInView}
+          isVisible={isVisible}
         />
       ))}
     </div>

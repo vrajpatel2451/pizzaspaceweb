@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import {
   Calendar,
@@ -11,7 +11,6 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { OrderTicketResponse } from "@/types/orderTicket";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,12 +19,12 @@ interface TicketCardProps {
   ticket: OrderTicketResponse;
   className?: string;
   index?: number;
+  isVisible?: boolean;
 }
 
-export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
+export function TicketCard({ ticket, className, index = 0, isVisible = true }: TicketCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
 
   // Format relative time
   const timeAgo = formatDistanceToNow(new Date(ticket.createdAt), {
@@ -73,24 +72,16 @@ export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
     : ticket.message;
 
   return (
-    <motion.div
-      initial={shouldReduceMotion ? {} : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.3,
-        delay: shouldReduceMotion ? 0 : index * 0.05,
-        ease: "easeOut",
-      }}
-      whileHover={
-        shouldReduceMotion
-          ? {}
-          : {
-              y: -3,
-            }
-      }
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className={cn("relative group", className)}
+    <div
+      className={cn(
+        "relative group transition-all duration-300",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+        isHovered && "-translate-y-0.5",
+        className
+      )}
+      style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Ambient glow effect on hover */}
       <div
@@ -173,18 +164,14 @@ export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
 
           {/* Message Preview/Full */}
           <div className="mb-4" id={`ticket-message-${ticket._id}`}>
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={isExpanded ? "expanded" : "collapsed"}
-                initial={shouldReduceMotion ? {} : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={shouldReduceMotion ? {} : { opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed break-words"
-              >
-                {isExpanded ? ticket.message : previewMessage}
-              </motion.p>
-            </AnimatePresence>
+            <p
+              className={cn(
+                "text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed break-words transition-opacity duration-150",
+                isExpanded ? "opacity-100" : "opacity-100"
+              )}
+            >
+              {isExpanded ? ticket.message : previewMessage}
+            </p>
 
             {shouldTruncate && (
               <Button
@@ -200,11 +187,7 @@ export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
                 aria-controls={`ticket-message-${ticket._id}`}
                 aria-label={isExpanded ? "Show less of message" : "Show more of message"}
               >
-                <motion.span
-                  className="flex items-center gap-1"
-                  whileHover={shouldReduceMotion ? {} : { x: 2 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                >
+                <span className="flex items-center gap-1 transition-transform duration-200 hover:translate-x-0.5">
                   {isExpanded ? (
                     <>
                       <ChevronUp className="w-3.5 h-3.5" />
@@ -216,7 +199,7 @@ export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
                       Read more
                     </>
                   )}
-                </motion.span>
+                </span>
               </Button>
             )}
           </div>
@@ -245,11 +228,12 @@ export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
 
           {/* Closing Message (if closed) */}
           {ticket.status === "closed" && ticket.closingMessage && (
-            <motion.div
-              initial={shouldReduceMotion ? {} : { opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800"
+            <div
+              className={cn(
+                "pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 transition-all duration-300",
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+              )}
+              style={{ transitionDelay: "100ms" }}
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="p-1 bg-emerald-100 dark:bg-emerald-500/20 rounded">
@@ -262,10 +246,10 @@ export function TicketCard({ ticket, className, index = 0 }: TicketCardProps) {
               <p className="text-sm text-slate-600 dark:text-slate-400 italic leading-relaxed pl-7">
                 &ldquo;{ticket.closingMessage}&rdquo;
               </p>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 // Form validation schema
 const contactFormSchema = z.object({
@@ -121,45 +121,43 @@ export function ContactForm() {
       </div>
 
       {/* Success/Error Messages */}
-      <AnimatePresence mode="wait">
-        {formStatus === 'success' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mb-6 p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-start gap-3"
-          >
-            <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-green-800 dark:text-green-400">
-                Message sent successfully!
-              </p>
-              <p className="text-sm text-green-600 dark:text-green-500 mt-1">
-                We&apos;ll get back to you within 24 hours.
-              </p>
-            </div>
-          </motion.div>
-        )}
+      {formStatus === 'success' && (
+        <div
+          className={cn(
+            "mb-6 p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg flex items-start gap-3",
+            "animate-in fade-in-0 slide-in-from-top-2 duration-300"
+          )}
+        >
+          <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-green-800 dark:text-green-400">
+              Message sent successfully!
+            </p>
+            <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+              We&apos;ll get back to you within 24 hours.
+            </p>
+          </div>
+        </div>
+      )}
 
-        {formStatus === 'error' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg flex items-start gap-3"
-          >
-            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-red-800 dark:text-red-400">
-                Error sending message
-              </p>
-              <p className="text-sm text-red-600 dark:text-red-500 mt-1">
-                {errorMessage}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {formStatus === 'error' && (
+        <div
+          className={cn(
+            "mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg flex items-start gap-3",
+            "animate-in fade-in-0 slide-in-from-top-2 duration-300"
+          )}
+        >
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-red-800 dark:text-red-400">
+              Error sending message
+            </p>
+            <p className="text-sm text-red-600 dark:text-red-500 mt-1">
+              {errorMessage}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>

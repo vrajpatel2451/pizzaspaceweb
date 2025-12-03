@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView, Variants } from "framer-motion";
 import { Users, UtensilsCrossed, MapPin } from "lucide-react";
 import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatItem {
   icon: LucideIcon;
@@ -39,39 +39,7 @@ const stats: StatItem[] = [
     color: "text-green-600 dark:text-green-400",
     bgColor: "bg-green-100 dark:bg-green-500/20",
   },
-  // {
-  //   icon: Clock,
-  //   value: 30,
-  //   suffix: " min",
-  //   label: "Delivery",
-  //   color: "text-purple-600 dark:text-purple-400",
-  //   bgColor: "bg-purple-100 dark:bg-purple-500/20",
-  // },
 ];
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
 
 // Animated count-up hook
 function useCountUp(
@@ -81,8 +49,26 @@ function useCountUp(
 ) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [isInView, setIsInView] = useState(false);
   const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-50px" }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!startOnView || !isInView || hasAnimated.current) return;
@@ -122,39 +108,45 @@ interface StatCardProps {
 function StatCard({ stat, index }: StatCardProps) {
   const { count, ref } = useCountUp(stat.value, 2000 + index * 200);
   const Icon = stat.icon;
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), index * 100);
+    return () => clearTimeout(timer);
+  }, [index]);
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      variants={itemVariants}
-      whileHover={{ y: -5, scale: 1.02 }}
-      className="group relative"
+      className={cn(
+        "group relative",
+        "transition-all duration-500 motion-reduce:transition-none",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+      )}
     >
-      <div className="relative bg-card rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md border border-border/50 transition-all duration-300">
+      <div className="relative bg-card rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md border border-border/50 transition-all duration-300 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
         {/* Subtle gradient background on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl motion-reduce:transition-none" />
 
         <div className="relative z-10 flex items-center gap-3 sm:gap-4">
           {/* Icon */}
-          <motion.div
-            whileHover={{ rotate: [0, -10, 10, 0] }}
-            transition={{ duration: 0.5 }}
-            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${stat.bgColor} flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}
+          <div
+            className={cn(
+              "w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0",
+              "transition-transform duration-300 group-hover:scale-110",
+              "motion-reduce:transition-none motion-reduce:group-hover:scale-100",
+              stat.bgColor
+            )}
           >
-            <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.color}`} />
-          </motion.div>
+            <Icon className={cn("w-5 h-5 sm:w-6 sm:h-6", stat.color)} />
+          </div>
 
           {/* Content */}
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-0.5 flex-wrap">
-              <motion.span
-                key={count}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-tight"
-              >
+              <span className="text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-tight">
                 {count}
-              </motion.span>
+              </span>
               <span className="text-xl md:text-2xl font-bold text-primary leading-tight">
                 {stat.suffix}
               </span>
@@ -166,24 +158,18 @@ function StatCard({ stat, index }: StatCardProps) {
         </div>
 
         {/* Corner accent */}
-        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-primary/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none motion-reduce:transition-none" />
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function StatsCounter() {
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
-    >
+    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       {stats.map((stat, index) => (
         <StatCard key={stat.label} stat={stat} index={index} />
       ))}
-    </motion.div>
+    </div>
   );
 }

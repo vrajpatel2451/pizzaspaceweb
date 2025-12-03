@@ -1,35 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
 import { Mail, MessageCircle, MapPin } from "lucide-react";
 
 export function ContactHeroSection() {
-  const shouldReduceMotion = useReducedMotion();
-
-  // Staggered animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.1,
-        delayChildren: shouldReduceMotion ? 0 : 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: shouldReduceMotion ? 0 : 0.5,
-        ease: [0, 0, 0.2, 1] as [number, number, number, number],
-      },
-    },
-  };
-
   return (
     <section
       className="relative w-full overflow-hidden pt-24 pb-10 sm:pt-28 sm:pb-12 md:pt-32 md:pb-16 lg:pt-36 lg:pb-20"
@@ -39,86 +12,54 @@ export function ContactHeroSection() {
       <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-orange-50/30 dark:from-orange-950/20 dark:via-slate-950 dark:to-orange-950/10" />
 
       {/* Decorative shapes with entrance animations */}
-      <motion.div
-        initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 1, ease: "easeOut" }}
-        className="absolute top-10 left-10 w-32 h-32 bg-orange-200/20 dark:bg-orange-800/10 rounded-full blur-3xl"
+      <div
+        className="absolute top-10 left-10 w-32 h-32 bg-orange-200/20 dark:bg-orange-800/10 rounded-full blur-3xl animate-scale-in-center motion-reduce:animate-none"
       />
-      <motion.div
-        initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 1, delay: shouldReduceMotion ? 0 : 0.2, ease: "easeOut" }}
-        className="absolute bottom-10 right-10 w-40 h-40 bg-orange-300/20 dark:bg-orange-700/10 rounded-full blur-3xl"
+      <div
+        className="absolute bottom-10 right-10 w-40 h-40 bg-orange-300/20 dark:bg-orange-700/10 rounded-full blur-3xl animate-scale-in-center animation-delay-200 motion-reduce:animate-none"
       />
 
       {/* Floating icons */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.8, delay: shouldReduceMotion ? 0 : 0.5 }}
-          className="absolute top-20 right-[15%] hidden lg:block"
+        <div
+          className="absolute top-20 right-[15%] hidden lg:block animate-fade-in-up animation-delay-500 motion-reduce:animate-none"
         >
-          <motion.div
-            animate={shouldReduceMotion ? {} : { y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          >
+          <div className="animate-float motion-reduce:animate-none">
             <Mail className="w-8 h-8 text-orange-400/30 dark:text-orange-400/20" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.8, delay: shouldReduceMotion ? 0 : 0.7 }}
-          className="absolute bottom-24 left-[10%] hidden lg:block"
+        <div
+          className="absolute bottom-24 left-[10%] hidden lg:block animate-fade-in-up animation-delay-700 motion-reduce:animate-none"
         >
-          <motion.div
-            animate={shouldReduceMotion ? {} : { y: [0, -8, 0], rotate: [0, 5, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          >
+          <div className="animate-float animation-delay-1000 motion-reduce:animate-none">
             <MessageCircle className="w-10 h-10 text-orange-300/40 dark:text-orange-300/20" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 0.9 }}
-          className="absolute top-1/2 left-[20%] hidden xl:block"
+        <div
+          className="absolute top-1/2 left-[20%] hidden xl:block animate-pop-in animation-delay-900 motion-reduce:animate-none"
         >
-          <motion.div
-            animate={shouldReduceMotion ? {} : { scale: [1, 1.1, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-          >
+          <div className="animate-pulse-subtle motion-reduce:animate-none">
             <MapPin className="w-7 h-7 text-orange-500/30 dark:text-orange-400/20" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl text-center">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div>
           {/* Badge */}
-          <motion.div
-            variants={itemVariants}
-            className="mb-4"
-          >
+          <div className="mb-4 animate-fade-in-up stagger-1 motion-reduce:animate-none">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
               <Mail className="w-3.5 h-3.5" />
               We&apos;re Here to Help
             </span>
-          </motion.div>
+          </div>
 
           {/* Headline */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 px-4 sm:px-0"
+          <h1
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 px-4 sm:px-0 animate-fade-in-up stagger-2 motion-reduce:animate-none"
           >
             Get In{" "}
             <span className="text-orange-500 relative">
@@ -138,26 +79,24 @@ export function ContactHeroSection() {
                 />
               </svg>
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Subheadline */}
-          <motion.p
-            variants={itemVariants}
-            className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
+          <p
+            className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-4 sm:px-0 animate-fade-in-up stagger-3 motion-reduce:animate-none"
           >
             We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
-          </motion.p>
+          </p>
 
           {/* Decorative elements */}
-          <motion.div
-            variants={itemVariants}
-            className="flex items-center justify-center gap-3 mt-6"
+          <div
+            className="flex items-center justify-center gap-3 mt-6 animate-fade-in-up stagger-4 motion-reduce:animate-none"
           >
             <span className="w-12 h-0.5 bg-gradient-to-r from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
             <span className="w-2 h-2 bg-orange-400 dark:bg-orange-500 rounded-full" />
             <span className="w-12 h-0.5 bg-gradient-to-l from-transparent to-orange-300 dark:to-orange-500/50 rounded-full" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Bottom fade gradient */}

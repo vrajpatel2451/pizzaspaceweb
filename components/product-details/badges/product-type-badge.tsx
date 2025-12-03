@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { ProductType } from "@/types/product";
 
@@ -81,9 +81,15 @@ export function ProductTypeBadge({
   animate = true,
   variant = "pill",
 }: ProductTypeBadgeProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const [isVisible, setIsVisible] = useState(false);
   const config = typeConfig[type];
   const sizes = sizeConfig[size];
+
+  useEffect(() => {
+    if (animate) {
+      requestAnimationFrame(() => setIsVisible(true));
+    }
+  }, [animate]);
 
   // Square indicator icon (Zomato style)
   const squareIndicator = (
@@ -141,32 +147,16 @@ export function ProductTypeBadge({
     config.bgColor,
     // Size
     sizes.pill,
+    // Animation
+    animate && "transition-all duration-300 motion-reduce:transition-none",
+    animate && (isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"),
     className
   );
 
-  if (!animate || shouldReduceMotion) {
-    return (
-      <span className={pillClasses} role="img" aria-label={config.label}>
-        {pillContent}
-      </span>
-    );
-  }
-
   return (
-    <motion.span
-      className={pillClasses}
-      role="img"
-      aria-label={config.label}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        type: "spring",
-        stiffness: 400,
-        damping: 20,
-      }}
-    >
+    <span className={pillClasses} role="img" aria-label={config.label}>
       {pillContent}
-    </motion.span>
+    </span>
   );
 }
 

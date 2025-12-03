@@ -1,11 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import type { VariantResponse } from "@/types/product";
-import { variantCardVariants } from "@/lib/animations";
 import { formatPrice } from "@/lib/utils/currency";
 
 interface VariantCardProps {
@@ -23,19 +21,8 @@ export function VariantCard({
   onSelect,
   className,
 }: VariantCardProps) {
-  const shouldReduceMotion = useReducedMotion();
-
-  // Simplified variants for reduced motion
-  const animationVariants = shouldReduceMotion
-    ? {
-        unselected: { scale: 1 },
-        selected: { scale: 1 },
-        hover: { scale: 1 },
-      }
-    : variantCardVariants;
-
   return (
-    <motion.div
+    <div
       onClick={onSelect}
       className={cn(
         // Base styles with touch-friendly height
@@ -43,9 +30,10 @@ export function VariantCard({
         // Responsive padding and min-height for touch targets
         "p-3 sm:p-4 min-h-[52px] sm:min-h-[56px]",
         // Transitions
-        "transition-all duration-200",
+        "transition-all duration-200 motion-reduce:transition-none",
         // Hover states (desktop only)
-        "sm:hover:border-primary sm:hover:bg-primary/5 sm:hover:shadow-md",
+        "sm:hover:border-primary sm:hover:bg-primary/5 sm:hover:shadow-md sm:hover:-translate-y-0.5",
+        "motion-reduce:sm:hover:translate-y-0",
         // Selected state
         isSelected && [
           "border-primary border-2 bg-primary/10",
@@ -53,13 +41,10 @@ export function VariantCard({
         ],
         // Unselected state
         !isSelected && "border-border bg-background",
+        // Tap effect
+        "active:scale-[0.98] motion-reduce:active:scale-100",
         className
       )}
-      variants={animationVariants}
-      initial="unselected"
-      animate={isSelected ? "selected" : "unselected"}
-      whileHover="hover"
-      whileTap={{ scale: shouldReduceMotion ? 1 : 0.98 }}
     >
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
         <RadioGroupItem
@@ -79,6 +64,6 @@ export function VariantCard({
           {formatPrice(price, { showSign: true })}
         </span>
       )}
-    </motion.div>
+    </div>
   );
 }

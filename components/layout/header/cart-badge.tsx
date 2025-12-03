@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { useCartCount, useIsCartLoading, useIsCartHydrated } from "@/store/cart-store";
@@ -19,16 +18,18 @@ export function CartBadge({ className, onClick, asButton = false }: CartBadgePro
   const isLoading = useIsCartLoading();
   const isHydrated = useIsCartHydrated();
 
-  // Track previous count for animation direction
+  // Track previous count for animation
   const prevCountRef = React.useRef(itemCount);
-  const [animationDirection, setAnimationDirection] = React.useState<"up" | "down">("up");
+  const [shouldAnimate, setShouldAnimate] = React.useState(false);
 
   React.useEffect(() => {
-    if (prevCountRef.current !== itemCount) {
-      setAnimationDirection(itemCount > prevCountRef.current ? "up" : "down");
+    if (prevCountRef.current !== itemCount && isHydrated) {
+      setShouldAnimate(true);
+      const timer = setTimeout(() => setShouldAnimate(false), 300);
       prevCountRef.current = itemCount;
+      return () => clearTimeout(timer);
     }
-  }, [itemCount]);
+  }, [itemCount, isHydrated]);
 
   // Show a subtle loading state during hydration
   const showLoadingPulse = !isHydrated || isLoading;
@@ -48,42 +49,22 @@ export function CartBadge({ className, onClick, asButton = false }: CartBadgePro
     >
       <ShoppingCart className="size-5" />
       {isHydrated && itemCount > 0 && (
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={itemCount}
-            initial={{
-              scale: 0.5,
-              opacity: 0,
-              y: animationDirection === "up" ? 10 : -10,
-            }}
-            animate={{
-              scale: 1,
-              opacity: 1,
-              y: 0,
-            }}
-            exit={{
-              scale: 0.5,
-              opacity: 0,
-              y: animationDirection === "up" ? -10 : 10,
-            }}
-            transition={{
-              duration: 0.2,
-              ease: "easeOut",
-            }}
-            className={cn(
-              "absolute -top-1 -right-1",
-              "flex items-center justify-center",
-              "min-w-[18px] h-[18px] px-1",
-              "text-[10px] font-bold",
-              "text-primary-foreground bg-primary",
-              "rounded-full",
-              "ring-2 ring-background"
-            )}
-            aria-live="polite"
-          >
-            {itemCount > 99 ? "99+" : itemCount}
-          </motion.span>
-        </AnimatePresence>
+        <span
+          className={cn(
+            "absolute -top-1 -right-1",
+            "flex items-center justify-center",
+            "min-w-[18px] h-[18px] px-1",
+            "text-[10px] font-bold",
+            "text-primary-foreground bg-primary",
+            "rounded-full",
+            "ring-2 ring-background",
+            "transition-transform duration-200",
+            shouldAnimate && "animate-badge-bounce"
+          )}
+          aria-live="polite"
+        >
+          {itemCount > 99 ? "99+" : itemCount}
+        </span>
       )}
     </IconButton>
   );

@@ -1,52 +1,31 @@
 "use client";
 
-import React, { useRef } from "react";
-import { motion, useInView, Variants } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { Clock, Truck, Gift, CheckCircle } from "lucide-react";
 import { InfoCard } from "./info-card";
 
-// Animation variants for container
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-// Animation variants for section header
-const headerVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.46, 0.45, 0.94] as const,
-    },
-  },
-};
-
-// Animation variants for cards
-const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94] as const,
-    },
-  },
-};
-
 export function DeliveryInfoSection() {
+  const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-100px" }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const deliveryInfo = [
     {
@@ -79,45 +58,48 @@ export function DeliveryInfoSection() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={headerVariants}
-          className="mb-8 sm:mb-12 text-center"
+        <div
+          className={cn(
+            "mb-8 sm:mb-12 text-center transition-all duration-600 motion-reduce:transition-none",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          )}
         >
-          <motion.h2
+          <h2
             id="delivery-info-heading"
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-navy-900 dark:text-white"
           >
             Our Delivery Service
-          </motion.h2>
-          <motion.p
-            className="mt-2 sm:mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-300"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          </h2>
+          <p
+            className={cn(
+              "mt-2 sm:mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-300 transition-opacity duration-500 motion-reduce:transition-none",
+              isVisible ? "opacity-100" : "opacity-0"
+            )}
+            style={{ transitionDelay: "200ms" }}
           >
             Fast, reliable, and fresh pizza delivered to your door
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
         {/* Info Cards Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4"
-        >
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {deliveryInfo.map((info, index) => (
-            <motion.div key={index} variants={cardVariants}>
+            <div
+              key={index}
+              className={cn(
+                "transition-all duration-500 motion-reduce:transition-none",
+                isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"
+              )}
+              style={{ transitionDelay: `${100 + index * 120}ms` }}
+            >
               <InfoCard
                 icon={info.icon}
                 title={info.title}
                 description={info.description}
               />
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

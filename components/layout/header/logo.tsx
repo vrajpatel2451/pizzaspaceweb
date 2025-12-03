@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
 import { Pizza } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,31 +9,6 @@ interface LogoProps {
   className?: string;
   showText?: boolean;
 }
-
-// Logo icon rotation on hover
-const iconVariants: Variants = {
-  rest: { rotate: 0 },
-  hover: {
-    rotate: 12,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  },
-};
-
-// Shine effect animation
-const shineVariants: Variants = {
-  rest: { opacity: 0, scale: 0.8 },
-  hover: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  },
-};
 
 export function Logo({
   variant = "default",
@@ -54,44 +28,35 @@ export function Logo({
       aria-label="Pizza Space Home"
     >
       {/* Logo Icon */}
-      <motion.div
-        initial="rest"
-        whileHover="hover"
-        animate="rest"
-        whileTap={{ scale: 0.95 }}
+      <div
         className={cn(
           "relative flex items-center justify-center size-10 rounded-full",
           "transition-all duration-300",
           "shadow-md group-hover:shadow-lg",
+          "active:scale-95",
           isLight
             ? "bg-white/90 dark:bg-white/20 backdrop-blur-sm group-hover:bg-white dark:group-hover:bg-white/30"
             : "bg-primary group-hover:bg-primary/90"
         )}
       >
-        <motion.div variants={iconVariants}>
+        <div className="transition-transform duration-300 ease-out group-hover:rotate-12">
           <Pizza
             className={cn(
               "size-5",
               isLight ? "text-primary dark:text-white" : "text-primary-foreground"
             )}
           />
-        </motion.div>
+        </div>
 
         {/* Enhanced shine effect */}
-        <motion.div
-          variants={shineVariants}
-          className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/40 via-white/20 to-transparent"
+        <div
+          className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/40 via-white/20 to-transparent opacity-0 scale-95 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100"
         />
-      </motion.div>
+      </div>
 
       {/* Logo Text */}
       {showText && (
-        <motion.div
-          className="flex flex-col"
-          initial={{ opacity: 1 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.2 }}
-        >
+        <div className="flex flex-col transition-transform duration-200 group-hover:scale-[1.02]">
           <span
             className={cn(
               "text-lg sm:text-xl font-bold leading-tight transition-colors duration-300",
@@ -110,7 +75,7 @@ export function Logo({
           >
             Authentic Italian
           </span>
-        </motion.div>
+        </div>
       )}
     </Link>
   );

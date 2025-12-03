@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { CustomImage } from "@/components/ui/custom-image";
+import { cn } from "@/lib/utils";
 
 interface TeamMember {
   name: string;
@@ -13,21 +13,22 @@ interface TeamMember {
 
 interface TeamCardProps {
   member: TeamMember;
-  delay?: number;
+  index?: number;
+  isVisible?: boolean;
 }
 
-export function TeamCard({ member, delay = 0 }: TeamCardProps) {
+export function TeamCard({ member, index = 0, isVisible = true }: TeamCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay, ease: "easeOut" }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group relative"
+    <div
+      className={cn(
+        "group relative transition-all duration-600",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      )}
+      style={{ transitionDelay: isVisible ? `${index * 100}ms` : "0ms" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Card container */}
       <div className="relative h-full bg-white dark:bg-navy-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-navy-700 shadow-md dark:shadow-navy-950/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -46,41 +47,31 @@ export function TeamCard({ member, delay = 0 }: TeamCardProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
           {/* Bio overlay - appears on hover */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/90 to-black/80 flex items-end p-6"
-              >
-                <p className="text-white text-sm leading-relaxed">
-                  {member.bio}
-                </p>
-              </motion.div>
+          <div
+            className={cn(
+              "absolute inset-0 bg-gradient-to-t from-black/95 via-black/90 to-black/80 flex items-end p-6 transition-all duration-300",
+              isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5 pointer-events-none"
             )}
-          </AnimatePresence>
+          >
+            <p className="text-white text-sm leading-relaxed">
+              {member.bio}
+            </p>
+          </div>
 
           {/* Name and role - always visible at bottom */}
-          <AnimatePresence>
-            {!isHovered && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.3 }}
-                className="absolute bottom-0 left-0 right-0 p-6"
-              >
-                <h3 className="text-lg md:text-xl font-bold text-white mb-1">
-                  {member.name}
-                </h3>
-                <p className="text-sm text-orange-300 dark:text-orange-400 font-medium">
-                  {member.role}
-                </p>
-              </motion.div>
+          <div
+            className={cn(
+              "absolute bottom-0 left-0 right-0 p-6 transition-all duration-300",
+              isHovered ? "opacity-0 translate-y-3" : "opacity-100 translate-y-0"
             )}
-          </AnimatePresence>
+          >
+            <h3 className="text-lg md:text-xl font-bold text-white mb-1">
+              {member.name}
+            </h3>
+            <p className="text-sm text-orange-300 dark:text-orange-400 font-medium">
+              {member.role}
+            </p>
+          </div>
         </div>
 
         {/* Decorative accent bar */}
@@ -88,12 +79,12 @@ export function TeamCard({ member, delay = 0 }: TeamCardProps) {
       </div>
 
       {/* Glow effect on hover */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isHovered ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
-        className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 to-orange-600/20 dark:from-orange-500/10 dark:to-orange-600/10 rounded-2xl blur-lg -z-10"
+      <div
+        className={cn(
+          "absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 to-orange-600/20 dark:from-orange-500/10 dark:to-orange-600/10 rounded-2xl blur-lg -z-10 transition-opacity duration-300",
+          isHovered ? "opacity-100" : "opacity-0"
+        )}
       />
-    </motion.div>
+    </div>
   );
 }

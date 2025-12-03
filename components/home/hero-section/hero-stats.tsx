@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import { Users, Star, Truck, Award } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatItem {
   icon: React.ElementType;
@@ -95,22 +95,27 @@ function StatBadge({
   isInView: boolean;
 }) {
   const Icon = stat.icon;
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 800 + index * 100);
+    return () => clearTimeout(timer);
+  }, [index]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{
-        duration: 0.5,
-        delay: 0.8 + index * 0.1,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      className="group relative"
+    <div
+      className={cn(
+        "group relative transition-all duration-500 motion-reduce:transition-none",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+      )}
     >
-      <div className="flex items-center gap-3 bg-white/80 dark:bg-navy-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-100/80 dark:border-navy-700/80 shadow-lg shadow-black/5 dark:shadow-black/10 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-white dark:hover:bg-navy-800">
+      <div className="flex items-center gap-3 bg-white/80 dark:bg-navy-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-100/80 dark:border-navy-700/80 shadow-lg shadow-black/5 dark:shadow-black/10 transition-all duration-300 hover:shadow-xl hover:scale-105 hover:bg-white dark:hover:bg-navy-800 motion-reduce:transition-none motion-reduce:hover:scale-100">
         {/* Icon */}
         <div
-          className={`flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-navy-700 ${stat.color} transition-transform duration-300 group-hover:scale-110`}
+          className={cn(
+            "flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-navy-700 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100",
+            stat.color
+          )}
         >
           <Icon className="w-5 h-5" />
         </div>
@@ -127,21 +132,39 @@ function StatBadge({
           <span className="text-xs text-muted-foreground">{stat.label}</span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function HeroStats() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "-100px" }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.6 }}
-      className="mt-8 sm:mt-10 lg:mt-14"
+      className={cn(
+        "mt-8 sm:mt-10 lg:mt-14 transition-opacity duration-500 motion-reduce:transition-none",
+        isInView ? "opacity-100" : "opacity-0"
+      )}
     >
       {/* Desktop: Inline layout */}
       <div className="hidden sm:flex flex-wrap gap-3">
@@ -166,6 +189,6 @@ export function HeroStats() {
           />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }

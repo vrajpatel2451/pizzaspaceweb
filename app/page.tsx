@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 
 // Force dynamic rendering since we're fetching API data
 export const dynamicParams = true;
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 60 seconds
 
 // Above-the-fold sections (loaded immediately)
 import { HeroSection } from "@/components/home/hero-section";
