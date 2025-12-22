@@ -9,7 +9,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import type { ProductDetailsResponse, VariantPricingResponse } from "@/types/product";
+import type { ProductDetailsResponse, VariantPricingResponse, VariantAddonSelectionType } from "@/types/product";
 
 /**
  * Pricing selection with quantity (matches API format)
@@ -56,6 +56,13 @@ interface ProductDetailsContextValue {
   isAddonVisible: (addonId: string) => boolean;
   getAddonPricingId: (addonId: string) => string | undefined;
   getSubVariantPricingId: (subVariantId: string) => string | undefined;
+
+  // maxItems validation helpers
+  getSelectedVariantMaxItems: () => { maxItems: number; maxItemTypes: VariantAddonSelectionType } | null;
+  getTotalAddonQuantity: () => number;
+  getGroupAddonQuantity: (groupId: string) => number;
+  getRemainingCapacity: (groupId?: string) => number;
+  canAddAddon: (addonId: string, additionalQty?: number) => boolean;
 }
 
 /**
@@ -426,6 +433,107 @@ export function ProductDetailsProvider({
   );
 
   // ============================================================================
+  // maxItems VALIDATION HELPERS
+  // ============================================================================
+
+  /**
+   * Get maxItems constraints from selected variant
+   */
+  const getSelectedVariantMaxItems = useCallback((): { maxItems: number; maxItemTypes: VariantAddonSelectionType } | null => {
+    if (!productData || !selectedVariantId) return null;
+    const variant = productData.variantList.find(v => v._id === selectedVariantId);
+    if (!variant) return null;
+    return {
+      maxItems: variant.maxItems,
+      maxItemTypes: variant.maxItemTypes,
+    };
+  }, [productData, selectedVariantId]);
+
+  /**
+   * Calculate total addon quantity across all groups
+   */
+  const getTotalAddonQuantity = useCallback((): number => {
+    if (!productData) return 0;
+
+    return selectedPricingIds.reduce((total, selection) => {
+      const pricing = productData.pricing.find(p => p._id === selection.id);
+      if (pricing?.type === "addon") {
+        return total + selection.quantity;
+      }
+      return total;
+    }, 0);
+  }, [productData, selectedPricingIds]);
+
+  /**
+   * Calculate addon quantity within a specific group
+   */
+  const getGroupAddonQuantity = useCallback((groupId: string): number => {
+    if (!productData) return 0;
+
+    return selectedPricingIds.reduce((total, selection) => {
+      const pricing = productData.pricing.find(p => p._id === selection.id);
+      if (pricing?.type !== "addon") return total;
+
+      const addon = productData.addonList.find(a => a._id === pricing.addonId);
+      if (addon?.groupId === groupId) {
+        return total + selection.quantity;
+      }
+      return total;
+    }, 0);
+  }, [productData, selectedPricingIds]);
+
+  /**
+   * Get remaining capacity based on maxItemTypes mode
+   * If groupId provided and mode is perGroup, returns remaining for that group
+   * Otherwise returns overall remaining
+   */
+  const getRemainingCapacity = useCallback((groupId?: string): number => {
+    const constraints = getSelectedVariantMaxItems();
+    if (!constraints || constraints.maxItemTypes === "none") {
+      return Infinity;
+    }
+
+    if (constraints.maxItemTypes === "perGroup" && groupId) {
+      const used = getGroupAddonQuantity(groupId);
+      return Math.max(0, constraints.maxItems - used);
+    }
+
+    if (constraints.maxItemTypes === "overall") {
+      const used = getTotalAddonQuantity();
+      return Math.max(0, constraints.maxItems - used);
+    }
+
+    return Infinity;
+  }, [getSelectedVariantMaxItems, getTotalAddonQuantity, getGroupAddonQuantity]);
+
+  /**
+   * Check if an addon can be added (or quantity increased)
+   */
+  const canAddAddon = useCallback((addonId: string, additionalQty = 1): boolean => {
+    if (!productData) return false;
+
+    const constraints = getSelectedVariantMaxItems();
+    if (!constraints || constraints.maxItemTypes === "none") {
+      return true; // No variant-level limit
+    }
+
+    const addon = productData.addonList.find(a => a._id === addonId);
+    if (!addon) return false;
+
+    if (constraints.maxItemTypes === "perGroup") {
+      const remaining = getRemainingCapacity(addon.groupId);
+      return remaining >= additionalQty;
+    }
+
+    if (constraints.maxItemTypes === "overall") {
+      const remaining = getRemainingCapacity();
+      return remaining >= additionalQty;
+    }
+
+    return true;
+  }, [productData, getSelectedVariantMaxItems, getRemainingCapacity]);
+
+  // ============================================================================
   // COMPUTED VALUES (following reference code amount calculation)
   // ============================================================================
 
@@ -474,13 +582,30 @@ export function ProductDetailsProvider({
       errors.push("Please select a variant");
     }
 
-    // TODO: Add more validation for required addon groups if needed
+    // Validate maxItems constraint
+    const constraints = getSelectedVariantMaxItems();
+    if (constraints && constraints.maxItemTypes !== "none" && constraints.maxItems > 0) {
+      if (constraints.maxItemTypes === "overall") {
+        const total = getTotalAddonQuantity();
+        if (total > constraints.maxItems) {
+          errors.push(`Maximum ${constraints.maxItems} addon items allowed. You have selected ${total}.`);
+        }
+      } else if (constraints.maxItemTypes === "perGroup") {
+        for (const group of productData.addonGroupList) {
+          const groupTotal = getGroupAddonQuantity(group._id);
+          if (groupTotal > constraints.maxItems) {
+            errors.push(`Maximum ${constraints.maxItems} items per group. "${group.label}" has ${groupTotal}.`);
+            break; // Show only first error
+          }
+        }
+      }
+    }
 
     return {
       isValid: errors.length === 0,
       errors,
     };
-  }, [productData, selectedVariantId]);
+  }, [productData, selectedVariantId, getSelectedVariantMaxItems, getTotalAddonQuantity, getGroupAddonQuantity]);
 
   // ============================================================================
   // ADD TO CART ACTION
@@ -527,6 +652,12 @@ export function ProductDetailsProvider({
       isAddonVisible,
       getAddonPricingId,
       getSubVariantPricingId,
+      // maxItems validation helpers
+      getSelectedVariantMaxItems,
+      getTotalAddonQuantity,
+      getGroupAddonQuantity,
+      getRemainingCapacity,
+      canAddAddon,
     }),
     [
       productId,
@@ -552,6 +683,11 @@ export function ProductDetailsProvider({
       isAddonVisible,
       getAddonPricingId,
       getSubVariantPricingId,
+      getSelectedVariantMaxItems,
+      getTotalAddonQuantity,
+      getGroupAddonQuantity,
+      getRemainingCapacity,
+      canAddAddon,
     ]
   );
 

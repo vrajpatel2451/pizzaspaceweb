@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AddonGroupCard } from "../cards/addon-group-card";
+import { SelectionCounter } from "../badges/selection-counter";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import type { AddonGroupsSectionProps } from "@/types/product-details";
 import { cn } from "@/lib/utils";
@@ -51,12 +52,32 @@ export function AddonGroupsSection({
     });
   };
 
+  // Get variant constraints for overall counter
+  const variantConstraints = context.getSelectedVariantMaxItems();
+  const showOverallCounter =
+    variantConstraints?.maxItemTypes === "overall" &&
+    (variantConstraints?.maxItems ?? 0) > 0;
+  const totalQuantity = context.getTotalAddonQuantity();
+
   if (addonGroupList.length === 0) {
     return null;
   }
 
   return (
     <div className={cn("space-y-4", className)}>
+      {/* Overall Counter Header */}
+      {showOverallCounter && (
+        <div className="flex items-center justify-between px-1">
+          <span className="text-sm font-medium text-foreground">
+            Add-ons
+          </span>
+          <SelectionCounter
+            current={totalQuantity}
+            max={variantConstraints!.maxItems}
+          />
+        </div>
+      )}
+
       {addonGroupList.map((group) => {
         const groupAddons = getAddonsForGroup(group._id);
 

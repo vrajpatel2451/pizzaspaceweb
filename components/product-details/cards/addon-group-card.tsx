@@ -4,6 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Check, ChevronDown, X } from "lucide-react";
 import { CompactQuantityPill } from "../controls/quantity-pill";
+import { SelectionCounter } from "../badges/selection-counter";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import { formatPrice } from "@/lib/utils/currency";
 import type { AddonGroupResponse, AddonResponse } from "@/types/product";
@@ -76,6 +77,19 @@ export function AddonGroupCard({
   ).length;
   const hasAnySelected = selectedCount > 0;
 
+  // Get variant constraints for maxItems validation
+  const variantConstraints = context.getSelectedVariantMaxItems();
+  const maxItemTypes = variantConstraints?.maxItemTypes ?? "none";
+  const maxItems = variantConstraints?.maxItems ?? 0;
+
+  // Calculate capacity based on mode
+  const groupQuantity = context.getGroupAddonQuantity(group._id);
+  const groupRemaining = context.getRemainingCapacity(group._id);
+  const overallRemaining = context.getRemainingCapacity();
+
+  // Determine which counter to show (perGroup mode shows counter in header)
+  const showGroupCounter = maxItemTypes === "perGroup" && maxItems > 0;
+
   // Collapse logic
   const shouldCollapse = visibleAddons.length > COLLAPSE_THRESHOLD;
   const displayedAddons =
@@ -84,17 +98,52 @@ export function AddonGroupCard({
       : visibleAddons;
   const hiddenCount = visibleAddons.length - COLLAPSE_THRESHOLD;
 
-  // Handlers
+  // Handlers with capacity checking
   const handleToggleAddon = (addonId: string, isSelected: boolean) => {
     const pricingId = context.getAddonPricingId(addonId);
     if (!pricingId) return;
-    context.toggleAddon(pricingId, isSelected ? 1 : 0);
+
+    if (isSelected) {
+      // Adding - check capacity first
+      if (!context.canAddAddon(addonId, 1)) {
+        return; // Silently prevent - UI should already be disabled
+      }
+      context.toggleAddon(pricingId, 1);
+    } else {
+      // Removing - always allowed
+      context.toggleAddon(pricingId, 0);
+    }
   };
 
-  const handleQuantityChange = (addonId: string, quantity: number) => {
+  const handleQuantityChange = (addonId: string, newQuantity: number) => {
     const pricingId = context.getAddonPricingId(addonId);
     if (!pricingId) return;
-    context.toggleAddon(pricingId, quantity);
+
+    const currentQty = context.getAddonQuantity(addonId);
+
+    // Allow decreasing always
+    if (newQuantity < currentQty) {
+      context.toggleAddon(pricingId, newQuantity);
+      return;
+    }
+
+    // For increasing, check capacity
+    const increase = newQuantity - currentQty;
+    if (context.canAddAddon(addonId, increase)) {
+      context.toggleAddon(pricingId, newQuantity);
+    }
+  };
+
+  // Calculate dynamic max quantity for an addon
+  const getMaxQuantityForAddon = (addonId: string): number => {
+    const currentQty = context.getAddonQuantity(addonId);
+    const perAddonMax = group.max > 0 ? group.max : 10;
+
+    // Get remaining capacity based on mode
+    const remaining = maxItemTypes === "perGroup" ? groupRemaining : overallRemaining;
+
+    // Can increase by remaining capacity
+    return Math.min(perAddonMax, currentQty + remaining);
   };
 
   // Don't render if no visible addons
@@ -132,23 +181,32 @@ export function AddonGroupCard({
             )}
           </div>
 
-          {/* Clear Button */}
-          {hasAnySelected && onClearAll && (
-            <button
-              type="button"
-              onClick={onClearAll}
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full px-2.5 py-1",
-                "text-xs font-medium text-orange-600 dark:text-orange-400",
-                "bg-orange-500/10 hover:bg-orange-500/20 dark:bg-orange-500/15",
-                "transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
-                "animate-in fade-in-0 zoom-in-95"
-              )}
-            >
-              <X className="size-3" />
-              Clear
-            </button>
-          )}
+          {/* Clear Button and Counter */}
+          <div className="flex items-center gap-2">
+            {showGroupCounter && (
+              <SelectionCounter
+                current={groupQuantity}
+                max={maxItems}
+                variant="compact"
+              />
+            )}
+            {hasAnySelected && onClearAll && (
+              <button
+                type="button"
+                onClick={onClearAll}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1",
+                  "text-xs font-medium text-orange-600 dark:text-orange-400",
+                  "bg-orange-500/10 hover:bg-orange-500/20 dark:bg-orange-500/15",
+                  "transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
+                  "animate-in fade-in-0 zoom-in-95"
+                )}
+              >
+                <X className="size-3" />
+                Clear
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -178,7 +236,8 @@ export function AddonGroupCard({
                 quantity={quantity}
                 isSelected={isSelected}
                 allowMulti={group.allowMulti}
-                maxQuantity={group.max > 0 ? group.max : 10}
+                maxQuantity={getMaxQuantityForAddon(addon._id)}
+                isDisabled={!isSelected && !context.canAddAddon(addon._id, 1)}
                 onToggle={(selected) => handleToggleAddon(addon._id, selected)}
                 onQuantityChange={(qty) => handleQuantityChange(addon._id, qty)}
               />
@@ -226,6 +285,7 @@ interface AddonOptionRowProps {
   isSelected: boolean;
   allowMulti: boolean;
   maxQuantity: number;
+  isDisabled?: boolean;
   onToggle: (selected: boolean) => void;
   onQuantityChange: (quantity: number) => void;
 }
@@ -237,6 +297,7 @@ function AddonOptionRow({
   isSelected,
   allowMulti,
   maxQuantity,
+  isDisabled = false,
   onToggle,
   onQuantityChange,
 }: AddonOptionRowProps) {
@@ -245,9 +306,12 @@ function AddonOptionRow({
       className={cn(
         "flex items-center gap-3 px-4 py-4 transition-all duration-200",
         "min-h-[60px]",
+        isDisabled && "opacity-50 cursor-not-allowed",
         isSelected
           ? "bg-primary/5 dark:bg-primary/10"
-          : "hover:bg-muted/40 dark:hover:bg-muted/20"
+          : isDisabled
+            ? "bg-muted/20"
+            : "hover:bg-muted/40 dark:hover:bg-muted/20"
       )}
     >
       {/* Checkbox */}
@@ -255,16 +319,21 @@ function AddonOptionRow({
         type="button"
         role="checkbox"
         aria-checked={isSelected}
-        onClick={() => onToggle(!isSelected)}
+        aria-disabled={isDisabled}
+        disabled={isDisabled}
+        onClick={() => !isDisabled && onToggle(!isSelected)}
         className={cn(
           "size-[22px] rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
           "touch-manipulation active:scale-90",
+          isDisabled && "cursor-not-allowed opacity-50",
           isSelected
             ? "border-primary bg-primary shadow-sm shadow-primary/30"
-            : "border-border/80 bg-background hover:border-primary/50 dark:border-border/60"
+            : isDisabled
+              ? "border-border/50 bg-muted/30"
+              : "border-border/80 bg-background hover:border-primary/50 dark:border-border/60"
         )}
-        aria-label={`${isSelected ? "Remove" : "Add"} ${addon.label}`}
+        aria-label={`${isSelected ? "Remove" : "Add"} ${addon.label}${isDisabled ? " (limit reached)" : ""}`}
       >
         {isSelected && (
           <div className="animate-in fade-in-0 zoom-in-50 duration-200">
@@ -275,8 +344,11 @@ function AddonOptionRow({
 
       {/* Content */}
       <div
-        className="flex-1 min-w-0 cursor-pointer"
-        onClick={() => onToggle(!isSelected)}
+        className={cn(
+          "flex-1 min-w-0",
+          isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+        )}
+        onClick={() => !isDisabled && onToggle(!isSelected)}
       >
         <span
           className={cn(

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { ShoppingBag, AlertCircle, Check } from "lucide-react";
 import { QuantityIncrementor } from "@/components/composite/quantity-incrementor";
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,15 @@ export function StickyActionBar({
   }, []);
 
   const handleAddToCart = async () => {
-    if (!isValid || isLoading) return;
+    if (isLoading) return;
+
+    // Show toast for validation errors
+    if (!isValid && validationErrors.length > 0) {
+      toast.error(validationErrors[0]);
+      return;
+    }
+
+    if (!isValid) return;
     await onAddToCart();
   };
 

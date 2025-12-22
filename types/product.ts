@@ -84,6 +84,7 @@ export interface ProductDetailsResponse {
   addonGroupList: AddonGroupResponse[];
   pricing: VariantPricingResponse[];
 }
+export type VariantAddonSelectionType = "none" | "overall" | "perGroup";
 export interface VariantResponse {
   _id: string;
   label: string;
@@ -91,6 +92,8 @@ export interface VariantResponse {
   groupId: string;
   itemId: string;
   isPrimary: boolean;
+  maxItems: number;
+  maxItemTypes: VariantAddonSelectionType;
   storeIds: string[];
   createdAt: string;
   updatedAt: string;
