@@ -5,7 +5,10 @@ import { toast } from "sonner";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { ProductDetailsDialog } from "./product-details-dialog";
 import { ProductDetailsBottomsheet } from "./product-details-bottomsheet";
-import { ProductDetailsProvider, PricingSelection } from "@/contexts/product-details-context";
+import {
+  ProductDetailsProvider,
+  PricingSelection,
+} from "@/contexts/product-details-context";
 import { useProductDetails } from "@/hooks/use-product-details";
 import { useAddToCart, useUpdateCartItem } from "@/lib/hooks/use-cart";
 import { useDeviceId } from "@/store/device-store";
@@ -28,7 +31,8 @@ export function ProductDetailsContainer({
 
   // Cart integration
   const { mutate: addToCart, isLoading: isAddingToCart } = useAddToCart();
-  const { mutate: updateCartItem, isLoading: isUpdatingCart } = useUpdateCartItem();
+  const { mutate: updateCartItem, isLoading: isUpdatingCart } =
+    useUpdateCartItem();
   const deviceId = useDeviceId();
   const { selectedStore } = useStore();
 
@@ -75,10 +79,11 @@ export function ProductDetailsContainer({
     const variantId = cartItem.variantId || undefined;
 
     // Get pricing array directly from cartItem (already in correct format)
-    const pricing: PricingSelection[] = cartItem.pricing?.map((p) => ({
-      id: p.id,
-      quantity: p.quantity,
-    })) || [];
+    const pricing: PricingSelection[] =
+      cartItem.pricing?.map((p) => ({
+        id: p.id,
+        quantity: p.quantity,
+      })) || [];
 
     return {
       variantId,
@@ -113,8 +118,12 @@ export function ProductDetailsContainer({
         return;
       }
 
-      // Validate variant selection
-      if (!cartData.variantId) {
+      // Validate variant selection (only if primary variants exist)
+      const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
+      const hasPrimaryVariants =
+        primaryGroup &&
+        data.variantList.some((v) => v.groupId === primaryGroup._id);
+      if (hasPrimaryVariants && !cartData.variantId) {
         toast.error("Please select a variant");
         return;
       }
@@ -122,13 +131,18 @@ export function ProductDetailsContainer({
       // Handle EDIT mode
       if (editMode === "edit" && cartItem) {
         const updatePayload: UpdateCartPayload = {
-          variantId: cartData.variantId,
           pricing: cartData.pricing,
           quantity: cartData.quantity,
           sessionId: deviceId,
+          // Only include variantId if it has a value
+          ...(cartData.variantId && { variantId: cartData.variantId }),
         };
 
-        const result = await updateCartItem(cartItem._id, updatePayload, selectedStore._id);
+        const result = await updateCartItem(
+          cartItem._id,
+          updatePayload,
+          selectedStore._id
+        );
 
         if (result.success) {
           handleClose();
@@ -143,9 +157,10 @@ export function ProductDetailsContainer({
         categoryId: data.product.category,
         storeId: selectedStore._id,
         sessionId: deviceId,
-        variantId: cartData.variantId,
         pricing: cartData.pricing,
         quantity: cartData.quantity,
+        // Only include variantId if it has a value
+        ...(cartData.variantId && { variantId: cartData.variantId }),
       };
 
       // Call API
@@ -163,15 +178,18 @@ export function ProductDetailsContainer({
           );
           const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
 
-          const selectedVariantsList = selectedVariant && primaryGroup
-            ? [{
-                groupId: primaryGroup._id,
-                groupLabel: primaryGroup.label,
-                variantId: selectedVariant._id,
-                variantLabel: selectedVariant.label,
-                price: selectedVariant.price,
-              }]
-            : [];
+          const selectedVariantsList =
+            selectedVariant && primaryGroup
+              ? [
+                  {
+                    groupId: primaryGroup._id,
+                    groupLabel: primaryGroup.label,
+                    variantId: selectedVariant._id,
+                    variantLabel: selectedVariant.label,
+                    price: selectedVariant.price,
+                  },
+                ]
+              : [];
 
           // Build addon list from pricing entries
           const selectedAddonsList = cartData.pricing
@@ -212,7 +230,18 @@ export function ProductDetailsContainer({
         }
       }
     },
-    [onAddToCart, data, addToCart, updateCartItem, deviceId, selectedStore, editMode, cartItem, onEditSuccess, handleClose]
+    [
+      onAddToCart,
+      data,
+      addToCart,
+      updateCartItem,
+      deviceId,
+      selectedStore,
+      editMode,
+      cartItem,
+      onEditSuccess,
+      handleClose,
+    ]
   );
 
   // Render trigger element
@@ -225,7 +254,7 @@ export function ProductDetailsContainer({
   // Add console logging for debugging
   React.useEffect(() => {
     if (isOpen) {
-      console.log('ProductDetailsContainer state:', {
+      console.log("ProductDetailsContainer state:", {
         isOpen,
         hasData: !!data,
         isLoading,

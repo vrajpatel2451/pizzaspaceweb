@@ -577,8 +577,12 @@ export function ProductDetailsProvider({
       return { isValid: false, errors };
     }
 
-    // Check primary variant is selected
-    if (!selectedVariantId) {
+    // Check primary variant is selected (only if variants exist)
+    const primaryGroup = productData.variantGroupList.find((g) => g.isPrimary);
+    const hasPrimaryVariants = primaryGroup && productData.variantList.some(
+      (v) => v.groupId === primaryGroup._id
+    );
+    if (hasPrimaryVariants && !selectedVariantId) {
       errors.push("Please select a variant");
     }
 
