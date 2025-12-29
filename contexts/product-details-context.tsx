@@ -511,7 +511,8 @@ export function ProductDetailsProvider({
     }
 
     if (constraints.maxItemTypes === "overall") {
-      const used = getTotalAddonQuantity();
+      // Exclude skipValidation groups from the count
+      const used = getTotalAddonQuantity(true);
       return Math.max(0, constraints.maxItems - used);
     }
 
@@ -524,13 +525,19 @@ export function ProductDetailsProvider({
   const canAddAddon = useCallback((addonId: string, additionalQty = 1): boolean => {
     if (!productData) return false;
 
+    const addon = productData.addonList.find(a => a._id === addonId);
+    if (!addon) return false;
+
+    // Check if addon's group has skipValidation - if so, always allow adding
+    const addonGroup = productData.addonGroupList.find(g => g._id === addon.groupId);
+    if (addonGroup?.skipValidation) {
+      return true; // Skip validation for this group
+    }
+
     const constraints = getSelectedVariantMaxItems();
     if (!constraints || constraints.maxItemTypes === "none") {
       return true; // No variant-level limit
     }
-
-    const addon = productData.addonList.find(a => a._id === addonId);
-    if (!addon) return false;
 
     if (constraints.maxItemTypes === "perGroup") {
       const remaining = getRemainingCapacity(addon.groupId);
