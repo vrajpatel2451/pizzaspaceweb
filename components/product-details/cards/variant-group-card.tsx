@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect, useCallback } from "react";
-import { Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import { formatPrice } from "@/lib/utils/currency";
 import type { VariantGroupResponse, VariantResponse } from "@/types/product";
@@ -27,6 +27,9 @@ export interface VariantGroupCardProps {
  * - Price modifiers aligned right
  * - Smooth selection animations
  */
+// Collapse threshold - show first N variants, then "see more" button
+const COLLAPSE_THRESHOLD = 4;
+
 export function VariantGroupCard({
   group,
   variants,
@@ -36,11 +39,19 @@ export function VariantGroupCard({
 }: VariantGroupCardProps) {
   const context = useProductDetailsContext();
   const [isVisible, setIsVisible] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Trigger entrance animation
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
   }, []);
+
+  // Collapse logic
+  const shouldCollapse = variants.length > COLLAPSE_THRESHOLD;
+  const displayedVariants = shouldCollapse && !isExpanded
+    ? variants.slice(0, COLLAPSE_THRESHOLD)
+    : variants;
+  const hiddenCount = variants.length - COLLAPSE_THRESHOLD;
 
   /**
    * Calculate variant price
@@ -111,7 +122,7 @@ export function VariantGroupCard({
         aria-required={group.isPrimary}
         className="divide-y divide-border/30"
       >
-        {variants.map((variant, index) => {
+        {displayedVariants.map((variant, index) => {
           const isSelected = selectedVariantId === variant._id;
           const price = calculateVariantPrice(variant._id);
 
@@ -135,6 +146,27 @@ export function VariantGroupCard({
           );
         })}
       </div>
+
+      {/* See More / See Less Button */}
+      {shouldCollapse && (
+        <div className="px-4 py-3 border-t border-border/30">
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center justify-center gap-2 w-full text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            <span
+              className={cn(
+                "transition-transform duration-200",
+                isExpanded && "rotate-180"
+              )}
+            >
+              <ChevronDown className="size-4" />
+            </span>
+            {isExpanded ? "Show less" : `+${hiddenCount} more options`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

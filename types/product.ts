@@ -125,6 +125,7 @@ export interface AddonGroupResponse {
   description: string;
   storeIds: string[];
   allowMulti: boolean;
+  skipValidation: boolean;
   min: number;
   max: number;
   createdAt: string;

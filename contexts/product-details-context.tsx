@@ -255,23 +255,19 @@ export function ProductDetailsProvider({
   }, []);
 
   /**
-   * Select primary variant - clears sub-variant pricing when variant changes
-   * (Following reference code handleSelectPrimary logic)
+   * Select primary variant - clears ALL pricing when variant changes
+   * This ensures user starts fresh when switching variants (better UX)
    */
   const selectPrimaryVariant = useCallback(
     (variantId: string) => {
       if (selectedVariantId !== variantId) {
-        // Clear variant-type pricing entries when primary variant changes
-        setSelectedPricingIds((prev) =>
-          prev.filter((p) => {
-            const entry = productData?.pricing.find((x) => x._id === p.id);
-            return entry?.type !== "variant";
-          })
-        );
+        // Clear ALL pricing selections when primary variant changes
+        // This includes both sub-variants AND addons for better UX
+        setSelectedPricingIds([]);
       }
       setSelectedVariantId(variantId);
     },
-    [selectedVariantId, productData]
+    [selectedVariantId]
   );
 
   /**
@@ -451,24 +447,40 @@ export function ProductDetailsProvider({
 
   /**
    * Calculate total addon quantity across all groups
+   * @param excludeSkipValidation - if true, exclude addons from groups with skipValidation=true
    */
-  const getTotalAddonQuantity = useCallback((): number => {
+  const getTotalAddonQuantity = useCallback((excludeSkipValidation = false): number => {
     if (!productData) return 0;
 
     return selectedPricingIds.reduce((total, selection) => {
       const pricing = productData.pricing.find(p => p._id === selection.id);
-      if (pricing?.type === "addon") {
-        return total + selection.quantity;
+      if (pricing?.type !== "addon") return total;
+
+      // If excluding skipValidation groups, check the addon's group
+      if (excludeSkipValidation) {
+        const addon = productData.addonList.find(a => a._id === pricing.addonId);
+        const group = productData.addonGroupList.find(g => g._id === addon?.groupId);
+        if (group?.skipValidation) {
+          return total; // Skip this addon's quantity
+        }
       }
-      return total;
+
+      return total + selection.quantity;
     }, 0);
   }, [productData, selectedPricingIds]);
 
   /**
    * Calculate addon quantity within a specific group
+   * Returns 0 if the group has skipValidation=true (to skip maxItems validation)
    */
   const getGroupAddonQuantity = useCallback((groupId: string): number => {
     if (!productData) return 0;
+
+    // Check if this group has skipValidation - if so, return 0 to skip validation
+    const group = productData.addonGroupList.find(g => g._id === groupId);
+    if (group?.skipValidation) {
+      return 0;
+    }
 
     return selectedPricingIds.reduce((total, selection) => {
       const pricing = productData.pricing.find(p => p._id === selection.id);
@@ -586,16 +598,19 @@ export function ProductDetailsProvider({
       errors.push("Please select a variant");
     }
 
-    // Validate maxItems constraint
+    // Validate maxItems constraint (excludes addon groups with skipValidation=true)
     const constraints = getSelectedVariantMaxItems();
     if (constraints && constraints.maxItemTypes !== "none" && constraints.maxItems > 0) {
       if (constraints.maxItemTypes === "overall") {
-        const total = getTotalAddonQuantity();
+        // Exclude skipValidation groups from total count
+        const total = getTotalAddonQuantity(true);
         if (total > constraints.maxItems) {
           errors.push(`Maximum ${constraints.maxItems} addon items allowed. You have selected ${total}.`);
         }
       } else if (constraints.maxItemTypes === "perGroup") {
         for (const group of productData.addonGroupList) {
+          // Skip groups with skipValidation=true (getGroupAddonQuantity returns 0 for these)
+          if (group.skipValidation) continue;
           const groupTotal = getGroupAddonQuantity(group._id);
           if (groupTotal > constraints.maxItems) {
             errors.push(`Maximum ${constraints.maxItems} items per group. "${group.label}" has ${groupTotal}.`);
