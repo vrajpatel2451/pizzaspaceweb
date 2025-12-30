@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Instagram, Facebook, Twitter } from "lucide-react";
+import { CustomImage } from "@/components/ui/custom-image";
 
 const socialLinks = [
   {
@@ -38,10 +39,14 @@ export function FooterBrand() {
     <div className="lg:pr-8">
       {/* Logo */}
       <Link href="/" className="inline-flex items-center gap-3 group mb-5">
-        <div className="relative w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow duration-300">
-          <span className="text-white font-bold text-xl">PS</span>
-          {/* Shine effect */}
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-primary-500/20 group-hover:shadow-primary-500/40 transition-shadow duration-300">
+          <CustomImage
+            src="/logo.png"
+            alt="Pizza Space Logo"
+            width={48}
+            height={48}
+            className="object-contain transition-transform duration-300 group-hover:scale-110"
+          />
         </div>
         <div className="flex flex-col">
           <span className="text-white font-bold text-xl tracking-tight">

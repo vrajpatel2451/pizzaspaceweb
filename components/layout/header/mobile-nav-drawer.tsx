@@ -20,6 +20,7 @@ import {
   ChevronDown,
   LogOut,
 } from "lucide-react";
+import { CustomImage } from "@/components/ui/custom-image";
 import { cn } from "@/lib/utils";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
@@ -182,8 +183,14 @@ export function MobileNavDrawer({ className }: MobileNavDrawerProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Pizza className="size-5" />
+            <div className="flex size-10 items-center justify-center rounded-full overflow-hidden">
+              <CustomImage
+                src="/logo.png"
+                alt="Pizza Space Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
             </div>
             <span className="text-lg font-bold text-primary">Pizza Space</span>
           </div>

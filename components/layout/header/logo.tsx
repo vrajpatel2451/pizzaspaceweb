@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Pizza } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CustomImage } from "@/components/ui/custom-image";
 
 interface LogoProps {
   variant?: "default" | "light";
@@ -30,27 +30,19 @@ export function Logo({
       {/* Logo Icon */}
       <div
         className={cn(
-          "relative flex items-center justify-center size-10 rounded-full",
+          "relative flex items-center justify-center size-10 rounded-full overflow-hidden",
           "transition-all duration-300",
           "shadow-md group-hover:shadow-lg",
-          "active:scale-95",
-          isLight
-            ? "bg-white/90 dark:bg-white/20 backdrop-blur-sm group-hover:bg-white dark:group-hover:bg-white/30"
-            : "bg-primary group-hover:bg-primary/90"
+          "active:scale-95"
         )}
       >
-        <div className="transition-transform duration-300 ease-out group-hover:rotate-12">
-          <Pizza
-            className={cn(
-              "size-5",
-              isLight ? "text-primary dark:text-white" : "text-primary-foreground"
-            )}
-          />
-        </div>
-
-        {/* Enhanced shine effect */}
-        <div
-          className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/40 via-white/20 to-transparent opacity-0 scale-95 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100"
+        <CustomImage
+          src="/logo.png"
+          alt="Pizza Space Logo"
+          width={40}
+          height={40}
+          className="object-contain transition-transform duration-300 ease-out group-hover:scale-110"
+          fetchPriority="high"
         />
       </div>
 
