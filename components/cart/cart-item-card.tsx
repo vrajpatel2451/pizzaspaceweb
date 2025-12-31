@@ -21,7 +21,6 @@ import { useProductDetails } from "@/lib/hooks/use-product-details";
 import { useDeliveryType } from "@/store/cart-store";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/formatters";
-import { PriceDisplay, AvailabilityBadge } from "@/components/product";
 
 interface CartItemCardProps {
   item: CartResponse;
@@ -173,7 +172,12 @@ export function CartItemCard({
   }, [productDetails, variantInfo, addonInfo, sVariantsInfo]);
 
   // Calculate total price for this cart item
-  const itemTotal = itemPrice * item.quantity;
+  // Simple pricing: if delivery, add packaging charges
+  const packagingPerItem = deliveryType === "delivery"
+    ? (productDetails?.product.packagingCharges || 0)
+    : 0;
+  const itemTotalWithPackaging = (itemPrice + packagingPerItem) * item.quantity;
+  const unitPriceWithPackaging = itemPrice + packagingPerItem;
 
   // Show loading skeleton while fetching product details
   if (isLoading) {
@@ -217,14 +221,6 @@ export function CartItemCard({
             fill
             className="object-cover"
           />
-          {/* Availability Badge */}
-          {isDisabled && (
-            <AvailabilityBadge
-              available={false}
-              deliveryType={deliveryType}
-              className="top-2 left-2"
-            />
-          )}
         </div>
 
         {/* Product Details */}
@@ -251,21 +247,12 @@ export function CartItemCard({
 
             {/* Price - Desktop */}
             <div className="hidden sm:block text-right">
-              <PriceDisplay
-                basePrice={itemTotal}
-                packagingCharges={
-                  deliveryType === "delivery"
-                    ? productDetails.product.packagingCharges * item.quantity
-                    : 0
-                }
-                deliveryType={deliveryType}
-                showBreakdown={deliveryType === "delivery"}
-                size="sm"
-                className="items-end"
-              />
+              <p className="font-semibold text-base">
+                {formatPrice(itemTotalWithPackaging)}
+              </p>
               {item.quantity > 1 && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formatPrice(itemPrice)} each
+                  {formatPrice(unitPriceWithPackaging)} each
                 </p>
               )}
             </div>
@@ -273,20 +260,12 @@ export function CartItemCard({
 
           {/* Price - Mobile */}
           <div className="sm:hidden flex justify-between items-center">
-            <PriceDisplay
-              basePrice={itemTotal}
-              packagingCharges={
-                deliveryType === "delivery"
-                  ? productDetails.product.packagingCharges * item.quantity
-                  : 0
-              }
-              deliveryType={deliveryType}
-              showBreakdown={deliveryType === "delivery"}
-              size="sm"
-            />
+            <p className="font-semibold text-base">
+              {formatPrice(itemTotalWithPackaging)}
+            </p>
             {item.quantity > 1 && (
               <p className="text-sm text-muted-foreground">
-                {formatPrice(itemPrice)} each
+                {formatPrice(unitPriceWithPackaging)} each
               </p>
             )}
           </div>

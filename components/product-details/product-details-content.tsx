@@ -9,6 +9,7 @@ import { AddonGroupsSection } from "./sections/addon-groups-section";
 import { StickyActionBar } from "./sections/sticky-action-bar";
 import { UnavailableNotice } from "./unavailable-notice";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
+import { useDeliveryType } from "@/store/cart-store";
 import type { ProductDetailsContentProps } from "@/types/product-details";
 import type { OrderDeliveryType } from "@/types/cart";
 
@@ -28,6 +29,16 @@ export function ProductDetailsContent({
   isProductAvailable?: boolean;
 }) {
   const context = useProductDetailsContext();
+  const storeDeliveryType = useDeliveryType();
+
+  // Use prop or store delivery type
+  const activeDeliveryType = deliveryType || storeDeliveryType;
+
+  // Calculate display price with packaging for delivery
+  const packagingTotal = activeDeliveryType === "delivery" && data
+    ? (data.product.packagingCharges || 0) * context.quantity
+    : 0;
+  const displayTotalPrice = context.totalPrice + packagingTotal;
 
   // Loading state - only show skeleton when actually loading data (not processing)
   if (isLoading && !data) {
@@ -117,14 +128,12 @@ export function ProductDetailsContent({
       <StickyActionBar
         quantity={context.quantity}
         onQuantityChange={context.setQuantity}
-        totalPrice={context.totalPrice}
+        totalPrice={displayTotalPrice}
         isValid={context.isValid && isProductAvailable}
         validationErrors={context.validationErrors}
         isLoading={isProcessing}
         onAddToCart={context.addToCart}
         editMode={editMode}
-        deliveryType={deliveryType}
-        packagingCharges={data.product.packagingCharges}
       />
     </div>
   );

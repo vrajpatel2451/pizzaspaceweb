@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Star, Flame, Sparkles, TrendingUp, Plus } from "lucide-react";
 import { ProductResponse } from "@/types";
 import { ProductDetailsContainer } from "@/components/product-details";
+import { useDeliveryType } from "@/store/cart-store";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/formatters";
 import { CustomImage } from "@/components/ui/custom-image";
@@ -119,9 +120,15 @@ export function ProductCard({
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
+  const deliveryType = useDeliveryType();
 
   const imageUrl = product.photoList[0] || "/placeholder.jpg";
   const badgeType = getBadgeType(product);
+
+  // Simple pricing: if delivery, add packaging charges
+  const displayPrice = deliveryType === "delivery"
+    ? product.basePrice + (product.packagingCharges || 0)
+    : product.basePrice;
 
   // Generate a pseudo-random rating based on product id for consistency
   const rating = 4 + (parseInt(product._id.slice(-2), 16) % 10) / 10;
@@ -237,7 +244,7 @@ export function ProductCard({
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col">
             <span className="text-xl sm:text-2xl font-bold text-orange-500">
-              {formatPrice(product.basePrice)}
+              {formatPrice(displayPrice)}
             </span>
           </div>
 

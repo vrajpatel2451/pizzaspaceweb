@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { QuantityIncrementor } from "@/components/composite/quantity-incrementor";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
+import { useDeliveryType } from "@/store/cart-store";
 import type { AddToCartSectionProps } from "@/types/product-details";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/utils/currency";
@@ -14,17 +15,25 @@ export function ProductDetailsFooter({
   className,
 }: Omit<AddToCartSectionProps, 'onAddToCart'>) {
   const context = useProductDetailsContext();
+  const deliveryType = useDeliveryType();
   const [buttonState, setButtonState] = useState<"idle" | "loading" | "success">("idle");
   const [priceKey, setPriceKey] = useState(0);
-  const [prevPrice, setPrevPrice] = useState(context.totalPrice);
+
+  // Simple pricing: if delivery, add packaging charges per item
+  const packagingTotal = deliveryType === "delivery"
+    ? (context.productData?.product.packagingCharges || 0) * context.quantity
+    : 0;
+  const displayTotal = context.totalPrice + packagingTotal;
+
+  const [prevPrice, setPrevPrice] = useState(displayTotal);
 
   // Track price changes for animation
   useEffect(() => {
-    if (context.totalPrice !== prevPrice) {
+    if (displayTotal !== prevPrice) {
       setPriceKey((k) => k + 1);
-      setPrevPrice(context.totalPrice);
+      setPrevPrice(displayTotal);
     }
-  }, [context.totalPrice, prevPrice]);
+  }, [displayTotal, prevPrice]);
 
   // Handle button click with animation states
   const handleAddToCart = async () => {
@@ -69,26 +78,20 @@ export function ProductDetailsFooter({
           />
         </div>
 
-        {/* Animated Total Price Display - Responsive sizing */}
-        <div className="flex flex-col flex-1 min-w-0">
-          <span className="text-xs sm:text-sm text-muted-foreground">Total</span>
-          <div
+        {/* Price Display - Just the total, no breakdown */}
+        <div className="flex-1 min-w-0">
+          <span
+            key={priceKey}
+            className={cn(
+              "text-xl sm:text-2xl font-bold text-primary truncate block",
+              "transition-all duration-200 motion-reduce:transition-none",
+              priceKey > 0 && "animate-in fade-in-0 slide-in-from-top-2"
+            )}
             role="status"
             aria-live="polite"
-            aria-atomic="true"
           >
-            <span
-              key={priceKey}
-              className={cn(
-                "text-xl sm:text-2xl font-bold text-primary truncate block",
-                "transition-all duration-200 motion-reduce:transition-none",
-                priceKey > 0 && "animate-in fade-in-0 slide-in-from-top-2"
-              )}
-            >
-              <span className="sr-only">Total price: </span>
-              {formatPrice(context.totalPrice)}
-            </span>
-          </div>
+            {formatPrice(displayTotal)}
+          </span>
         </div>
 
         {/* Add to Cart Button - Responsive sizing */}

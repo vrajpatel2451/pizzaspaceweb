@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ChevronDown, Flame } from "lucide-react";
 import type { ProductInfoSectionProps } from "@/types/product-details";
+import { useDeliveryType } from "@/store/cart-store";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/utils/currency";
 import {
@@ -23,6 +24,12 @@ export function ProductInfoSection({
   defaultExpanded = false,
 }: ProductInfoSectionProps & { defaultExpanded?: boolean }) {
   const [isOpen, setIsOpen] = React.useState(defaultExpanded);
+  const deliveryType = useDeliveryType();
+
+  // Simple pricing: if delivery, add packaging charges
+  const displayPrice = deliveryType === "delivery"
+    ? product.basePrice + (product.packagingCharges || 0)
+    : product.basePrice;
 
   const hasNutritionalInfo =
     (product.protein !== undefined && product.protein > 0) ||
@@ -75,7 +82,7 @@ export function ProductInfoSection({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold text-primary">
-            {formatPrice(product.basePrice)}
+            {formatPrice(displayPrice)}
           </span>
           <ChevronDown
             className={cn(

@@ -6,10 +6,8 @@ import { toast } from "sonner";
 import { ShoppingBag, AlertCircle, Check } from "lucide-react";
 import { QuantityIncrementor } from "@/components/composite/quantity-incrementor";
 import { Button } from "@/components/ui/button";
-import { PriceDisplay } from "@/components/product/price-display";
 import { formatPrice } from "@/lib/utils/currency";
 import { cn } from "@/lib/utils";
-import type { OrderDeliveryType } from "@/types/cart";
 
 export interface StickyActionBarProps {
   quantity: number;
@@ -22,8 +20,6 @@ export interface StickyActionBarProps {
   onAddToCart: () => void | Promise<void>;
   className?: string;
   editMode?: "add" | "edit";
-  deliveryType?: OrderDeliveryType;
-  packagingCharges?: number;
 }
 
 /**
@@ -49,8 +45,6 @@ export function StickyActionBar({
   onAddToCart,
   className,
   editMode = "add",
-  deliveryType,
-  packagingCharges = 0,
 }: StickyActionBarProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -137,30 +131,7 @@ export function StickyActionBar({
                 <ShoppingBag className="size-5" />
                 <span>{editMode === "edit" ? "Update cart" : "Add item"}</span>
                 <span className="mx-1 opacity-60">-</span>
-                {deliveryType && packagingCharges > 0 && deliveryType === "delivery" ? (
-                  <div className="flex flex-col items-end leading-tight text-white">
-                    <PriceDisplay
-                      basePrice={totalPrice - packagingCharges}
-                      packagingCharges={packagingCharges}
-                      deliveryType={deliveryType}
-                      showBreakdown={true}
-                      size="lg"
-                      className="[&>div]:!text-white [&_span]:!text-white"
-                      animate={true}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-end leading-tight">
-                    <span className="font-bold">
-                      {formatPrice(totalPrice)}
-                    </span>
-                    {hasDiscount && (
-                      <span className="text-[10px] line-through opacity-70">
-                        {formatPrice(originalPrice)}
-                      </span>
-                    )}
-                  </div>
-                )}
+                <span className="font-bold">{formatPrice(totalPrice)}</span>
               </>
             )}
           </Button>
