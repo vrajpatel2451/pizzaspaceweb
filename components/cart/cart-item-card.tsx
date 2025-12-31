@@ -18,15 +18,17 @@ import { QuantityIncrementor } from "@/components/composite/quantity-incrementor
 import { ProductDetailsContainer } from "@/components/product-details/product-details-container";
 import { CartResponse } from "@/types";
 import { useProductDetails } from "@/lib/hooks/use-product-details";
+import { useDeliveryType } from "@/store/cart-store";
 import { cn } from "@/lib/utils";
-import { formatNumber } from "@/lib/utils/format";
 import { formatPrice } from "@/lib/formatters";
+import { PriceDisplay, AvailabilityBadge } from "@/components/product";
 
 interface CartItemCardProps {
   item: CartResponse;
   onQuantityChange: (cartId: string, newQuantity: number) => Promise<void>;
   onRemove: (cartId: string) => Promise<void>;
   onEditSuccess?: () => void;
+  isDisabled?: boolean;
   className?: string;
 }
 
@@ -35,8 +37,11 @@ export function CartItemCard({
   onQuantityChange,
   onRemove,
   onEditSuccess,
+  isDisabled = false,
   className,
 }: CartItemCardProps) {
+  // Get delivery type from store
+  const deliveryType = useDeliveryType();
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const [isUpdatingQuantity, setIsUpdatingQuantity] = useState(false);
@@ -200,6 +205,7 @@ export function CartItemCard({
       <div
         className={cn(
           "flex flex-col sm:flex-row gap-4 rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md",
+          isDisabled && "opacity-50 pointer-events-none",
           className
         )}
       >
@@ -211,6 +217,14 @@ export function CartItemCard({
             fill
             className="object-cover"
           />
+          {/* Availability Badge */}
+          {isDisabled && (
+            <AvailabilityBadge
+              available={false}
+              deliveryType={deliveryType}
+              className="top-2 left-2"
+            />
+          )}
         </div>
 
         {/* Product Details */}
@@ -237,11 +251,20 @@ export function CartItemCard({
 
             {/* Price - Desktop */}
             <div className="hidden sm:block text-right">
-              <p className="font-semibold text-base">
-                {formatPrice(itemTotal)}
-              </p>
+              <PriceDisplay
+                basePrice={itemTotal}
+                packagingCharges={
+                  deliveryType === "delivery"
+                    ? productDetails.product.packagingCharges * item.quantity
+                    : 0
+                }
+                deliveryType={deliveryType}
+                showBreakdown={deliveryType === "delivery"}
+                size="sm"
+                className="items-end"
+              />
               {item.quantity > 1 && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-1">
                   {formatPrice(itemPrice)} each
                 </p>
               )}
@@ -250,7 +273,17 @@ export function CartItemCard({
 
           {/* Price - Mobile */}
           <div className="sm:hidden flex justify-between items-center">
-            <p className="font-semibold text-lg">{formatPrice(itemTotal)}</p>
+            <PriceDisplay
+              basePrice={itemTotal}
+              packagingCharges={
+                deliveryType === "delivery"
+                  ? productDetails.product.packagingCharges * item.quantity
+                  : 0
+              }
+              deliveryType={deliveryType}
+              showBreakdown={deliveryType === "delivery"}
+              size="sm"
+            />
             {item.quantity > 1 && (
               <p className="text-sm text-muted-foreground">
                 {formatPrice(itemPrice)} each
@@ -277,7 +310,7 @@ export function CartItemCard({
               min={1}
               max={99}
               size="sm"
-              disabled={isUpdatingQuantity}
+              disabled={isUpdatingQuantity || isDisabled}
             />
 
             <div className="flex items-center gap-1 sm:gap-1">
@@ -293,6 +326,7 @@ export function CartItemCard({
                     size="icon-sm"
                     className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-8 sm:w-8"
                     aria-label="Edit item"
+                    disabled={isDisabled}
                   >
                     <Edit2 className="h-5 w-5 sm:h-4 sm:w-4" />
                   </Button>
@@ -305,6 +339,7 @@ export function CartItemCard({
                 onClick={() => setShowRemoveDialog(true)}
                 className="min-h-[44px] min-w-[44px] h-11 w-11 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                 aria-label="Remove item"
+                disabled={isDisabled}
               >
                 <Trash2 className="h-5 w-5 sm:h-4 sm:w-4" />
               </Button>

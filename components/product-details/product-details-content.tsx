@@ -7,8 +7,10 @@ import { ProductInfoSection } from "./sections/product-info-section";
 import { VariantGroupsSection } from "./sections/variant-groups-section";
 import { AddonGroupsSection } from "./sections/addon-groups-section";
 import { StickyActionBar } from "./sections/sticky-action-bar";
+import { UnavailableNotice } from "./unavailable-notice";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
 import type { ProductDetailsContentProps } from "@/types/product-details";
+import type { OrderDeliveryType } from "@/types/cart";
 
 export function ProductDetailsContent({
   data,
@@ -17,7 +19,14 @@ export function ProductDetailsContent({
   onClose,
   editMode = "add",
   isProcessing = false,
-}: ProductDetailsContentProps & { editMode?: "add" | "edit"; isProcessing?: boolean }) {
+  deliveryType,
+  isProductAvailable = true,
+}: ProductDetailsContentProps & {
+  editMode?: "add" | "edit";
+  isProcessing?: boolean;
+  deliveryType?: OrderDeliveryType;
+  isProductAvailable?: boolean;
+}) {
   const context = useProductDetailsContext();
 
   // Loading state - only show skeleton when actually loading data (not processing)
@@ -71,6 +80,17 @@ export function ProductDetailsContent({
             />
           </div>
 
+          {/* Unavailable Notice - Show when product is not available for delivery type */}
+          {!isProductAvailable && deliveryType && (
+            <div className="animate-fade-in-up stagger-3 motion-reduce:animate-none">
+              <UnavailableNotice
+                productName={data.product.name}
+                deliveryType={deliveryType}
+                availableDeliveryTypes={data.product.availableDeliveryTypes ?? []}
+              />
+            </div>
+          )}
+
           {/* Variant Groups */}
           {hasVariants && (
             <div className="animate-fade-in-up stagger-3 motion-reduce:animate-none">
@@ -98,11 +118,13 @@ export function ProductDetailsContent({
         quantity={context.quantity}
         onQuantityChange={context.setQuantity}
         totalPrice={context.totalPrice}
-        isValid={context.isValid}
+        isValid={context.isValid && isProductAvailable}
         validationErrors={context.validationErrors}
         isLoading={isProcessing}
         onAddToCart={context.addToCart}
         editMode={editMode}
+        deliveryType={deliveryType}
+        packagingCharges={data.product.packagingCharges}
       />
     </div>
   );

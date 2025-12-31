@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo, useTransition } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useState, useCallback, useMemo, useTransition, useEffect, useRef } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { CategoryResponse, SubCategoryResponse, ProductResponse } from "@/types";
 import { CategoryAccordion } from "./sidebar/category-accordion";
@@ -11,6 +11,7 @@ import { SkipLink } from "./skip-link";
 import { ScreenReaderAnnouncer } from "./screen-reader-announcer";
 import { ProductGrid } from "./product-grid/product-grid";
 import { MenuEmpty } from "./states/menu-empty";
+import { useDeliveryType } from "@/store/cart-store";
 
 // Dynamic import for mobile-only component to reduce initial bundle size
 const MobileFilterSheet = dynamic(
@@ -58,12 +59,38 @@ export function MenuPageClient({
 }: MenuPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // Mobile filter sheet state
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
   // Loading state for filter transitions
   const [isPending, startTransition] = useTransition();
+
+  // Track delivery type changes
+  const deliveryType = useDeliveryType();
+  const prevDeliveryTypeRef = useRef(deliveryType);
+
+  // Update URL when delivery type changes
+  useEffect(() => {
+    // Skip on initial mount
+    if (prevDeliveryTypeRef.current === deliveryType) {
+      return;
+    }
+
+    prevDeliveryTypeRef.current = deliveryType;
+
+    // Build new URL with updated delivery type
+    const params = new URLSearchParams(searchParams.toString());
+
+    // Update or add delivery type parameter
+    params.set('deliveryType', deliveryType);
+
+    // Navigate to updated URL (this will trigger server component re-render)
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
+  }, [deliveryType, pathname, searchParams, router]);
 
   // Group subcategories by category for accordion
   const subcategoriesByCategory = useMemo(() => {

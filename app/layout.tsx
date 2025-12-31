@@ -5,8 +5,10 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { CartProvider } from "@/components/providers/cart-provider";
 import { StoreProvider } from "@/lib/contexts/store-context";
+import { DeliveryTypeProvider } from "@/contexts/delivery-type-context";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { DeliveryTypeModalWrapper } from "@/components/delivery/delivery-type-modal-wrapper";
 import {
   RestaurantJsonLd,
   LocalBusinessJsonLd,
@@ -172,13 +174,16 @@ export default function RootLayout({
           <Toaster />
           <StoreProvider>
             <CartProvider>
-              <AuthProvider>
-                <Header />
-                <main id="main-content" className="min-h-screen">
-                  {children}
-                </main>
-                <Footer />
-              </AuthProvider>
+              <DeliveryTypeProvider>
+                <AuthProvider>
+                  <Header />
+                  <main id="main-content" className="min-h-screen">
+                    {children}
+                  </main>
+                  <Footer />
+                  <DeliveryTypeModalWrapper />
+                </AuthProvider>
+              </DeliveryTypeProvider>
             </CartProvider>
           </StoreProvider>
         </ThemeProvider>

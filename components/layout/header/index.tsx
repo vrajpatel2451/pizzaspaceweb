@@ -30,3 +30,5 @@ export { ThemeToggle, ThemeTogglePill } from "./theme-toggle";
 export { UserDropdown } from "./user-dropdown";
 export { CartBadge } from "./cart-badge";
 export { MobileNavDrawer } from "./mobile-nav-drawer";
+export { StoreLocator } from "./store-locator";
+export { DeliveryTypeSwitcher } from "./delivery-type-switcher";

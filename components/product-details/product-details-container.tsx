@@ -13,6 +13,8 @@ import { useProductDetails } from "@/hooks/use-product-details";
 import { useAddToCart, useUpdateCartItem } from "@/lib/hooks/use-cart";
 import { useDeviceId } from "@/store/device-store";
 import { useStore } from "@/lib/contexts/store-context";
+import { useDeliveryTypeContext } from "@/contexts/delivery-type-context";
+import { isProductAvailableForDeliveryType } from "@/lib/utils/price";
 import type { ProductDetailsContainerProps } from "@/types/product-details";
 import type { AddToCartPayload, UpdateCartPayload } from "@/types";
 
@@ -36,11 +38,22 @@ export function ProductDetailsContainer({
   const deviceId = useDeviceId();
   const { selectedStore } = useStore();
 
+  // Get delivery type context
+  const { deliveryType } = useDeliveryTypeContext();
+
   // Use hook to fetch product details
   const { data, isLoading, error, refetch } = useProductDetails(productId);
 
   // Processing state - defined early for use in handleClose
   const isProcessing = isAddingToCart || isUpdatingCart;
+
+  // Check product availability for current delivery type
+  const isProductAvailable =
+    !data?.product?.availableDeliveryTypes ||
+    isProductAvailableForDeliveryType(
+      data.product.availableDeliveryTypes,
+      deliveryType
+    );
 
   // Fetch data when modal opens (lazy mode)
   React.useEffect(() => {
@@ -283,6 +296,8 @@ export function ProductDetailsContainer({
             isProcessing={isProcessing}
             error={error}
             editMode={editMode}
+            deliveryType={deliveryType}
+            isProductAvailable={isProductAvailable}
           />
         ) : (
           <ProductDetailsBottomsheet
@@ -293,6 +308,8 @@ export function ProductDetailsContainer({
             isProcessing={isProcessing}
             error={error}
             editMode={editMode}
+            deliveryType={deliveryType}
+            isProductAvailable={isProductAvailable}
           />
         )}
       </ProductDetailsProvider>

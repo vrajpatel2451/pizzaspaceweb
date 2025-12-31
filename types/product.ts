@@ -1,3 +1,5 @@
+import { OrderDeliveryType } from "./cart";
+
 export type ProductType = "veg" | "non_veg" | "vegan";
 export type SpiceLevel = "0_chilli" | "1_chilli" | "2_chilli";
 
@@ -43,6 +45,7 @@ export interface ProductResponse {
   category: string;
   subCategory: string;
   noOfPeople: number;
+  availableDeliveryTypes: OrderDeliveryType[];
   dishSize: DishSize;
   basePrice: number;
   packagingCharges: number;
@@ -71,6 +74,7 @@ export interface ProductQueryParams {
   search?: string;
   storeId?: string;
   categoryId?: string;
+  deliveryType?: string;
   ids?: string[];
   all?: boolean;
   subCategoryId?: string;

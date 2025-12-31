@@ -20,6 +20,8 @@ export async function getProducts(
   if (params?.categoryId) queryParams.append("categoryId", params.categoryId);
   if (params?.subCategoryId)
     queryParams.append("subCategoryId", params.subCategoryId);
+  if (params?.deliveryType)
+    queryParams.append("deliveryType", params.deliveryType);
   if (params?.all !== undefined)
     queryParams.append("all", params.all.toString());
   if (params?.ids && params.ids.length > 0) {

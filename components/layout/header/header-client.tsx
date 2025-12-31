@@ -16,6 +16,7 @@ import { UserDropdown } from "./user-dropdown";
 import { CartBadge } from "./cart-badge";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
 import { StoreLocator } from "./store-locator";
+import { DeliveryTypeSwitcher } from "./delivery-type-switcher";
 
 interface NavLink {
   label: string;
@@ -197,6 +198,15 @@ export function HeaderClient({ className }: HeaderClientProps) {
 
             {/* Store Locator */}
             <StoreLocator
+              className={cn(
+                !scrolled && isHomePage
+                  ? "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"
+                  : ""
+              )}
+            />
+
+            {/* Delivery Type Switcher */}
+            <DeliveryTypeSwitcher
               className={cn(
                 !scrolled && isHomePage
                   ? "text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10"

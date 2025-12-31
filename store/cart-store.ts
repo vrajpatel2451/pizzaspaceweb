@@ -10,6 +10,7 @@ interface CartState {
   selectedDiscountIds: string[];
   deliveryType: OrderDeliveryType;
   selectedAddressId: string | null;
+  isDeliveryTypeSelected: boolean;
   isLoading: boolean;
   isSummaryLoading: boolean;
   error: string | null;
@@ -26,6 +27,7 @@ interface CartActions {
   setSummary: (summary: CustomerBillingOnCart | null) => void;
   setDeliveryType: (deliveryType: OrderDeliveryType) => void;
   setSelectedAddress: (addressId: string | null) => void;
+  setDeliveryTypeSelected: (selected: boolean) => void;
   addDiscount: (discountId: string) => void;
   removeDiscount: (discountId: string) => void;
   setDiscounts: (discountIds: string[]) => void;
@@ -46,6 +48,7 @@ const initialState: CartState = {
   selectedDiscountIds: [],
   deliveryType: 'pickup',
   selectedAddressId: null,
+  isDeliveryTypeSelected: false,
   isLoading: false,
   isSummaryLoading: false,
   error: null,
@@ -104,6 +107,8 @@ export const useCartStore = create<CartStore>()(
 
       setSelectedAddress: (addressId) => set({ selectedAddressId: addressId }),
 
+      setDeliveryTypeSelected: (selected) => set({ isDeliveryTypeSelected: selected }),
+
       addDiscount: (discountId) => set((state) => ({
         selectedDiscountIds: state.selectedDiscountIds.includes(discountId)
           ? state.selectedDiscountIds
@@ -145,6 +150,7 @@ export const useCartStore = create<CartStore>()(
         selectedDiscountIds: state.selectedDiscountIds,
         deliveryType: state.deliveryType,
         selectedAddressId: state.selectedAddressId,
+        isDeliveryTypeSelected: state.isDeliveryTypeSelected,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
@@ -159,6 +165,7 @@ export const useCartSummary = () => useCartStore((state) => state.summary);
 export const useSelectedDiscountIds = () => useCartStore((state) => state.selectedDiscountIds);
 export const useDeliveryType = () => useCartStore((state) => state.deliveryType);
 export const useSelectedAddressId = () => useCartStore((state) => state.selectedAddressId);
+export const useIsDeliveryTypeSelected = () => useCartStore((state) => state.isDeliveryTypeSelected);
 export const useIsCartLoading = () => useCartStore((state) => state.isLoading);
 export const useIsSummaryLoading = () => useCartStore((state) => state.isSummaryLoading);
 export const useCartError = () => useCartStore((state) => state.error);

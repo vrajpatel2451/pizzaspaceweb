@@ -4,6 +4,7 @@ import { MenuJsonLd } from "@/components/seo/menu-json-ld";
 import { MenuPageJsonLd } from "@/components/seo/json-ld";
 import { MenuPageClient } from "@/components/menu/menu-page-client";
 import { UtensilsCrossed } from "lucide-react";
+import { cookies } from "next/headers";
 
 // Page will be dynamically rendered with search params
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ interface MenuPageProps {
     subcategory?: string;
     search?: string;
     page?: string;
+    deliveryType?: string;
   }>;
 }
 
@@ -119,6 +121,9 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || "1");
 
+  // Get delivery type from searchParams (passed from client)
+  const deliveryType = params.deliveryType;
+
   // Parallel data fetching for optimal performance
   const [categoriesResult, subcategoriesResult, productsResult] =
     await Promise.all([
@@ -128,6 +133,7 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
         categoryId: params.category,
         subCategoryId: params.subcategory,
         search: params.search,
+        deliveryType: deliveryType,
         page,
         limit: 12,
       }),

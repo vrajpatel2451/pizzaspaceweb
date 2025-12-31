@@ -27,6 +27,9 @@ import { useCartStore } from "@/store/cart-store";
 import { useStore } from "@/lib/contexts/store-context";
 import { getAddresses } from "@/lib/api/address";
 import { useDeviceId } from "@/store/device-store";
+import { useCartValidation } from "@/hooks/use-cart-validation";
+import { InvalidItemsWarning } from "@/components/cart/invalid-items-warning";
+import { useDeliveryTypeContext } from "@/contexts/delivery-type-context";
 
 // Premium Section Badge Component
 function SectionBadge({ children }: { children: React.ReactNode }) {
@@ -106,14 +109,23 @@ export default function CartPage() {
   // Cart store state
   const {
     items: cartItems,
-    deliveryType,
     selectedAddressId,
     selectedDiscountIds,
-    setDeliveryType,
     setSelectedAddress,
     getCartIds,
     clearCart,
   } = useCartStore();
+
+  // Get delivery type from context
+  const { deliveryType, openModal, setDeliveryType } = useDeliveryTypeContext();
+
+  // Cart validation
+  const {
+    invalidItems,
+    hasInvalidItems,
+    isCartValid,
+    invalidItemCount,
+  } = useCartValidation();
 
   // Device ID - Use centralized store for consistency
   const deviceId = useDeviceId() || "";
@@ -279,6 +291,22 @@ export default function CartPage() {
     router.push("/menu");
   };
 
+  // Handle remove invalid items
+  const handleRemoveInvalidItems = async () => {
+    if (invalidItems.length === 0) return;
+
+    const itemsToRemove = invalidItems.map((item) => item._id);
+
+    // Remove all invalid items in parallel
+    await Promise.all(
+      itemsToRemove.map((cartId) => removeCartItem(cartId, deviceId))
+    );
+
+    toast.success(
+      `Removed ${invalidItemCount} invalid ${invalidItemCount === 1 ? "item" : "items"} from cart`
+    );
+  };
+
   // Show error state if no store selected
   if (!isLoadingStore && !storeId) {
     return (
@@ -343,6 +371,19 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Cart Items & Delivery Options */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            {/* Invalid Items Warning */}
+            {hasInvalidItems && (
+              <InvalidItemsWarning
+                invalidItems={invalidItems.map((item) => ({
+                  id: item._id,
+                  name: item.productDetails?.product.name || "Unknown Item",
+                }))}
+                deliveryType={deliveryType}
+                onRemoveItems={handleRemoveInvalidItems}
+                onChangeDeliveryType={openModal}
+              />
+            )}
+
             {/* Cart Items */}
             <div className="space-y-4">
               {/* <h2 className="text-lg sm:text-xl font-semibold">Your Items</h2> */}
@@ -394,7 +435,9 @@ export default function CartPage() {
                 onRetry={refetchSummary}
                 onCheckout={handleCheckout}
                 checkoutDisabled={
-                  deliveryType === "delivery" && !selectedAddressId
+                  (deliveryType === "delivery" && !selectedAddressId) ||
+                  !isCartValid ||
+                  hasInvalidItems
                 }
                 paymentMethod={paymentMethod}
                 onPaymentMethodChange={setPaymentMethod}
