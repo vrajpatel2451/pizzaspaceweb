@@ -17,7 +17,7 @@ import { useDeliveryTypeContext } from "@/contexts/delivery-type-context";
 import { isProductAvailableForDeliveryType } from "@/lib/utils/price";
 import type { ProductDetailsContainerProps } from "@/types/product-details";
 import type { AddToCartPayload, UpdateCartPayload, ComboSelection } from "@/types";
-import type { FlatComboSelection } from "@/types/combo";
+import type { FlatComboSelection, ComboGroupSelectionState, ComboItemSelection } from "@/types/combo";
 
 export function ProductDetailsContainer({
   productId,
@@ -86,7 +86,7 @@ export function ProductDetailsContainer({
   // Now returns variantId and pricing array directly (matching reference code)
   const initialSelections = React.useMemo(() => {
     if (editMode !== "edit" || !cartItem || !data) {
-      return { variantId: undefined, pricing: undefined, quantity: 1 };
+      return { variantId: undefined, pricing: undefined, quantity: 1, comboSelections: undefined };
     }
 
     // Get variant ID directly from cartItem
@@ -99,10 +99,51 @@ export function ProductDetailsContainer({
         quantity: p.quantity,
       })) || [];
 
+    // For combo products, convert cart comboSelections to ComboGroupSelectionState
+    let comboSelections: ComboGroupSelectionState | undefined = undefined;
+    if (cartItem.isCombo && cartItem.comboSelections && data.comboGroupProducts) {
+      comboSelections = {};
+
+      for (const selection of cartItem.comboSelections) {
+        // selection.groupId is the ComboGroup.groupId string (e.g., "pizzas")
+        const groupId = selection.groupId;
+
+        // Find the combo group by groupId to get its _id
+        const comboGroup = data.comboGroups?.find(
+          (g) => g.groupId === groupId
+        );
+
+        // Find the comboGroupProduct matching both the product and the combo group
+        const comboGroupProduct = data.comboGroupProducts.find(
+          (cgp) =>
+            cgp.productId === selection.productId &&
+            cgp.comboGroupId === comboGroup?._id
+        );
+
+        if (comboGroupProduct) {
+          if (!comboSelections[groupId]) {
+            comboSelections[groupId] = [];
+          }
+
+          // Create ComboItemSelection from cart data
+          const itemSelection: ComboItemSelection = {
+            productId: selection.productId,
+            comboGroupProductId: comboGroupProduct._id,
+            variantId: comboGroupProduct.defaultVariantId || "",
+            pricing: selection.pricing || [],
+            customized: (selection.pricing?.length ?? 0) > 0,
+          };
+
+          comboSelections[groupId].push(itemSelection);
+        }
+      }
+    }
+
     return {
       variantId,
       pricing: pricing.length > 0 ? pricing : undefined,
       quantity: cartItem.quantity,
+      comboSelections,
     };
   }, [editMode, cartItem, data]);
 
@@ -325,6 +366,7 @@ export function ProductDetailsContainer({
         initialVariantId={initialSelections.variantId}
         initialPricing={initialSelections.pricing}
         initialQuantity={initialSelections.quantity}
+        initialComboSelections={initialSelections.comboSelections}
       >
         {isDesktop ? (
           <ProductDetailsDialog

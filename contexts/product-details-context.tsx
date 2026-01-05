@@ -10,6 +10,7 @@ import React, {
   useRef,
 } from "react";
 import type { ProductDetailsResponse, VariantPricingResponse, VariantAddonSelectionType } from "@/types/product";
+import { getProductDetails } from "@/lib/api/products";
 import type {
   ComboGroupSelectionState,
   ComboItemSelection,
@@ -323,6 +324,13 @@ export function ProductDetailsProvider({
       setSelectedPricingIds([...initialPricing]);
     }
   }, [initialPricing]);
+
+  // Sync combo selections when they change (for edit mode)
+  useEffect(() => {
+    if (initialComboSelections && Object.keys(initialComboSelections).length > 0) {
+      setComboSelections({ ...initialComboSelections });
+    }
+  }, [initialComboSelections]);
 
   // ============================================================================
   // ACTIONS (following reference code pattern)
@@ -737,14 +745,16 @@ export function ProductDetailsProvider({
       setIsCustomizationLoading(true);
 
       try {
-        // Use provided fetch function or fallback to default fetch
+        // Use provided fetch function or fallback to getProductDetails API
         let data: ProductDetailsResponse;
         if (onFetchProductDetails) {
           data = await onFetchProductDetails(selection.productId);
         } else {
-          const response = await fetch(`/api/products/${selection.productId}`);
-          if (!response.ok) throw new Error("Failed to fetch product");
-          data = await response.json();
+          const response = await getProductDetails(selection.productId);
+          if (response.statusCode !== 200 || !response.data) {
+            throw new Error(response.errorMessage || "Failed to fetch product");
+          }
+          data = response.data;
         }
         setCustomizationProductData(data);
       } catch (err) {

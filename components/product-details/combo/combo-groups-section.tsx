@@ -29,38 +29,26 @@ export function ComboGroupsSection({ className }: ComboGroupsSectionProps) {
   }
 
   return (
-    <div className={cn("space-y-4 sm:space-y-5", className)}>
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-          Build Your Combo
-        </h2>
-        <span className="text-xs sm:text-sm text-muted-foreground">
-          {comboGroups.length} selection{comboGroups.length !== 1 ? "s" : ""} required
-        </span>
-      </div>
-
+    <div className={cn("space-y-4", className)}>
       {/* Combo Groups */}
-      <div className="space-y-4">
-        {comboGroups.map((group, index) => {
-          // Get products that belong to this combo group
-          const groupProducts = comboGroupProducts.filter(
-            (cgp) => cgp.comboGroupId === group._id
-          );
+      {comboGroups.map((group, index) => {
+        // Get products that belong to this combo group
+        const groupProducts = comboGroupProducts.filter(
+          (cgp) => cgp.comboGroupId === group._id
+        );
 
-          return (
-            <div
-              key={group._id}
-              className={cn(
-                "animate-fade-in-up motion-reduce:animate-none",
-                `stagger-${Math.min(index + 1, 5)}`
-              )}
-            >
-              <ComboGroupCard group={group} products={groupProducts} />
-            </div>
-          );
-        })}
-      </div>
+        return (
+          <div
+            key={group._id}
+            className={cn(
+              "animate-fade-in-up motion-reduce:animate-none"
+            )}
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <ComboGroupCard group={group} products={groupProducts} />
+          </div>
+        );
+      })}
 
       {/* Customization Dialog - Single instance, controlled by context */}
       <ComboCustomizationDialog />
