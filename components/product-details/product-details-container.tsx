@@ -42,8 +42,11 @@ export function ProductDetailsContainer({
   // Get delivery type context
   const { deliveryType } = useDeliveryTypeContext();
 
-  // Use hook to fetch product details
-  const { data, isLoading, error, refetch } = useProductDetails(productId);
+  // Use hook to fetch product details - pass storeId if available
+  const { data, isLoading, error, refetch } = useProductDetails(
+    productId,
+    selectedStore?._id
+  );
 
   // Processing state - defined early for use in handleClose
   const isProcessing = isAddingToCart || isUpdatingCart;

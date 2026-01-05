@@ -11,11 +11,16 @@ import { productDetailsCache } from "@/lib/cache/product-details-cache";
  * - Global cache to prevent duplicate fetches
  * - Loading, error, data states
  * - Refetch capability
+ * @param productId - The product ID to fetch
+ * @param storeId - Optional store ID to include in the API request
  */
-export function useProductDetails(productId: string) {
+export function useProductDetails(productId: string, storeId?: string) {
   const [data, setData] = useState<ProductDetailsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Create cache key that includes storeId if provided
+  const cacheKey = storeId ? `${productId}:${storeId}` : productId;
 
   const refetch = useCallback(async () => {
     if (!productId) {
@@ -24,7 +29,7 @@ export function useProductDetails(productId: string) {
     }
 
     // Check cache first
-    const cachedData = productDetailsCache.get(productId);
+    const cachedData = productDetailsCache.get(cacheKey);
     if (cachedData) {
       setData(cachedData);
       setError(null);
@@ -37,7 +42,7 @@ export function useProductDetails(productId: string) {
     setError(null);
 
     try {
-      const response = await getProductDetails(productId);
+      const response = await getProductDetails(productId, storeId);
 
       // Check if the request was aborted
       if (abortController.signal.aborted) {
@@ -46,7 +51,7 @@ export function useProductDetails(productId: string) {
 
       if (response.statusCode === 200 && response.data) {
         // Store in cache
-        productDetailsCache.set(productId, response.data);
+        productDetailsCache.set(cacheKey, response.data);
 
         setData(response.data);
         setError(null);
@@ -76,7 +81,7 @@ export function useProductDetails(productId: string) {
     return () => {
       abortController.abort();
     };
-  }, [productId]);
+  }, [productId, storeId, cacheKey]);
 
   return {
     data,

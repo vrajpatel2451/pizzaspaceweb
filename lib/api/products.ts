@@ -57,9 +57,15 @@ export async function getProducts(
   }
 }
 export async function getProductDetails(
-  productId: string
+  productId: string,
+  storeId?: string
 ): Promise<APIResponse<ProductDetailsResponse>> {
-  const url = `/product/details/${productId}`;
+  const queryParams = new URLSearchParams();
+  if (storeId) {
+    queryParams.append("storeId", storeId);
+  }
+  const queryString = queryParams.toString();
+  const url = `/product/details/${productId}${queryString ? `?${queryString}` : ""}`;
   try {
     const response: AxiosResponse<APIResponse<ProductDetailsResponse>> =
       await apiClient.get<APIResponse<ProductDetailsResponse>>(url);
