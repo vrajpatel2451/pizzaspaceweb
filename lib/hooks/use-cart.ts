@@ -361,8 +361,14 @@ export function useCartSummary(
     autoFetch,
     params.storeId,
     // Trigger when cart items change (using JSON.stringify for deep comparison)
+    // Include id, quantity, variantId, and pricing to catch all edit scenarios
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(items.map((item) => ({ id: item._id, qty: item.quantity }))),
+    JSON.stringify(items.map((item) => ({
+      id: item._id,
+      qty: item.quantity,
+      variantId: item.variantId,
+      pricing: item.pricing,
+    }))),
     // Trigger when discounts change
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedDiscountIds),
