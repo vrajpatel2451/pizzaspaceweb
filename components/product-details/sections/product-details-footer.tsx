@@ -19,9 +19,15 @@ export function ProductDetailsFooter({
   const [buttonState, setButtonState] = useState<"idle" | "loading" | "success">("idle");
   const [priceKey, setPriceKey] = useState(0);
 
+  // Get selected primary variant for packaging charges
+  const selectedPrimaryVariant = context.productData?.variantList.find(
+    (v) => v._id === context.selectedVariantId
+  );
+
   // Simple pricing: if delivery, add packaging charges per item
+  // Use variant's packaging if available, otherwise fall back to product's
   const packagingTotal = deliveryType === "delivery"
-    ? (context.productData?.product.packagingCharges || 0) * context.quantity
+    ? (selectedPrimaryVariant?.packagingCharges ?? context.productData?.product.packagingCharges ?? 0) * context.quantity
     : 0;
   const displayTotal = context.totalPrice + packagingTotal;
 

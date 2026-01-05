@@ -43,11 +43,6 @@ export function VariantGroupCard({
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Get packaging charges for delivery
-  const packagingCharges = deliveryType === "delivery"
-    ? (context.productData?.product.packagingCharges || 0)
-    : 0;
-
   // Trigger entrance animation
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
@@ -62,7 +57,7 @@ export function VariantGroupCard({
 
   /**
    * Calculate variant price
-   * - For primary variants: use variant.price + packaging for delivery
+   * - For primary variants: use variant.price + variant.packagingCharges for delivery
    * - For sub-variants: lookup in pricing array (no packaging added)
    */
   const calculateVariantPrice = useCallback(
@@ -73,8 +68,9 @@ export function VariantGroupCard({
       if (!variant) return 0;
 
       if (group.isPrimary) {
-        // Primary variant: use direct price + packaging for delivery
-        return variant.price + packagingCharges;
+        // Primary variant: use direct price + variant's packaging charges for delivery
+        const variantPackaging = deliveryType === "delivery" ? (variant.packagingCharges || 0) : 0;
+        return variant.price + variantPackaging;
       } else {
         // Sub-variant: lookup in pricing array (no packaging - it's already in base)
         const pricing = context.productData.pricing.find(
@@ -86,7 +82,7 @@ export function VariantGroupCard({
         return pricing?.price ?? 0;
       }
     },
-    [context.productData, context.selectedVariantId, group.isPrimary, variants, packagingCharges]
+    [context.productData, context.selectedVariantId, group.isPrimary, variants, deliveryType]
   );
 
   return (
@@ -287,13 +283,10 @@ export function HorizontalVariantSelector({
   const context = useProductDetailsContext();
   const deliveryType = useDeliveryType();
 
-  // Get packaging charges for delivery
-  const packagingCharges = deliveryType === "delivery"
-    ? (context.productData?.product.packagingCharges || 0)
-    : 0;
-
   /**
    * Calculate variant price
+   * - For primary variants: use variant.price + variant.packagingCharges for delivery
+   * - For sub-variants: lookup in pricing array
    */
   const calculateVariantPrice = useCallback(
     (variantId: string): number => {
@@ -303,7 +296,8 @@ export function HorizontalVariantSelector({
       if (!variant) return 0;
 
       if (group.isPrimary) {
-        return variant.price + packagingCharges;
+        const variantPackaging = deliveryType === "delivery" ? (variant.packagingCharges || 0) : 0;
+        return variant.price + variantPackaging;
       } else {
         const pricing = context.productData.pricing.find(
           (p) =>
@@ -314,7 +308,7 @@ export function HorizontalVariantSelector({
         return pricing?.price ?? 0;
       }
     },
-    [context.productData, context.selectedVariantId, group.isPrimary, variants, packagingCharges]
+    [context.productData, context.selectedVariantId, group.isPrimary, variants, deliveryType]
   );
 
   return (

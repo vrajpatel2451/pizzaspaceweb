@@ -175,7 +175,8 @@ export function CartItemCard({
       const productName = comboGroupProduct?.product?.name ?? "Selected Item";
 
       // Check if there are customizations (pricing entries)
-      const hasCustomizations = selection.pricing && selection.pricing.length > 0;
+      const hasCustomizations =
+        selection.pricing && selection.pricing.length > 0;
 
       return {
         groupId: selection.groupId,
@@ -202,7 +203,8 @@ export function CartItemCard({
           if (selection.pricing) {
             for (const pricingItem of selection.pricing) {
               // The price is already captured in the pricing entry
-              comboExtrasTotal += (pricingItem.price ?? 0) * pricingItem.quantity;
+              comboExtrasTotal +=
+                (pricingItem.price ?? 0) * pricingItem.quantity;
             }
           }
         }
@@ -223,13 +225,25 @@ export function CartItemCard({
     );
 
     return variantPrice + addonsTotal + sVariantTotal;
-  }, [productDetails, variantInfo, addonInfo, sVariantsInfo, item.isCombo, item.comboSelections]);
+  }, [
+    productDetails,
+    variantInfo,
+    addonInfo,
+    sVariantsInfo,
+    item.isCombo,
+    item.comboSelections,
+  ]);
 
   // Calculate total price for this cart item
   // Simple pricing: if delivery, add packaging charges
-  const packagingPerItem = deliveryType === "delivery"
-    ? (productDetails?.product.packagingCharges || 0)
-    : 0;
+  // - For products with variant: use variant's packaging charges
+  // - For combo products or no variant: fall back to product's packaging charges
+  const packagingPerItem =
+    deliveryType === "delivery"
+      ? variantInfo?.packagingCharges ??
+        productDetails?.product.packagingCharges ??
+        0
+      : 0;
   const itemTotalWithPackaging = (itemPrice + packagingPerItem) * item.quantity;
   const unitPriceWithPackaging = itemPrice + packagingPerItem;
 
@@ -298,7 +312,8 @@ export function CartItemCard({
                     {variantInfo.label}
                   </Badge>
                 )}
-                {!item.isCombo && sVariantsInfo?.length >= 1 &&
+                {!item.isCombo &&
+                  sVariantsInfo?.length >= 1 &&
                   sVariantsInfo.map((e) => (
                     <Badge variant="secondary" className="mt-1.5" key={e.label}>
                       {e.label}
@@ -347,13 +362,20 @@ export function CartItemCard({
           {item.isCombo && comboSelectionsInfo.length > 0 && (
             <div className="flex flex-col gap-1 mt-1">
               {comboSelectionsInfo.map((selection, idx) => (
-                <div key={`${selection.groupId}-${selection.productId}-${idx}`} className="flex items-center gap-1.5">
+                <div
+                  key={`${selection.groupId}-${selection.productId}-${idx}`}
+                  className="flex items-center gap-1.5"
+                >
                   <span className="text-xs text-muted-foreground">•</span>
                   <span className="text-xs text-foreground">
                     {selection.productName}
                   </span>
                   {selection.hasCustomizations && (
-                    <Badge variant="secondary" size="sm" className="text-[10px] px-1.5 py-0">
+                    <Badge
+                      variant="secondary"
+                      size="sm"
+                      className="text-[10px] px-1.5 py-0"
+                    >
                       +{selection.customizationCount} extras
                     </Badge>
                   )}

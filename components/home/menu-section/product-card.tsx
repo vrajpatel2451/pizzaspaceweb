@@ -125,7 +125,8 @@ export function ProductCard({
   const imageUrl = product.photoList[0] || "/placeholder.jpg";
   const badgeType = getBadgeType(product);
 
-  // Simple pricing: if delivery, add packaging charges
+  // Show base price + product's packaging charges for delivery
+  // (This is before variant selection, so we use product-level packaging)
   const displayPrice = deliveryType === "delivery"
     ? product.basePrice + (product.packagingCharges || 0)
     : product.basePrice;

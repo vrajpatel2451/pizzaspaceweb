@@ -134,6 +134,7 @@ export interface VariantResponse {
   isPrimary: boolean;
   maxItems: number;
   maxItemTypes: VariantAddonSelectionType;
+  packagingCharges: number;
   storeIds: string[];
   createdAt: string;
   updatedAt: string;

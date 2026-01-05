@@ -26,7 +26,8 @@ export function ProductInfoSection({
   const [isOpen, setIsOpen] = React.useState(defaultExpanded);
   const deliveryType = useDeliveryType();
 
-  // Simple pricing: if delivery, add packaging charges
+  // Show base price + product's packaging charges for delivery
+  // (This is before variant selection, so we use product-level packaging as the starting price)
   const displayPrice = deliveryType === "delivery"
     ? product.basePrice + (product.packagingCharges || 0)
     : product.basePrice;

@@ -38,11 +38,17 @@ export function ProductDetailsContent({
   // Check if this is a combo product
   const isCombo = data?.product.isCombo ?? false;
 
+  // Get selected primary variant for packaging charges
+  const selectedPrimaryVariant = data?.variantList.find(
+    (v) => v._id === context.selectedVariantId
+  );
+
   // Calculate display price with packaging for delivery
   // For combos, use comboTotalPrice; for regular products, use totalPrice
+  // Packaging charges: use variant's if available, otherwise fall back to product's
   const basePrice = isCombo ? context.comboTotalPrice : context.totalPrice;
-  const packagingTotal = activeDeliveryType === "delivery" && data
-    ? (data.product.packagingCharges || 0) * context.quantity
+  const packagingTotal = activeDeliveryType === "delivery"
+    ? (selectedPrimaryVariant?.packagingCharges ?? data?.product.packagingCharges ?? 0) * context.quantity
     : 0;
   const displayTotalPrice = basePrice + packagingTotal;
 
