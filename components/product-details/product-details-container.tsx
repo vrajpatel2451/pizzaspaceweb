@@ -16,8 +16,16 @@ import { useStore } from "@/lib/contexts/store-context";
 import { useDeliveryTypeContext } from "@/contexts/delivery-type-context";
 import { isProductAvailableForDeliveryType } from "@/lib/utils/price";
 import type { ProductDetailsContainerProps } from "@/types/product-details";
-import type { AddToCartPayload, UpdateCartPayload, ComboSelection } from "@/types";
-import type { FlatComboSelection, ComboGroupSelectionState, ComboItemSelection } from "@/types/combo";
+import type {
+  AddToCartPayload,
+  UpdateCartPayload,
+  ComboSelection,
+} from "@/types";
+import type {
+  FlatComboSelection,
+  ComboGroupSelectionState,
+  ComboItemSelection,
+} from "@/types/combo";
 
 export function ProductDetailsContainer({
   productId,
@@ -59,19 +67,19 @@ export function ProductDetailsContainer({
       deliveryType
     );
 
-  // Fetch data when modal opens (lazy mode)
+  // Fetch data when modal opens (lazy mode) - always fetch fresh
   React.useEffect(() => {
-    if (isOpen && mode === "lazy" && !data) {
+    if (isOpen && mode === "lazy") {
       refetch();
     }
-  }, [isOpen, mode, data, refetch]);
+  }, [isOpen, mode, refetch]);
 
   // Fetch data immediately (eager mode)
   React.useEffect(() => {
-    if (mode === "eager" && !data) {
+    if (mode === "eager") {
       refetch();
     }
-  }, [mode, data, refetch]);
+  }, [mode, refetch]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -89,7 +97,12 @@ export function ProductDetailsContainer({
   // Now returns variantId and pricing array directly (matching reference code)
   const initialSelections = React.useMemo(() => {
     if (editMode !== "edit" || !cartItem || !data) {
-      return { variantId: undefined, pricing: undefined, quantity: 1, comboSelections: undefined };
+      return {
+        variantId: undefined,
+        pricing: undefined,
+        quantity: 1,
+        comboSelections: undefined,
+      };
     }
 
     // Get variant ID directly from cartItem
@@ -104,7 +117,11 @@ export function ProductDetailsContainer({
 
     // For combo products, convert cart comboSelections to ComboGroupSelectionState
     let comboSelections: ComboGroupSelectionState | undefined = undefined;
-    if (cartItem.isCombo && cartItem.comboSelections && data.comboGroupProducts) {
+    if (
+      cartItem.isCombo &&
+      cartItem.comboSelections &&
+      data.comboGroupProducts
+    ) {
       comboSelections = {};
 
       for (const selection of cartItem.comboSelections) {
@@ -112,9 +129,7 @@ export function ProductDetailsContainer({
         const groupId = selection.groupId;
 
         // Find the combo group by groupId to get its _id
-        const comboGroup = data.comboGroups?.find(
-          (g) => g.groupId === groupId
-        );
+        const comboGroup = data.comboGroups?.find((g) => g.groupId === groupId);
 
         // Find the comboGroupProduct matching both the product and the combo group
         const comboGroupProduct = data.comboGroupProducts.find(

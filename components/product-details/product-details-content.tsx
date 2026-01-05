@@ -80,9 +80,16 @@ export function ProductDetailsContent({
     return <ProductDetailsSkeleton />;
   }
 
-  // Check if product has variants, addons, or combo groups
-  const hasVariants = data.variantGroupList.length > 0;
-  const hasAddons = data.addonGroupList.length > 0;
+  // Check if product has primary variants (required for showing any selections)
+  const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
+  const hasPrimaryVariants = primaryGroup
+    ? data.variantList.some((v) => v.groupId === primaryGroup._id)
+    : false;
+
+  // Only show variants and addons if primary variants exist
+  // If no primary variants, hide all variant selections and addons
+  const hasVariants = hasPrimaryVariants && data.variantGroupList.length > 0;
+  const hasAddons = hasPrimaryVariants && data.addonGroupList.length > 0;
   const hasComboGroups = isCombo && (data.comboGroups?.length ?? 0) > 0;
 
   return (
