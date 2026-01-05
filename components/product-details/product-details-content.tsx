@@ -6,6 +6,7 @@ import { ProductImageSection } from "./sections/product-image-section";
 import { ProductInfoSection } from "./sections/product-info-section";
 import { VariantGroupsSection } from "./sections/variant-groups-section";
 import { AddonGroupsSection } from "./sections/addon-groups-section";
+import { ComboGroupsSection } from "./combo/combo-groups-section";
 import { StickyActionBar } from "./sections/sticky-action-bar";
 import { UnavailableNotice } from "./unavailable-notice";
 import { useProductDetailsContext } from "@/contexts/product-details-context";
@@ -34,11 +35,19 @@ export function ProductDetailsContent({
   // Use prop or store delivery type
   const activeDeliveryType = deliveryType || storeDeliveryType;
 
+  // Check if this is a combo product
+  const isCombo = data?.product.isCombo ?? false;
+
   // Calculate display price with packaging for delivery
+  // For combos, use comboTotalPrice; for regular products, use totalPrice
+  const basePrice = isCombo ? context.comboTotalPrice : context.totalPrice;
   const packagingTotal = activeDeliveryType === "delivery" && data
     ? (data.product.packagingCharges || 0) * context.quantity
     : 0;
-  const displayTotalPrice = context.totalPrice + packagingTotal;
+  const displayTotalPrice = basePrice + packagingTotal;
+
+  // Validation: For combos use isComboValid, for regular products use isValid
+  const isProductValid = isCombo ? context.isComboValid : context.isValid;
 
   // Loading state - only show skeleton when actually loading data (not processing)
   if (isLoading && !data) {
@@ -65,9 +74,10 @@ export function ProductDetailsContent({
     return <ProductDetailsSkeleton />;
   }
 
-  // Check if product has variants or addons
+  // Check if product has variants, addons, or combo groups
   const hasVariants = data.variantGroupList.length > 0;
   const hasAddons = data.addonGroupList.length > 0;
+  const hasComboGroups = isCombo && (data.comboGroups?.length ?? 0) > 0;
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -87,7 +97,7 @@ export function ProductDetailsContent({
           <div className="animate-fade-in-up stagger-2 motion-reduce:animate-none">
             <ProductInfoSection
               product={data.product}
-              defaultExpanded={!hasVariants && !hasAddons}
+              defaultExpanded={!hasVariants && !hasAddons && !hasComboGroups}
             />
           </div>
 
@@ -102,8 +112,15 @@ export function ProductDetailsContent({
             </div>
           )}
 
-          {/* Variant Groups */}
-          {hasVariants && (
+          {/* Combo Groups - Show for combo products instead of variants/addons */}
+          {hasComboGroups && (
+            <div className="animate-fade-in-up stagger-3 motion-reduce:animate-none">
+              <ComboGroupsSection />
+            </div>
+          )}
+
+          {/* Variant Groups - Only for non-combo products */}
+          {!isCombo && hasVariants && (
             <div className="animate-fade-in-up stagger-3 motion-reduce:animate-none">
               <VariantGroupsSection
                 variantGroupList={data.variantGroupList}
@@ -112,8 +129,8 @@ export function ProductDetailsContent({
             </div>
           )}
 
-          {/* Addon Groups */}
-          {hasAddons && (
+          {/* Addon Groups - Only for non-combo products */}
+          {!isCombo && hasAddons && (
             <div className="animate-fade-in-up stagger-4 motion-reduce:animate-none">
               <AddonGroupsSection
                 addonGroupList={data.addonGroupList}
@@ -129,7 +146,7 @@ export function ProductDetailsContent({
         quantity={context.quantity}
         onQuantityChange={context.setQuantity}
         totalPrice={displayTotalPrice}
-        isValid={context.isValid && isProductAvailable}
+        isValid={isProductValid && isProductAvailable}
         validationErrors={context.validationErrors}
         isLoading={isProcessing}
         onAddToCart={context.addToCart}

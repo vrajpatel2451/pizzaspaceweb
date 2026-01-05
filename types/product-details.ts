@@ -15,6 +15,7 @@ import type {
   VariantPricingResponse,
   ProductType
 } from './product';
+import type { FlatComboSelection } from './combo';
 
 // ============================================================================
 // CART TYPES
@@ -32,6 +33,9 @@ export interface CartItem {
   selectedVariants: CartItemVariant[];
   selectedAddons: CartItemAddon[];
   specialInstructions?: string;
+  // Combo-specific fields
+  isCombo?: boolean;
+  comboSelections?: FlatComboSelection[];
 }
 
 export interface CartItemVariant {

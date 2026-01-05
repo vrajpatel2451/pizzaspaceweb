@@ -40,6 +40,7 @@ export interface ProductResponse {
   _id: string;
   name: string;
   description: string;
+  isCombo: boolean;
   type: ProductType;
   photoList: string[];
   category: string;
@@ -87,7 +88,42 @@ export interface ProductDetailsResponse {
   addonList: AddonResponse[];
   addonGroupList: AddonGroupResponse[];
   pricing: VariantPricingResponse[];
+  // combo data (only populated if product.isCombo is true)
+  comboGroups?: ComboGroupResponse[];
+  comboGroupProducts?: ComboGroupProductResponse[];
 }
+
+export interface ComboGroupResponse {
+  _id: string;
+  groupId: string; // UUID from frontend
+  comboId: string; // reference to combo Product
+  label: string;
+  description: string;
+  minSelection: number;
+  maxSelection: number;
+  allowCustomization: boolean;
+  storeIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ComboGroupProduct - links selectable products to a combo group
+export interface ComboGroupProductResponse {
+  _id: string;
+  comboGroupId: string; // reference to ComboGroup
+  productId: string; // selectable product
+  defaultVariantId?: string; // pre-selected variant (e.g., "9 inch")
+  storeIds: string[];
+  createdAt: string;
+  updatedAt: string;
+  product?: {
+    _id: string;
+    name: string;
+    photoList: string[];
+    type?: ProductType; // veg or non_veg for badge display
+  };
+}
+
 export type VariantAddonSelectionType = "none" | "overall" | "perGroup";
 export interface VariantResponse {
   _id: string;

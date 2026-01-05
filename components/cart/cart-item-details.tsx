@@ -1,5 +1,6 @@
 "use client";
 
+import { Package } from "lucide-react";
 import { CustomImage } from "@/components/ui/custom-image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,7 @@ export function CartItemDetails({
   // Find selected variant
   const selectedVariant = variantList.find((v) => v._id === item.variantId);
 
-  // Get selected addons from pricing
+  // Get selected addons from pricing (for regular products)
   const selectedAddons = item.pricing
     .map((p) => {
       const pricingItem = pricing.find((pr) => pr._id === p.id);
@@ -46,13 +47,50 @@ export function CartItemDetails({
     })
     .filter(Boolean);
 
+  // Get combo selections info (for combo products)
+  const comboSelectionsInfo = item.isCombo && item.comboSelections
+    ? item.comboSelections.map((selection) => {
+        // Find the combo group for this selection
+        const comboGroup = productDetails.comboGroups?.find(
+          (g) => g.groupId === selection.groupId
+        );
+
+        // Find the combo group product to get product details
+        const comboGroupProduct = productDetails.comboGroupProducts?.find(
+          (cgp) => cgp.productId === selection.productId
+        );
+
+        // Get product name from the embedded product data
+        const productName = comboGroupProduct?.product?.name ?? "Selected Item";
+
+        // Calculate extras total for this selection
+        const extrasTotal = selection.pricing?.reduce(
+          (sum, p) => sum + (p.price ?? 0) * p.quantity,
+          0
+        ) ?? 0;
+
+        return {
+          groupId: selection.groupId,
+          groupLabel: comboGroup?.label ?? "Item",
+          productId: selection.productId,
+          productName,
+          extrasTotal,
+          pricing: selection.pricing ?? [],
+        };
+      })
+    : [];
+
   // Calculate unit price from pricing
-  const unitPrice = pricing
-    .filter((p) => item.pricing.some((ip) => ip.id === p._id))
-    .reduce((sum, p) => {
-      const itemPricing = item.pricing.find((ip) => ip.id === p._id);
-      return sum + p.price * (itemPricing?.quantity || 1);
-    }, 0);
+  const unitPrice = item.isCombo
+    ? // For combos: base price + combo extras
+      product.basePrice + comboSelectionsInfo.reduce((sum, s) => sum + s.extrasTotal, 0)
+    : // For regular products: sum of pricing entries
+      pricing
+        .filter((p) => item.pricing.some((ip) => ip.id === p._id))
+        .reduce((sum, p) => {
+          const itemPricing = item.pricing.find((ip) => ip.id === p._id);
+          return sum + p.price * (itemPricing?.quantity || 1);
+        }, 0);
 
   const totalPrice = unitPrice * item.quantity;
 
@@ -77,6 +115,12 @@ export function CartItemDetails({
             {product.description}
           </p>
           <div className="flex items-center gap-2">
+            {item.isCombo && (
+              <Badge variant="outline" className="text-xs gap-1">
+                <Package className="h-3 w-3" />
+                Combo
+              </Badge>
+            )}
             <Badge
               variant={
                 product.type === "veg"
@@ -97,8 +141,8 @@ export function CartItemDetails({
         </div>
       </div>
 
-      {/* Selected Variant */}
-      {selectedVariant && (
+      {/* Selected Variant (for regular products only) */}
+      {!item.isCombo && selectedVariant && (
         <div className="space-y-1">
           <p className="text-sm font-medium text-foreground">
             Selected Variant
@@ -112,8 +156,8 @@ export function CartItemDetails({
         </div>
       )}
 
-      {/* Selected Addons */}
-      {selectedAddons.length > 0 && (
+      {/* Selected Addons (for regular products only) */}
+      {!item.isCombo && selectedAddons.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-foreground">Selected Addons</p>
           <div className="space-y-1">
@@ -129,6 +173,42 @@ export function CartItemDetails({
                 <span className="text-sm font-medium">
                   {formatNumber(addon!.pricingItem.price * addon!.quantity)}
                 </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Combo Selections (for combo products only) */}
+      {item.isCombo && comboSelectionsInfo.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-foreground">Combo Items</p>
+          <div className="space-y-2">
+            {comboSelectionsInfo.map((selection, idx) => (
+              <div
+                key={`${selection.groupId}-${selection.productId}-${idx}`}
+                className="rounded-md border bg-muted/50 px-3 py-2"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-xs text-muted-foreground">
+                      {selection.groupLabel}
+                    </span>
+                    <p className="text-sm font-medium">{selection.productName}</p>
+                  </div>
+                  {selection.extrasTotal > 0 && (
+                    <span className="text-sm font-medium text-primary">
+                      +{formatNumber(selection.extrasTotal)}
+                    </span>
+                  )}
+                </div>
+                {selection.pricing.length > 0 && (
+                  <div className="mt-1 pt-1 border-t border-dashed">
+                    <span className="text-xs text-muted-foreground">
+                      +{selection.pricing.length} customization{selection.pricing.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

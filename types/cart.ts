@@ -2,6 +2,12 @@
 export type PricingIdsAndQuantity = {
   id: string;
   quantity: number;
+  price?: number; // captured at add-to-cart time, optional (mainly used for combo pricing)
+};
+export type ComboSelection = {
+  groupId: string; // references ComboGroup.groupId
+  productId: string; // selected product
+  pricing: PricingIdsAndQuantity[]; // addon/variant selections
 };
 
 export type CartResponse = {
@@ -16,6 +22,8 @@ export type CartResponse = {
   userId: string;
   createdAt: Date;
   updatedAt: Date;
+  isCombo: boolean;
+  comboSelections: ComboSelection[];
 };
 
 export type AddToCartPayload = Pick<
@@ -27,7 +35,11 @@ export type AddToCartPayload = Pick<
   | "sessionId"
   | "variantId"
   | "storeId"
->;
+> & {
+  // Optional combo fields
+  isCombo?: boolean;
+  comboSelections?: ComboSelection[];
+};
 
 export type UpdateCartPayload = Pick<
   CartResponse,

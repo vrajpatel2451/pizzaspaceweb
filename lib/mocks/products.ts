@@ -47,6 +47,7 @@ export const mockProducts: ProductResponse[] = [
     availableDeliveryTypes: ["dineIn", "pickup", "delivery"],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
+    isCombo: false,
   },
   {
     _id: "prod_002",
@@ -87,6 +88,7 @@ export const mockProducts: ProductResponse[] = [
     availableDeliveryTypes: ["dineIn", "pickup", "delivery"],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
+    isCombo: false,
   },
   {
     _id: "prod_003",
@@ -129,6 +131,7 @@ export const mockProducts: ProductResponse[] = [
     availableDeliveryTypes: ["dineIn", "pickup", "delivery"],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
+    isCombo: false,
   },
   {
     _id: "prod_004",
@@ -170,6 +173,7 @@ export const mockProducts: ProductResponse[] = [
     availableDeliveryTypes: ["dineIn", "pickup", "delivery"],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
+    isCombo: false,
   },
   {
     _id: "prod_005",
@@ -209,6 +213,7 @@ export const mockProducts: ProductResponse[] = [
     availableDeliveryTypes: ["dineIn", "pickup", "delivery"],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
+    isCombo: false,
   },
   {
     _id: "prod_006",
@@ -249,6 +254,7 @@ export const mockProducts: ProductResponse[] = [
     availableDeliveryTypes: ["dineIn", "pickup", "delivery"],
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
+    isCombo: false,
   },
 ];
 

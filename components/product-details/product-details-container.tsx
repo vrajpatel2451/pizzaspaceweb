@@ -16,7 +16,8 @@ import { useStore } from "@/lib/contexts/store-context";
 import { useDeliveryTypeContext } from "@/contexts/delivery-type-context";
 import { isProductAvailableForDeliveryType } from "@/lib/utils/price";
 import type { ProductDetailsContainerProps } from "@/types/product-details";
-import type { AddToCartPayload, UpdateCartPayload } from "@/types";
+import type { AddToCartPayload, UpdateCartPayload, ComboSelection } from "@/types";
+import type { FlatComboSelection } from "@/types/combo";
 
 export function ProductDetailsContainer({
   productId,
@@ -107,6 +108,7 @@ export function ProductDetailsContainer({
 
   // Handle add/edit cart from context
   // Now receives the new format: {productId, variantId, pricing, quantity, totalPrice}
+  // Combo products also include: {isCombo, comboSelections}
   const handleAddToCart = React.useCallback(
     async (cartData: {
       productId: string;
@@ -114,6 +116,9 @@ export function ProductDetailsContainer({
       pricing: PricingSelection[];
       quantity: number;
       totalPrice: number;
+      // Combo-specific fields
+      isCombo?: boolean;
+      comboSelections?: FlatComboSelection[];
     }) => {
       // Validate prerequisites
       if (!deviceId) {
@@ -131,14 +136,17 @@ export function ProductDetailsContainer({
         return;
       }
 
-      // Validate variant selection (only if primary variants exist)
-      const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
-      const hasPrimaryVariants =
-        primaryGroup &&
-        data.variantList.some((v) => v.groupId === primaryGroup._id);
-      if (hasPrimaryVariants && !cartData.variantId) {
-        toast.error("Please select a variant");
-        return;
+      // Validate variant selection (only if primary variants exist and NOT a combo)
+      // Combo products don't use variants - they use combo groups instead
+      if (!cartData.isCombo) {
+        const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
+        const hasPrimaryVariants =
+          primaryGroup &&
+          data.variantList.some((v) => v.groupId === primaryGroup._id);
+        if (hasPrimaryVariants && !cartData.variantId) {
+          toast.error("Please select a variant");
+          return;
+        }
       }
 
       // Handle EDIT mode
@@ -165,6 +173,16 @@ export function ProductDetailsContainer({
       }
 
       // Handle ADD mode (default)
+      // Convert FlatComboSelection[] to ComboSelection[] for API
+      const comboSelectionsForApi: ComboSelection[] | undefined =
+        cartData.isCombo && cartData.comboSelections
+          ? cartData.comboSelections.map((s) => ({
+              groupId: s.groupId,
+              productId: s.productId,
+              pricing: s.pricing,
+            }))
+          : undefined;
+
       const payload: AddToCartPayload = {
         itemId: data.product._id,
         categoryId: data.product.category,
@@ -172,8 +190,13 @@ export function ProductDetailsContainer({
         sessionId: deviceId,
         pricing: cartData.pricing,
         quantity: cartData.quantity,
-        // Only include variantId if it has a value
+        // Only include variantId if it has a value (not used for combos)
         ...(cartData.variantId && { variantId: cartData.variantId }),
+        // Include combo fields if this is a combo product
+        ...(cartData.isCombo && {
+          isCombo: true,
+          comboSelections: comboSelectionsForApi,
+        }),
       };
 
       // Call API
@@ -185,61 +208,77 @@ export function ProductDetailsContainer({
 
         // Call optional callback with CartItem format (for legacy support)
         if (onAddToCart) {
-          // Find variant info for the callback
-          const selectedVariant = data.variantList.find(
-            (v) => v._id === cartData.variantId
-          );
-          const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
+          // Handle combo products differently
+          if (cartData.isCombo) {
+            // For combo products, provide combo-specific information
+            onAddToCart({
+              productId: data.product._id,
+              productName: data.product.name,
+              quantity: cartData.quantity,
+              basePrice: data.product.basePrice,
+              totalPrice: cartData.totalPrice,
+              selectedVariants: [],
+              selectedAddons: [],
+              isCombo: true,
+              comboSelections: cartData.comboSelections,
+            });
+          } else {
+            // Regular products: Find variant info for the callback
+            const selectedVariant = data.variantList.find(
+              (v) => v._id === cartData.variantId
+            );
+            const primaryGroup = data.variantGroupList.find((g) => g.isPrimary);
 
-          const selectedVariantsList =
-            selectedVariant && primaryGroup
-              ? [
-                  {
-                    groupId: primaryGroup._id,
-                    groupLabel: primaryGroup.label,
-                    variantId: selectedVariant._id,
-                    variantLabel: selectedVariant.label,
-                    price: selectedVariant.price,
-                  },
-                ]
-              : [];
+            const selectedVariantsList =
+              selectedVariant && primaryGroup
+                ? [
+                    {
+                      groupId: primaryGroup._id,
+                      groupLabel: primaryGroup.label,
+                      variantId: selectedVariant._id,
+                      variantLabel: selectedVariant.label,
+                      price: selectedVariant.price,
+                    },
+                  ]
+                : [];
 
-          // Build addon list from pricing entries
-          const selectedAddonsList = cartData.pricing
-            .map((p) => {
-              const pricingEntry = data.pricing.find((pr) => pr._id === p.id);
-              if (!pricingEntry || pricingEntry.type !== "addon") return null;
+            // Build addon list from pricing entries
+            const selectedAddonsList = cartData.pricing
+              .map((p) => {
+                const pricingEntry = data.pricing.find((pr) => pr._id === p.id);
+                if (!pricingEntry || pricingEntry.type !== "addon") return null;
 
-              const addon = data.addonList.find(
-                (a) => a._id === pricingEntry.addonId
-              );
-              const group = data.addonGroupList.find(
-                (g) => g._id === addon?.groupId
-              );
+                const addon = data.addonList.find(
+                  (a) => a._id === pricingEntry.addonId
+                );
+                const group = data.addonGroupList.find(
+                  (g) => g._id === addon?.groupId
+                );
 
-              if (!addon) return null;
+                if (!addon) return null;
 
-              return {
-                addonId: addon._id,
-                addonLabel: addon.label,
-                groupId: addon.groupId,
-                groupLabel: group?.label ?? "",
-                quantity: p.quantity,
-                unitPrice: pricingEntry.price,
-                totalPrice: pricingEntry.price * p.quantity,
-              };
-            })
-            .filter((x): x is NonNullable<typeof x> => x !== null);
+                return {
+                  addonId: addon._id,
+                  addonLabel: addon.label,
+                  groupId: addon.groupId,
+                  groupLabel: group?.label ?? "",
+                  quantity: p.quantity,
+                  unitPrice: pricingEntry.price,
+                  totalPrice: pricingEntry.price * p.quantity,
+                };
+              })
+              .filter((x): x is NonNullable<typeof x> => x !== null);
 
-          onAddToCart({
-            productId: data.product._id,
-            productName: data.product.name,
-            quantity: cartData.quantity,
-            basePrice: data.product.basePrice,
-            totalPrice: cartData.totalPrice,
-            selectedVariants: selectedVariantsList,
-            selectedAddons: selectedAddonsList,
-          });
+            onAddToCart({
+              productId: data.product._id,
+              productName: data.product.name,
+              quantity: cartData.quantity,
+              basePrice: data.product.basePrice,
+              totalPrice: cartData.totalPrice,
+              selectedVariants: selectedVariantsList,
+              selectedAddons: selectedAddonsList,
+            });
+          }
         }
       }
     },

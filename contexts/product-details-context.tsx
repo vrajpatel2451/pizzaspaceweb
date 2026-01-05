@@ -10,6 +10,14 @@ import React, {
   useRef,
 } from "react";
 import type { ProductDetailsResponse, VariantPricingResponse, VariantAddonSelectionType } from "@/types/product";
+import type {
+  ComboGroupSelectionState,
+  ComboItemSelection,
+  ComboValidationResult,
+  FlatComboSelection,
+} from "@/types/combo";
+import { COMBO_DEFAULTS, COMBO_ERRORS } from "@/types/combo";
+import type { PricingIdsAndQuantity } from "@/types/cart";
 
 /**
  * Pricing selection with quantity (matches API format)
@@ -63,6 +71,65 @@ interface ProductDetailsContextValue {
   getGroupAddonQuantity: (groupId: string) => number;
   getRemainingCapacity: (groupId?: string) => number;
   canAddAddon: (addonId: string, additionalQty?: number) => boolean;
+
+  // ============================================================================
+  // COMBO STATE (only used when product.isCombo === true)
+  // ============================================================================
+
+  /** All combo selections organized by combo group ID */
+  comboSelections: ComboGroupSelectionState;
+
+  /** Currently active customization dialog's group ID (null when closed) */
+  activeCustomizationGroup: string | null;
+
+  /** Currently active customization dialog's selection index (null when closed) */
+  activeCustomizationIndex: number | null;
+
+  /** Full product details for the item being customized (null when no dialog open) */
+  customizationProductData: ProductDetailsResponse | null;
+
+  /** Whether customization product data is loading */
+  isCustomizationLoading: boolean;
+
+  // ============================================================================
+  // COMBO ACTIONS
+  // ============================================================================
+
+  /** Toggle selection of a combo product */
+  toggleComboProduct: (
+    groupId: string,
+    productId: string,
+    comboGroupProductId: string,
+    defaultVariantId?: string
+  ) => void;
+
+  /** Open customization dialog for a selected combo product */
+  openComboCustomization: (groupId: string, selectionIndex: number) => Promise<void>;
+
+  /** Close customization dialog */
+  closeComboCustomization: () => void;
+
+  /** Update addon pricing for a specific combo item */
+  updateComboItemPricing: (
+    groupId: string,
+    selectionIndex: number,
+    pricing: PricingIdsAndQuantity[]
+  ) => void;
+
+  /** Remove a specific combo selection */
+  removeComboSelection: (groupId: string, selectionIndex: number) => void;
+
+  /** Get validation result for a specific combo group */
+  getComboGroupValidation: (groupId: string) => ComboValidationResult;
+
+  /** Whether all combo groups pass validation */
+  isComboValid: boolean;
+
+  /** Total price for combo product (base + all addons) */
+  comboTotalPrice: number;
+
+  /** Transform combo selections to API format */
+  getComboSelectionsForAPI: () => FlatComboSelection[];
 }
 
 /**
@@ -82,11 +149,18 @@ interface ProductDetailsProviderProps {
     pricing: PricingSelection[];
     quantity: number;
     totalPrice: number;
+    // Combo-specific fields
+    isCombo?: boolean;
+    comboSelections?: FlatComboSelection[];
   }) => void;
   // Initial selections for edit mode
   initialVariantId?: string;
   initialPricing?: PricingSelection[];
   initialQuantity?: number;
+  // Initial combo selections for edit mode
+  initialComboSelections?: ComboGroupSelectionState;
+  // Callback for fetching product details (for customization dialog)
+  onFetchProductDetails?: (productId: string) => Promise<ProductDetailsResponse>;
 }
 
 /**
@@ -127,6 +201,8 @@ export function ProductDetailsProvider({
   initialVariantId,
   initialPricing,
   initialQuantity = 1,
+  initialComboSelections,
+  onFetchProductDetails,
 }: ProductDetailsProviderProps) {
   // Product state
   const [productId, setProductId] = useState<string | null>(null);
@@ -146,6 +222,18 @@ export function ProductDetailsProvider({
   // Track previous initialData to detect changes
   const prevInitialDataRef = useRef<ProductDetailsResponse | null>(null);
   const isFirstRender = useRef(true);
+
+  // ============================================================================
+  // COMBO STATE
+  // ============================================================================
+
+  const [comboSelections, setComboSelections] = useState<ComboGroupSelectionState>(
+    () => initialComboSelections || COMBO_DEFAULTS.EMPTY_SELECTION_STATE
+  );
+  const [activeCustomizationGroup, setActiveCustomizationGroup] = useState<string | null>(null);
+  const [activeCustomizationIndex, setActiveCustomizationIndex] = useState<number | null>(null);
+  const [customizationProductData, setCustomizationProductData] = useState<ProductDetailsResponse | null>(null);
+  const [isCustomizationLoading, setIsCustomizationLoading] = useState(false);
 
   // ============================================================================
   // HELPER FUNCTIONS (following reference code pattern)
@@ -252,6 +340,11 @@ export function ProductDetailsProvider({
     setSelectedPricingIds([]);
     setQuantityState(1);
     setError(null);
+    // Reset combo state
+    setComboSelections({});
+    setActiveCustomizationGroup(null);
+    setActiveCustomizationIndex(null);
+    setCustomizationProductData(null);
   }, []);
 
   /**
@@ -553,6 +646,296 @@ export function ProductDetailsProvider({
   }, [productData, getSelectedVariantMaxItems, getRemainingCapacity]);
 
   // ============================================================================
+  // COMBO ACTIONS
+  // ============================================================================
+
+  /**
+   * Initialize combo selections when product data loads
+   */
+  useEffect(() => {
+    if (productData?.product.isCombo && productData.comboGroups) {
+      // Only initialize if empty (don't override edit mode initial data)
+      setComboSelections((prev) => {
+        if (Object.keys(prev).length > 0) return prev;
+
+        const initialSelections: ComboGroupSelectionState = {};
+        productData.comboGroups?.forEach((group) => {
+          initialSelections[group.groupId] = [];
+        });
+        return initialSelections;
+      });
+    }
+  }, [productData]);
+
+  /**
+   * Toggle combo product selection
+   */
+  const toggleComboProduct = useCallback(
+    (
+      groupId: string,
+      productIdToToggle: string,
+      comboGroupProductId: string,
+      defaultVariantId?: string
+    ) => {
+      setComboSelections((prev) => {
+        const groupSelections = prev[groupId] || [];
+
+        // Check if already selected
+        const existingIndex = groupSelections.findIndex(
+          (s) => s.productId === productIdToToggle
+        );
+
+        if (existingIndex >= 0) {
+          // Remove selection
+          return {
+            ...prev,
+            [groupId]: groupSelections.filter((_, i) => i !== existingIndex),
+          };
+        }
+
+        // Check maxSelection limit
+        const group = productData?.comboGroups?.find((g) => g.groupId === groupId);
+        if (group && groupSelections.length >= group.maxSelection) {
+          // Don't add - at max capacity
+          return prev;
+        }
+
+        // Add new selection
+        const newSelection: ComboItemSelection = {
+          productId: productIdToToggle,
+          comboGroupProductId,
+          variantId: defaultVariantId || COMBO_DEFAULTS.DEFAULT_VARIANT_ID,
+          pricing: [],
+          customized: false,
+        };
+
+        return {
+          ...prev,
+          [groupId]: [...groupSelections, newSelection],
+        };
+      });
+    },
+    [productData]
+  );
+
+  /**
+   * Open customization dialog for a combo item
+   */
+  const openComboCustomization = useCallback(
+    async (groupId: string, selectionIndex: number) => {
+      const selections = comboSelections[groupId];
+      if (!selections || !selections[selectionIndex]) {
+        console.error("Invalid combo selection index");
+        return;
+      }
+
+      const selection = selections[selectionIndex];
+
+      // Set dialog state
+      setActiveCustomizationGroup(groupId);
+      setActiveCustomizationIndex(selectionIndex);
+      setIsCustomizationLoading(true);
+
+      try {
+        // Use provided fetch function or fallback to default fetch
+        let data: ProductDetailsResponse;
+        if (onFetchProductDetails) {
+          data = await onFetchProductDetails(selection.productId);
+        } else {
+          const response = await fetch(`/api/products/${selection.productId}`);
+          if (!response.ok) throw new Error("Failed to fetch product");
+          data = await response.json();
+        }
+        setCustomizationProductData(data);
+      } catch (err) {
+        console.error("Failed to load customization data:", err);
+        setError(err as Error);
+        // Reset dialog state on error
+        setActiveCustomizationGroup(null);
+        setActiveCustomizationIndex(null);
+      } finally {
+        setIsCustomizationLoading(false);
+      }
+    },
+    [comboSelections, onFetchProductDetails]
+  );
+
+  /**
+   * Close customization dialog
+   */
+  const closeComboCustomization = useCallback(() => {
+    setActiveCustomizationGroup(null);
+    setActiveCustomizationIndex(null);
+    setCustomizationProductData(null);
+    setIsCustomizationLoading(false);
+  }, []);
+
+  /**
+   * Update addon pricing for a combo item
+   */
+  const updateComboItemPricing = useCallback(
+    (groupId: string, selectionIndex: number, pricing: PricingIdsAndQuantity[]) => {
+      setComboSelections((prev) => {
+        const groupSelections = prev[groupId];
+        if (!groupSelections || !groupSelections[selectionIndex]) {
+          return prev;
+        }
+
+        const updatedSelections = [...groupSelections];
+        updatedSelections[selectionIndex] = {
+          ...updatedSelections[selectionIndex],
+          pricing,
+          customized: true,
+        };
+
+        return {
+          ...prev,
+          [groupId]: updatedSelections,
+        };
+      });
+
+      // Close the customization dialog
+      closeComboCustomization();
+    },
+    [closeComboCustomization]
+  );
+
+  /**
+   * Remove a specific combo selection
+   */
+  const removeComboSelection = useCallback(
+    (groupId: string, selectionIndex: number) => {
+      setComboSelections((prev) => {
+        const groupSelections = prev[groupId];
+        if (!groupSelections) return prev;
+
+        return {
+          ...prev,
+          [groupId]: groupSelections.filter((_, i) => i !== selectionIndex),
+        };
+      });
+    },
+    []
+  );
+
+  /**
+   * Get validation result for a combo group
+   */
+  const getComboGroupValidation = useCallback(
+    (groupId: string): ComboValidationResult => {
+      const group = productData?.comboGroups?.find((g) => g.groupId === groupId);
+      const selections = comboSelections[groupId] || [];
+
+      if (!group) {
+        return {
+          isValid: false,
+          error: "Group not found",
+          selectedCount: 0,
+          minRequired: 0,
+          maxAllowed: 0,
+        };
+      }
+
+      const selectedCount = selections.length;
+      const { minSelection, maxSelection } = group;
+
+      // Check minimum requirement
+      if (selectedCount < minSelection) {
+        return {
+          isValid: false,
+          error: COMBO_ERRORS.MIN_NOT_MET(minSelection),
+          selectedCount,
+          minRequired: minSelection,
+          maxAllowed: maxSelection,
+        };
+      }
+
+      // Check maximum limit
+      if (selectedCount > maxSelection) {
+        return {
+          isValid: false,
+          error: COMBO_ERRORS.MAX_EXCEEDED(maxSelection),
+          selectedCount,
+          minRequired: minSelection,
+          maxAllowed: maxSelection,
+        };
+      }
+
+      return {
+        isValid: true,
+        selectedCount,
+        minRequired: minSelection,
+        maxAllowed: maxSelection,
+      };
+    },
+    [productData, comboSelections]
+  );
+
+  /**
+   * Transform combo selections to API format
+   */
+  const getComboSelectionsForAPI = useCallback((): FlatComboSelection[] => {
+    const flatSelections: FlatComboSelection[] = [];
+
+    Object.entries(comboSelections).forEach(([groupId, selections]) => {
+      selections.forEach((selection) => {
+        flatSelections.push({
+          groupId,
+          productId: selection.productId,
+          pricing: selection.pricing,
+        });
+      });
+    });
+
+    return flatSelections;
+  }, [comboSelections]);
+
+  // ============================================================================
+  // COMBO COMPUTED VALUES
+  // ============================================================================
+
+  /**
+   * Check if all combo groups are valid
+   */
+  const isComboValid = useMemo(() => {
+    if (!productData?.product.isCombo || !productData.comboGroups) {
+      return false;
+    }
+
+    // Check all groups meet requirements
+    return productData.comboGroups.every((group) => {
+      const validation = getComboGroupValidation(group.groupId);
+      return validation.isValid;
+    });
+  }, [productData, getComboGroupValidation]);
+
+  /**
+   * Calculate total combo price
+   * Formula: baseComboPrice + totalAddonPrice * quantity
+   */
+  const comboTotalPrice = useMemo(() => {
+    if (!productData?.product.isCombo) return 0;
+
+    // Start with base combo price
+    let total = productData.product.basePrice;
+
+    // Add addon prices from all combo items
+    Object.values(comboSelections).forEach((groupSelections) => {
+      groupSelections.forEach((selection) => {
+        // Sum all addon prices for this combo item
+        const itemAddonTotal = selection.pricing.reduce(
+          (sum, pricing) => sum + (pricing.price * pricing.quantity),
+          0
+        );
+        total += itemAddonTotal;
+      });
+    });
+
+    // Multiply by quantity
+    return total * quantity;
+  }, [productData, comboSelections, quantity]);
+
+  // ============================================================================
   // COMPUTED VALUES (following reference code amount calculation)
   // ============================================================================
 
@@ -640,6 +1023,28 @@ export function ProductDetailsProvider({
   const addToCart = useCallback(() => {
     if (!productData || !onAddToCart) return;
 
+    // For combo products, use combo validation and data
+    if (productData.product.isCombo) {
+      if (!isComboValid) {
+        console.error("Combo validation failed");
+        return;
+      }
+
+      onAddToCart({
+        productId: productData.product._id,
+        variantId: "", // Not used for combos
+        pricing: [], // Not used for combos
+        quantity,
+        totalPrice: comboTotalPrice,
+        isCombo: true,
+        comboSelections: getComboSelectionsForAPI(),
+      });
+      return;
+    }
+
+    // Regular product flow
+    if (!validation.isValid) return;
+
     onAddToCart({
       productId: productData.product._id,
       variantId: selectedVariantId,
@@ -647,7 +1052,18 @@ export function ProductDetailsProvider({
       quantity,
       totalPrice,
     });
-  }, [productData, selectedVariantId, selectedPricingIds, quantity, totalPrice, onAddToCart]);
+  }, [
+    productData,
+    selectedVariantId,
+    selectedPricingIds,
+    quantity,
+    totalPrice,
+    onAddToCart,
+    isComboValid,
+    comboTotalPrice,
+    getComboSelectionsForAPI,
+    validation.isValid,
+  ]);
 
   // ============================================================================
   // CONTEXT VALUE
@@ -684,6 +1100,23 @@ export function ProductDetailsProvider({
       getGroupAddonQuantity,
       getRemainingCapacity,
       canAddAddon,
+      // Combo state
+      comboSelections,
+      activeCustomizationGroup,
+      activeCustomizationIndex,
+      customizationProductData,
+      isCustomizationLoading,
+      // Combo actions
+      toggleComboProduct,
+      openComboCustomization,
+      closeComboCustomization,
+      updateComboItemPricing,
+      removeComboSelection,
+      getComboGroupValidation,
+      // Combo computed
+      isComboValid,
+      comboTotalPrice,
+      getComboSelectionsForAPI,
     }),
     [
       productId,
@@ -714,6 +1147,21 @@ export function ProductDetailsProvider({
       getGroupAddonQuantity,
       getRemainingCapacity,
       canAddAddon,
+      // Combo dependencies
+      comboSelections,
+      activeCustomizationGroup,
+      activeCustomizationIndex,
+      customizationProductData,
+      isCustomizationLoading,
+      toggleComboProduct,
+      openComboCustomization,
+      closeComboCustomization,
+      updateComboItemPricing,
+      removeComboSelection,
+      getComboGroupValidation,
+      isComboValid,
+      comboTotalPrice,
+      getComboSelectionsForAPI,
     ]
   );
 

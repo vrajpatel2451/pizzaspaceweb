@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Package } from "lucide-react";
 import { CustomImage } from "@/components/ui/custom-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -154,10 +154,64 @@ export function CartItemCard({
     }>;
   }, [productDetails, item.pricing]);
 
-  // Calculate item price (variant price + addons)
+  // Extract combo selections info (for combo products)
+  const comboSelectionsInfo = useMemo(() => {
+    if (!item.isCombo || !item.comboSelections || !productDetails) {
+      return [];
+    }
+
+    return item.comboSelections.map((selection) => {
+      // Find the combo group for this selection
+      const comboGroup = productDetails.comboGroups?.find(
+        (g) => g.groupId === selection.groupId
+      );
+
+      // Find the combo group product to get product details
+      const comboGroupProduct = productDetails.comboGroupProducts?.find(
+        (cgp) => cgp.productId === selection.productId
+      );
+
+      // Get product name from the embedded product data
+      const productName = comboGroupProduct?.product?.name ?? "Selected Item";
+
+      // Check if there are customizations (pricing entries)
+      const hasCustomizations = selection.pricing && selection.pricing.length > 0;
+
+      return {
+        groupId: selection.groupId,
+        groupLabel: comboGroup?.label ?? "Item",
+        productId: selection.productId,
+        productName,
+        hasCustomizations,
+        customizationCount: selection.pricing?.length ?? 0,
+      };
+    });
+  }, [item.isCombo, item.comboSelections, productDetails]);
+
+  // Calculate item price (variant price + addons for regular, base price + combo addon extras for combos)
   const itemPrice = useMemo(() => {
     if (!productDetails) return 0;
 
+    // For combo products: base price + any addon extras from customizations
+    if (item.isCombo) {
+      let comboExtrasTotal = 0;
+
+      // Calculate extras from combo selections' pricing
+      if (item.comboSelections) {
+        for (const selection of item.comboSelections) {
+          if (selection.pricing) {
+            for (const pricingItem of selection.pricing) {
+              // The price is already captured in the pricing entry
+              comboExtrasTotal += (pricingItem.price ?? 0) * pricingItem.quantity;
+            }
+          }
+        }
+      }
+
+      return productDetails.product.basePrice + comboExtrasTotal;
+    }
+
+    // Regular products: variant price + addons
     const variantPrice = variantInfo?.price || productDetails.product.basePrice;
     const addonsTotal = addonInfo.reduce(
       (sum, addon) => sum + addon.price * addon.quantity,
@@ -169,7 +223,7 @@ export function CartItemCard({
     );
 
     return variantPrice + addonsTotal + sVariantTotal;
-  }, [productDetails, variantInfo, addonInfo, sVariantsInfo]);
+  }, [productDetails, variantInfo, addonInfo, sVariantsInfo, item.isCombo, item.comboSelections]);
 
   // Calculate total price for this cart item
   // Simple pricing: if delivery, add packaging charges
@@ -230,13 +284,21 @@ export function CartItemCard({
               <h3 className="font-semibold text-base sm:text-base line-clamp-2">
                 {product.name}
               </h3>
-              <div className="flex items-center gap-2">
-                {variantInfo && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Combo badge for combo products */}
+                {item.isCombo && (
+                  <Badge variant="outline" className="mt-1.5 gap-1">
+                    <Package className="h-3 w-3" />
+                    Combo
+                  </Badge>
+                )}
+                {/* Regular product badges */}
+                {!item.isCombo && variantInfo && (
                   <Badge variant="secondary" className="mt-1.5">
                     {variantInfo.label}
                   </Badge>
                 )}
-                {sVariantsInfo?.length >= 1 &&
+                {!item.isCombo && sVariantsInfo?.length >= 1 &&
                   sVariantsInfo.map((e) => (
                     <Badge variant="secondary" className="mt-1.5" key={e.label}>
                       {e.label}
@@ -270,13 +332,32 @@ export function CartItemCard({
             )}
           </div>
 
-          {/* Selected Addons */}
-          {addonInfo.length > 0 && (
+          {/* Selected Addons (for regular products) */}
+          {!item.isCombo && addonInfo.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {addonInfo.map((addon, idx) => (
                 <span key={idx} className="text-xs text-muted-foreground">
                   {addon.label} x{addon.quantity}
                 </span>
+              ))}
+            </div>
+          )}
+
+          {/* Combo Selections (for combo products) */}
+          {item.isCombo && comboSelectionsInfo.length > 0 && (
+            <div className="flex flex-col gap-1 mt-1">
+              {comboSelectionsInfo.map((selection, idx) => (
+                <div key={`${selection.groupId}-${selection.productId}-${idx}`} className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-foreground">
+                    {selection.productName}
+                  </span>
+                  {selection.hasCustomizations && (
+                    <Badge variant="secondary" size="sm" className="text-[10px] px-1.5 py-0">
+                      +{selection.customizationCount} extras
+                    </Badge>
+                  )}
+                </div>
               ))}
             </div>
           )}
