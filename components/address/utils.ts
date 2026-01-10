@@ -69,7 +69,7 @@ export function parseGeocodingResult(
     ]),
     country: getComponent(["country"]),
     zip: getComponent(["postal_code"]),
-    lat: typeof location.lat === "function" ? location.lat() : location.lat,
-    long: typeof location.lng === "function" ? location.lng() : location.lng,
+    lat: location.lat(),
+    long: location.lng(),
   };
 }
