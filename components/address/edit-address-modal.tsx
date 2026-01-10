@@ -96,22 +96,24 @@ export function EditAddressModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="w-full sm:w-[90vw] md:w-[70vw] lg:w-[50vw] max-w-[900px] h-[90vh] flex flex-col p-0">
+        <DialogHeader className="sticky top-0 z-10 bg-background border-b px-6 py-4">
           <DialogTitle>Edit Address</DialogTitle>
           <DialogDescription>
             Update the details of your delivery address below.
           </DialogDescription>
         </DialogHeader>
-        {address && (
-          <AddressForm
-            defaultValues={defaultValues}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            isLoading={isLoading}
-            submitLabel="Update Address"
-          />
-        )}
+        <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
+          {address && (
+            <AddressForm
+              defaultValues={defaultValues}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              isLoading={isLoading}
+              submitLabel="Update Address"
+            />
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

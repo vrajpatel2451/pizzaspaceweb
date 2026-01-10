@@ -46,7 +46,7 @@ interface MenuLink {
 
 const accountLinks: MenuLink[] = [
   { label: "My Orders", href: "/order", icon: ShoppingBag },
-  { label: "Saved Addresses", href: "/account/addresses", icon: MapPin },
+  { label: "Saved Addresses", href: "/addresses", icon: MapPin },
   { label: "Profile", href: "/profile", icon: User },
 ];
 
@@ -70,9 +70,9 @@ export function UserDropdown({
       // Close dropdown
       setOpen(false);
       // Navigate to home
-      router.push('/');
+      router.push("/");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     } finally {
       setIsLoggingOut(false);
     }
@@ -96,11 +96,7 @@ export function UserDropdown({
             <User className="size-5" />
           </IconButton>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-80 p-0"
-          align="end"
-          sideOffset={12}
-        >
+        <PopoverContent className="w-80 p-0" align="end" sideOffset={12}>
           {/* Header */}
           <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10">
             <div className="flex items-center gap-3">
@@ -189,11 +185,7 @@ export function UserDropdown({
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent
-        className="w-80 p-0"
-        align="end"
-        sideOffset={12}
-      >
+      <PopoverContent className="w-80 p-0" align="end" sideOffset={12}>
         {/* User Info Header */}
         <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10">
           <div className="flex items-center gap-3">
@@ -270,7 +262,7 @@ export function UserDropdown({
             )}
           >
             <LogOut className={cn("size-4", isLoggingOut && "animate-spin")} />
-            <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
+            <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
           </button>
         </div>
       </PopoverContent>

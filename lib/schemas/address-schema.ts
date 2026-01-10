@@ -6,7 +6,7 @@ const UK_POSTCODE_REGEX = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
 // UK Phone number regex (basic validation for UK numbers)
 const UK_PHONE_REGEX = /^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/;
 
-export const addressSchema = z.object({
+const baseAddressSchema = z.object({
   name: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -86,7 +86,7 @@ export const addressSchema = z.object({
 
   isDefault: z.boolean(),
 
-  isForMe: z.boolean().default(true),
+  isForMe: z.boolean(),
 
   recipientName: z
     .string()
@@ -104,7 +104,9 @@ export const addressSchema = z.object({
     .trim()
     .optional()
     .or(z.literal("")),
-}).refine(
+});
+
+export const addressSchema = baseAddressSchema.refine(
   (data) => {
     // If type is "other", otherAddressLabel must be provided
     if (data.type === "other") {
@@ -142,4 +144,4 @@ export const addressSchema = z.object({
   }
 );
 
-export type AddressFormData = z.infer<typeof addressSchema>;
+export type AddressFormData = z.infer<typeof baseAddressSchema>;
