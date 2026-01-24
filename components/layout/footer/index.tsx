@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { NewsletterSection } from "./newsletter-section";
 import { FooterBrand } from "./footer-brand";
 import { FooterLinksColumn, quickLinks, helpLinks } from "./footer-links";
 import { FooterContact } from "./footer-contact";
@@ -87,9 +86,6 @@ async function FooterContent() {
 export function Footer() {
   return (
     <footer className="relative">
-      {/* Newsletter Section */}
-      <NewsletterSection />
-
       {/* Main Footer */}
       <div className="bg-navy-900">
         {/* Decorative top border - orange gradient accent */}

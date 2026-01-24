@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Search, MapPin, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryResponse } from "@/types/category";
 import Link from "next/link";
@@ -21,9 +21,10 @@ interface HeroSearchProps {
 
 export function HeroSearch({ trendingCategories }: HeroSearchProps) {
   // Use category names for popular searches if available
-  const popularSearches = trendingCategories.length > 0
-    ? trendingCategories.slice(0, 4).map((cat) => cat.name)
-    : defaultPopularSearches;
+  const popularSearches =
+    trendingCategories.length > 0
+      ? trendingCategories.slice(0, 4).map((cat) => cat.name)
+      : defaultPopularSearches;
   const [searchValue, setSearchValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +40,10 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
   };
 
   return (
-    <div className="w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-600 motion-reduce:animate-none" style={{ animationDelay: "500ms" }}>
+    <div
+      className="w-full animate-in fade-in-0 slide-in-from-bottom-2 duration-600 motion-reduce:animate-none"
+      style={{ animationDelay: "500ms" }}
+    >
       <div className="relative">
         {/* Main Search Container */}
         <div
@@ -49,11 +53,11 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
             "border-2",
             isFocused
               ? "border-primary shadow-xl shadow-primary/10 dark:shadow-primary/5"
-              : "border-gray-100 dark:border-navy-700"
+              : "border-gray-100 dark:border-navy-700",
           )}
         >
           {/* Location Input - Hidden on mobile */}
-          <div className="hidden md:flex items-center gap-2 pl-4 pr-3 py-3 border-r border-gray-100 dark:border-navy-700">
+          {/* <div className="hidden md:flex items-center gap-2 pl-4 pr-3 py-3 border-r border-gray-100 dark:border-navy-700">
             <MapPin className="w-5 h-5 text-primary" aria-hidden="true" />
             <label htmlFor="location-input" className="sr-only">
               Enter your location
@@ -65,11 +69,14 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
               className="w-28 lg:w-36 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
               aria-label="Enter your location for delivery"
             />
-          </div>
+          </div> */}
 
           {/* Search Input */}
           <div className="flex-1 flex items-center gap-2 sm:gap-3 pl-3 sm:pl-4 pr-2 py-2.5 sm:py-3 min-h-[44px]">
-            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+            <Search
+              className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0"
+              aria-hidden="true"
+            />
             <label htmlFor="search-input" className="sr-only">
               Search for pizzas, sides, and drinks
             </label>
@@ -85,7 +92,9 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
               className="flex-1 bg-transparent text-sm sm:text-base text-foreground placeholder:text-muted-foreground outline-none min-w-0 touch-manipulation"
               aria-label="Search for pizzas, sides, and drinks"
               aria-autocomplete="list"
-              aria-controls={isFocused && !searchValue ? "search-suggestions" : undefined}
+              aria-controls={
+                isFocused && !searchValue ? "search-suggestions" : undefined
+              }
             />
 
             {/* Clear Button */}
@@ -94,11 +103,14 @@ export function HeroSearch({ trendingCategories }: HeroSearchProps) {
                 onClick={handleClear}
                 className={cn(
                   "p-1.5 sm:p-1 rounded-full hover:bg-gray-100 dark:hover:bg-navy-700 transition-all duration-200 min-w-[28px] min-h-[28px] flex items-center justify-center touch-manipulation motion-reduce:transition-none",
-                  "animate-in zoom-in-0 duration-200"
+                  "animate-in zoom-in-0 duration-200",
                 )}
                 aria-label="Clear search input"
               >
-                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" aria-hidden="true" />
+                <X
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
               </button>
             )}
           </div>
