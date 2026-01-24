@@ -6,6 +6,7 @@
 export interface GeneralRating {
   _id: string;
   personName: string;
+  message: string;
   personImage?: string;
   ratings: number;
   personTagRole?: string;
@@ -40,6 +41,7 @@ export interface RatingsListParams {
 
 export interface CreateRatingInput {
   personName: string;
+  message: string;
   personImage?: string;
   ratings: number;
   personTagRole?: string;

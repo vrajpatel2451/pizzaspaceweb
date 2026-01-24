@@ -11,6 +11,7 @@ import { TestimonialsCarousel } from "./testimonials-carousel";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TextArea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -24,19 +25,28 @@ import type { GeneralRating } from "@/types";
 // Review form validation schema
 const reviewFormSchema = z.object({
   personName: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
-  personPhone: z.string().optional(),
+  message: z.string().min(10, "Message must be at least 10 characters").max(500, "Message must be less than 500 characters"),
   ratings: z.number().min(1, "Please select a rating").max(5),
+  personTagRole: z.string().max(50, "Role must be less than 50 characters").optional(),
+  personPhone: z.string().optional(),
 });
 
 type ReviewFormData = z.infer<typeof reviewFormSchema>;
 
 interface TestimonialsSectionClientProps {
   testimonials: GeneralRating[];
+  totalReviews: number;
 }
 
 export function TestimonialsSectionClient({
   testimonials,
+  totalReviews,
 }: TestimonialsSectionClientProps) {
+  // Calculate average rating from current testimonials
+  const averageRating =
+    testimonials.length > 0
+      ? testimonials.reduce((sum, t) => sum + t.ratings, 0) / testimonials.length
+      : 0;
   const [isVisible, setIsVisible] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,8 +65,10 @@ export function TestimonialsSectionClient({
     resolver: zodResolver(reviewFormSchema),
     defaultValues: {
       personName: "",
-      personPhone: "",
+      message: "",
       ratings: 0,
+      personTagRole: "",
+      personPhone: "",
     },
   });
 
@@ -68,7 +80,9 @@ export function TestimonialsSectionClient({
     try {
       const response = await createRating({
         personName: data.personName,
+        message: data.message,
         ratings: data.ratings,
+        personTagRole: data.personTagRole || undefined,
         personPhone: data.personPhone || undefined,
       });
 
@@ -181,7 +195,11 @@ export function TestimonialsSectionClient({
       {/* Content Container */}
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
-        <TestimonialsHeader />
+        <TestimonialsHeader
+          averageRating={averageRating}
+          totalReviews={totalReviews}
+          testimonials={testimonials}
+        />
 
         {/* Testimonials Carousel */}
         <div
@@ -299,6 +317,31 @@ export function TestimonialsSectionClient({
                   autoComplete="name"
                   error={errors.personName?.message}
                   {...register("personName")}
+                />
+              </div>
+
+              {/* Message */}
+              <div>
+                <TextArea
+                  id="message"
+                  label="Your Review"
+                  placeholder="Share your experience with us..."
+                  rows={4}
+                  maxLength={500}
+                  showCharCount
+                  error={errors.message?.message}
+                  {...register("message")}
+                />
+              </div>
+
+              {/* Role/Title (Optional) */}
+              <div>
+                <Input
+                  id="personTagRole"
+                  label="Your Role/Title (Optional)"
+                  placeholder="e.g., Food Blogger, Regular Customer"
+                  error={errors.personTagRole?.message}
+                  {...register("personTagRole")}
                 />
               </div>
 

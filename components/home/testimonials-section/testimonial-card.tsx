@@ -60,10 +60,10 @@ export function TestimonialCard({
         </span>
       </div>
 
-      {/* Customer Info Section */}
+      {/* Customer Message */}
       <div className="relative z-10 mb-6">
         <p className="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-medium italic">
-          &ldquo;Amazing pizza experience! The quality and service exceeded all expectations.&rdquo;
+          &ldquo;{testimonial.message || "Great experience!"}&rdquo;
         </p>
       </div>
 
