@@ -17,6 +17,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createContactQuery } from '@/lib/api/contact-queries';
+import type { ContactSubject } from '@/types';
 
 // Form validation schema
 const contactFormSchema = z.object({
@@ -82,23 +84,33 @@ export function ContactForm() {
     setErrorMessage('');
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Call the actual contact query API
+      const response = await createContactQuery({
+        name: data.fullName,
+        email: data.email,
+        phone: data.phone || undefined,
+        subject: data.subject as ContactSubject,
+        message: data.message,
+      });
 
-      // TODO: Replace with actual API call
-      console.log('Form data:', data);
+      if (response.statusCode === 200 || response.statusCode === 201) {
+        // Success
+        setFormStatus('success');
+        reset();
 
-      // Success
-      setFormStatus('success');
-      reset();
-
-      // Reset success message after 5 seconds
-      setTimeout(() => {
-        setFormStatus('idle');
-      }, 5000);
-    } catch {
+        // Reset success message after 5 seconds
+        setTimeout(() => {
+          setFormStatus('idle');
+        }, 5000);
+      } else if (response.statusCode === 429) {
+        setFormStatus('error');
+        setErrorMessage('Too many requests. Please wait before trying again.');
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
       setFormStatus('error');
-      setErrorMessage('Something went wrong. Please try again.');
+      setErrorMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
 
       // Reset error after 5 seconds
       setTimeout(() => {
@@ -216,10 +228,11 @@ export function ContactForm() {
               <SelectValue placeholder="Select a subject" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="general">General Inquiry</SelectItem>
-              <SelectItem value="order">Order Issue</SelectItem>
+              <SelectItem value="general inquiry">General Inquiry</SelectItem>
+              <SelectItem value="order issue">Order Issue</SelectItem>
               <SelectItem value="feedback">Feedback</SelectItem>
-              <SelectItem value="partnership">Partnership</SelectItem>
+              <SelectItem value="reservation">Reservation</SelectItem>
+              <SelectItem value="general complaint">General Complaint</SelectItem>
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>

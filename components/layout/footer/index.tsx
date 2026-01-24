@@ -75,6 +75,11 @@ async function FooterContent() {
           openingHours={data.openingHours}
         />
       </div>
+
+      {/* Bottom Bar - Pass policies for legal links */}
+      <div className="sm:col-span-2 lg:col-span-4">
+        <FooterBottom policies={data.footerPolicies} />
+      </div>
     </>
   );
 }
@@ -110,9 +115,6 @@ export function Footer() {
               <FooterContent />
             </Suspense>
           </div>
-
-          {/* Bottom Bar */}
-          <FooterBottom />
         </div>
 
         {/* Decorative bottom gradient line */}

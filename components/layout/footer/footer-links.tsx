@@ -64,16 +64,11 @@ export const quickLinks: FooterLink[] = [
   { label: "Our Menu", href: "/menu" },
   { label: "Locations", href: "/stores" },
   { label: "About Us", href: "/about" },
-  { label: "Careers", href: "/careers", badge: "Hiring" },
-  { label: "Blog", href: "/blog" },
 ];
 
 export const helpLinks: FooterLink[] = [
   { label: "Contact Us", href: "/contact" },
-  { label: "FAQs", href: "/faqs" },
-  { label: "Delivery Info", href: "/delivery-terms" },
-  { label: "Track Order", href: "/track-order" },
-  { label: "Allergen Info", href: "/allergens" },
+  { label: "Track Order", href: "/order" },
 ];
 
 // Combined component for simpler usage

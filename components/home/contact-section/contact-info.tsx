@@ -1,7 +1,7 @@
 'use client';
 
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
-import type { ContactInfo as ContactInfoType } from '@/types';
+import type { ContactInfo as ContactInfoType, OpeningHours } from '@/types';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -60,9 +60,10 @@ function InfoCard({ icon: Icon, title, primary, secondary, action, href }: InfoC
 
 interface ContactInfoProps {
   contactInfo: ContactInfoType | null;
+  openingHours: OpeningHours[];
 }
 
-export function ContactInfo({ contactInfo }: ContactInfoProps) {
+export function ContactInfo({ contactInfo, openingHours }: ContactInfoProps) {
   // Format address from contact info
   const formatAddress = () => {
     if (!contactInfo) return 'Address not available';
@@ -100,6 +101,48 @@ export function ContactInfo({ contactInfo }: ContactInfoProps) {
     return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(address)}`;
   };
 
+  // Format opening hours from backend
+  const formatOpeningHoursDisplay = () => {
+    if (openingHours.length === 0) {
+      return { primary: 'Hours not available', secondary: '' };
+    }
+
+    // Group consecutive days with same hours
+    const groups: { days: string[]; time: string }[] = [];
+    let currentGroup: { days: string[]; time: string } | null = null;
+
+    for (const hour of openingHours) {
+      const timeStr = `${hour.startTime} - ${hour.endTime}`;
+      if (currentGroup && currentGroup.time === timeStr) {
+        currentGroup.days.push(hour.day);
+      } else {
+        if (currentGroup) groups.push(currentGroup);
+        currentGroup = { days: [hour.day], time: timeStr };
+      }
+    }
+    if (currentGroup) groups.push(currentGroup);
+
+    // Format for display
+    if (groups.length === 1) {
+      const g = groups[0];
+      const dayRange = g.days.length > 1 ? `${g.days[0]} - ${g.days[g.days.length - 1]}` : g.days[0];
+      return { primary: `${dayRange}: ${g.time}`, secondary: '' };
+    } else if (groups.length === 2) {
+      const g1 = groups[0];
+      const g2 = groups[1];
+      const dayRange1 = g1.days.length > 1 ? `${g1.days[0]} - ${g1.days[g1.days.length - 1]}` : g1.days[0];
+      const dayRange2 = g2.days.length > 1 ? `${g2.days[0]} - ${g2.days[g2.days.length - 1]}` : g2.days[0];
+      return { primary: `${dayRange1}: ${g1.time}`, secondary: `${dayRange2}: ${g2.time}` };
+    } else {
+      // More complex schedule - show first two
+      const g1 = groups[0];
+      const dayRange1 = g1.days.length > 1 ? `${g1.days[0]} - ${g1.days[g1.days.length - 1]}` : g1.days[0];
+      return { primary: `${dayRange1}: ${g1.time}`, secondary: 'View full schedule' };
+    }
+  };
+
+  const hoursDisplay = formatOpeningHoursDisplay();
+
   const contactMethods = [
     {
       icon: Phone,
@@ -127,8 +170,8 @@ export function ContactInfo({ contactInfo }: ContactInfoProps) {
     {
       icon: Clock,
       title: 'Opening Hours',
-      primary: 'Mon-Thu: 11:00 - 22:00',
-      secondary: 'Fri-Sun: 11:00 - 23:00',
+      primary: hoursDisplay.primary,
+      secondary: hoursDisplay.secondary,
     },
   ];
 

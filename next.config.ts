@@ -8,7 +8,7 @@ const imageHostname = imageDomain.replace(/^https?:\/\//, "");
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    formats: ['image/avif', 'image/webp'], // Enable modern formats
+    formats: ["image/avif", "image/webp"], // Enable modern formats
     deviceSizes: [640, 750, 828, 1080, 1200, 1920], // Responsive breakpoints
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Smaller sizes
     minimumCacheTTL: 60, // Cache images for 60 seconds
@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/*'], // Tree-shake icon libraries
+    optimizePackageImports: ["lucide-react", "@radix-ui/*"], // Tree-shake icon libraries
   },
 };
 

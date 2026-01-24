@@ -1,10 +1,34 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2, Star, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { TestimonialsHeader } from "./testimonials-header";
 import { TestimonialsCarousel } from "./testimonials-carousel";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { createRating } from "@/lib/api/general-ratings";
 import type { GeneralRating } from "@/types";
+
+// Review form validation schema
+const reviewFormSchema = z.object({
+  personName: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
+  personPhone: z.string().optional(),
+  ratings: z.number().min(1, "Please select a rating").max(5),
+});
+
+type ReviewFormData = z.infer<typeof reviewFormSchema>;
 
 interface TestimonialsSectionClientProps {
   testimonials: GeneralRating[];
@@ -14,7 +38,74 @@ export function TestimonialsSectionClient({
   testimonials,
 }: TestimonialsSectionClientProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset,
+  } = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewFormSchema),
+    defaultValues: {
+      personName: "",
+      personPhone: "",
+      ratings: 0,
+    },
+  });
+
+  const currentRating = watch("ratings");
+
+  const onSubmitReview = async (data: ReviewFormData) => {
+    setIsSubmitting(true);
+
+    try {
+      const response = await createRating({
+        personName: data.personName,
+        ratings: data.ratings,
+        personPhone: data.personPhone || undefined,
+      });
+
+      if (response.statusCode === 200 || response.statusCode === 201) {
+        setShowSuccess(true);
+        toast.success("Thank you for your review!", {
+          description: "Your review has been submitted and will be published after approval.",
+        });
+
+        setTimeout(() => {
+          reset();
+          setShowSuccess(false);
+          setIsDialogOpen(false);
+        }, 2000);
+      } else if (response.statusCode === 429) {
+        toast.error("Too Many Requests", {
+          description: "Please wait before submitting another review.",
+        });
+      } else {
+        throw new Error("Failed to submit review");
+      }
+    } catch {
+      toast.error("Submission Failed", {
+        description: "Unable to submit your review. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDialogClose = () => {
+    if (!isSubmitting) {
+      setIsDialogOpen(false);
+      reset();
+      setShowSuccess(false);
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -114,8 +205,8 @@ export function TestimonialsSectionClient({
           <p className="text-slate-600 dark:text-slate-400 mb-4">
             Join our growing community of pizza lovers
           </p>
-          <a
-            href="#"
+          <button
+            onClick={() => setIsDialogOpen(true)}
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-98 motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
           >
             <span>Leave Your Review</span>
@@ -132,12 +223,128 @@ export function TestimonialsSectionClient({
                 d="M17 8l4 4m0 0l-4 4m4-4H3"
               />
             </svg>
-          </a>
+          </button>
         </div>
       </div>
 
       {/* Bottom Wave Decoration */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-200 dark:via-orange-800/30 to-transparent" />
+
+      {/* Review Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Leave Your Review</DialogTitle>
+            <DialogDescription>
+              Share your experience with us. Your review will be published after approval.
+            </DialogDescription>
+          </DialogHeader>
+
+          {showSuccess ? (
+            <div className="py-8 text-center">
+              <div className="w-16 h-16 bg-green-100 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-8 h-8 text-green-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                Thank You!
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Your review has been submitted successfully.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmitReview)} className="space-y-5">
+              {/* Star Rating */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-900 dark:text-white">
+                  Your Rating <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setValue("ratings", star, { shouldValidate: true })}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="p-1 transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={cn(
+                          "w-8 h-8 transition-colors",
+                          (hoverRating || currentRating) >= star
+                            ? "fill-orange-400 text-orange-400"
+                            : "fill-none text-slate-300 dark:text-slate-600"
+                        )}
+                      />
+                    </button>
+                  ))}
+                  {currentRating > 0 && (
+                    <span className="ml-2 text-sm text-slate-600 dark:text-slate-400">
+                      {currentRating} of 5
+                    </span>
+                  )}
+                </div>
+                {errors.ratings && (
+                  <p className="text-xs text-red-500">{errors.ratings.message}</p>
+                )}
+              </div>
+
+              {/* Name */}
+              <div>
+                <Input
+                  id="personName"
+                  label="Your Name"
+                  placeholder="John Doe"
+                  autoComplete="name"
+                  error={errors.personName?.message}
+                  {...register("personName")}
+                />
+              </div>
+
+              {/* Phone (Optional) */}
+              <div>
+                <Input
+                  id="personPhone"
+                  label="Phone (Optional)"
+                  type="tel"
+                  placeholder="+44 20 1234 5678"
+                  autoComplete="tel"
+                  error={errors.personPhone?.message}
+                  {...register("personPhone")}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleDialogClose}
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Review"
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -8,13 +8,29 @@ import type {
   GeneralRating,
 } from "@/types";
 
+// Raw API response structure
+interface RawRatingsApiResponse {
+  statusCode: number;
+  data: {
+    data: GeneralRating[];
+    meta: {
+      currentPage: string;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: string;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
+
 /**
  * Get published customer ratings/testimonials
  * @param params - Pagination and sorting options
  * @returns Paginated list of published ratings
  */
 export async function getGeneralRatings(
-  params?: RatingsListParams
+  params?: RatingsListParams,
 ): Promise<RatingsListResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -28,9 +44,23 @@ export async function getGeneralRatings(
     const queryString = queryParams.toString();
     const url = `/general-ratings/list${queryString ? `?${queryString}` : ""}`;
 
-    const response: AxiosResponse<RatingsListResponse> =
+    const response: AxiosResponse<RawRatingsApiResponse> =
       await apiClient.get(url);
-    return response.data;
+
+    // Transform API response to expected format
+    const rawData = response.data;
+    return {
+      statusCode: rawData.statusCode,
+      data: {
+        ratings: rawData.data?.data || [],
+        pagination: {
+          page: parseInt(rawData.data?.meta?.currentPage || "1", 10),
+          limit: parseInt(rawData.data?.meta?.itemsPerPage || "10", 10),
+          total: rawData.data?.meta?.totalItems || 0,
+          totalPages: rawData.data?.meta?.totalPages || 0,
+        },
+      },
+    };
   } catch (error) {
     console.error("Failed to fetch ratings:", error);
     return {
@@ -56,12 +86,12 @@ export async function getGeneralRatings(
  * @returns Created rating with isPublished: false
  */
 export async function createRating(
-  input: CreateRatingInput
+  input: CreateRatingInput,
 ): Promise<CreateRatingResponse> {
   try {
     const response: AxiosResponse<CreateRatingResponse> = await apiClient.post(
       "/general-ratings/create",
-      input
+      input,
     );
     return response.data;
   } catch (error) {

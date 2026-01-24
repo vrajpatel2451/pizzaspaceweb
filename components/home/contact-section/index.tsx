@@ -2,11 +2,14 @@ import Link from 'next/link';
 import { ContactInfo } from './contact-info';
 import { ContactForm } from './contact-form';
 import { Mail } from 'lucide-react';
-import { fetchContactInfo } from '@/lib/api/server-fetchers';
+import { fetchContactInfo, fetchOpeningHours } from '@/lib/api/server-fetchers';
 
 export async function ContactSection() {
-  // Fetch contact info from API
-  const contactInfo = await fetchContactInfo();
+  // Fetch contact info and opening hours from API
+  const [contactInfo, openingHours] = await Promise.all([
+    fetchContactInfo(),
+    fetchOpeningHours(),
+  ]);
   return (
     <section
       id="contact"
@@ -62,7 +65,7 @@ export async function ContactSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 max-w-7xl mx-auto">
           {/* Left Column - Contact Info & Map */}
           <div className="order-2 lg:order-1">
-            <ContactInfo contactInfo={contactInfo} />
+            <ContactInfo contactInfo={contactInfo} openingHours={openingHours} />
           </div>
 
           {/* Right Column - Contact Form */}

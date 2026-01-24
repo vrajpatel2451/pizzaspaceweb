@@ -1,11 +1,15 @@
 import Link from "next/link";
+import type { PolicyListItem } from "@/types";
 
-// Keep static legal links as fallback
-const legalLinks = [
+interface FooterBottomProps {
+  policies?: PolicyListItem[];
+}
+
+// Fallback legal links if no policies from backend
+const fallbackLegalLinks = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
   { label: "Cookie Policy", href: "/cookies" },
-  { label: "Accessibility", href: "/accessibility" },
 ];
 
 // Payment method icons as simple SVG components
@@ -82,8 +86,16 @@ const paymentMethods = [
   { name: "Google Pay", Icon: GooglePayIcon },
 ];
 
-export function FooterBottom() {
+export function FooterBottom({ policies = [] }: FooterBottomProps) {
   const currentYear = new Date().getFullYear();
+
+  // Use backend policies if available, otherwise use fallback
+  const legalLinks = policies.length > 0
+    ? policies.map((policy) => ({
+        label: policy.name,
+        href: `/policies/${policy.slug}`,
+      }))
+    : fallbackLegalLinks;
 
   return (
     <div className="border-t border-navy-800 mt-12 pt-8">
