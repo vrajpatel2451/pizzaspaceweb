@@ -1,6 +1,9 @@
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { formatAddress, formatOpeningHours } from "@/lib/api/server-fetchers";
+import type { ContactInfo, OpeningHours } from "@/types";
 
-const contactInfo = [
+// Fallback data
+const fallbackContactInfo = [
   {
     icon: MapPin,
     label: "Visit Us",
@@ -21,13 +24,53 @@ const contactInfo = [
   },
 ];
 
-const openingHours = [
-  { days: "Monday - Thursday", hours: "11:00 - 22:00" },
-  { days: "Friday - Saturday", hours: "11:00 - 23:00" },
-  { days: "Sunday", hours: "12:00 - 21:00" },
+const fallbackOpeningHours = [
+  "Monday - Thursday: 11:00 AM - 10:00 PM",
+  "Friday - Saturday: 11:00 AM - 11:00 PM",
+  "Sunday: 12:00 PM - 9:00 PM",
 ];
 
-export function FooterContact() {
+interface FooterContactProps {
+  contactInfo: ContactInfo | null;
+  openingHours: OpeningHours[];
+}
+
+export function FooterContact({
+  contactInfo,
+  openingHours,
+}: FooterContactProps) {
+  // Build contact info array from API data or use fallback
+  const contactItems = contactInfo
+    ? [
+        {
+          icon: MapPin,
+          label: "Visit Us",
+          content: formatAddress(contactInfo),
+          href: contactInfo.lat && contactInfo.lng
+            ? `https://www.google.com/maps?q=${contactInfo.lat},${contactInfo.lng}`
+            : "https://maps.google.com",
+        },
+        {
+          icon: Phone,
+          label: "Call Us",
+          content: contactInfo.phone,
+          href: `tel:${contactInfo.phone.replace(/\s/g, "")}`,
+        },
+        {
+          icon: Mail,
+          label: "Email Us",
+          content: contactInfo.email,
+          href: `mailto:${contactInfo.email}`,
+        },
+      ]
+    : fallbackContactInfo;
+
+  // Format opening hours or use fallback
+  const formattedHours =
+    openingHours.length > 0
+      ? formatOpeningHours(openingHours)
+      : fallbackOpeningHours;
+
   return (
     <div>
       <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-5">
@@ -36,14 +79,18 @@ export function FooterContact() {
 
       {/* Contact Items */}
       <ul className="space-y-4 mb-6">
-        {contactInfo.map((item) => {
+        {contactItems.map((item) => {
           const Icon = item.icon;
           return (
             <li key={item.label}>
               <a
                 href={item.href}
                 target={item.href.startsWith("http") ? "_blank" : undefined}
-                rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                rel={
+                  item.href.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
                 className="group flex items-start gap-3"
               >
                 <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-navy-800 group-hover:bg-primary-500 flex items-center justify-center transition-colors duration-300">
@@ -68,12 +115,21 @@ export function FooterContact() {
           <span className="text-white font-medium text-sm">Opening Hours</span>
         </div>
         <ul className="space-y-2">
-          {openingHours.map((schedule) => (
-            <li key={schedule.days} className="flex justify-between text-xs">
-              <span className="text-gray-400">{schedule.days}</span>
-              <span className="text-gray-300 font-medium">{schedule.hours}</span>
-            </li>
-          ))}
+          {formattedHours.map((schedule, index) => {
+            // Parse the formatted string "Day(s): Time"
+            const [days, time] = schedule.includes(":")
+              ? schedule.split(": ")
+              : [schedule, ""];
+
+            return (
+              <li key={index} className="flex justify-between text-xs">
+                <span className="text-gray-400">{days}</span>
+                {time && (
+                  <span className="text-gray-300 font-medium">{time}</span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

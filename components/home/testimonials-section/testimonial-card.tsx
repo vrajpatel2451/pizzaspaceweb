@@ -1,22 +1,12 @@
 "use client";
 
 import { CustomImage } from "@/components/ui/custom-image";
-import { Quote, Star, BadgeCheck } from "lucide-react";
+import { Quote, Star, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-export interface Testimonial {
-  id: number;
-  quote: string;
-  name: string;
-  title: string;
-  avatar: string;
-  rating: number;
-  date: string;
-  isVerified: boolean;
-}
+import type { GeneralRating } from "@/types";
 
 interface TestimonialCardProps {
-  testimonial: Testimonial;
+  testimonial: GeneralRating;
   isActive?: boolean;
 }
 
@@ -49,7 +39,7 @@ export function TestimonialCard({
       </div>
 
       {/* Star Rating */}
-      <div className="flex items-center gap-1.5 mb-4">
+      <div className="flex items-center gap-1.5 mb-6">
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
@@ -58,69 +48,58 @@ export function TestimonialCard({
           >
             <Star
               className={`w-5 h-5 ${
-                i < testimonial.rating
+                i < testimonial.ratings
                   ? "fill-yellow-400 text-yellow-400"
                   : "fill-slate-200 text-slate-200 dark:fill-slate-600 dark:text-slate-600"
               }`}
             />
           </div>
         ))}
+        <span className="ml-2 text-sm font-semibold text-slate-600 dark:text-slate-400">
+          {testimonial.ratings}.0
+        </span>
       </div>
 
-      {/* Quote Text */}
-      <blockquote className="relative z-10 mb-8">
-        <p className="text-slate-700 dark:text-slate-300 text-base sm:text-lg md:text-xl leading-relaxed font-medium">
-          &ldquo;{testimonial.quote}&rdquo;
+      {/* Customer Info Section */}
+      <div className="relative z-10 mb-6">
+        <p className="text-slate-700 dark:text-slate-300 text-base sm:text-lg leading-relaxed font-medium italic">
+          &ldquo;Amazing pizza experience! The quality and service exceeded all expectations.&rdquo;
         </p>
-      </blockquote>
+      </div>
 
       {/* Divider */}
       <div className="h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent mb-6" />
 
       {/* Customer Info */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {/* Avatar */}
-          <div className="relative">
+      <div className="flex items-center gap-4">
+        {/* Avatar */}
+        <div className="relative">
+          {testimonial.personImage ? (
             <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden ring-4 ring-orange-100 dark:ring-orange-950/50">
               <CustomImage
-                src={testimonial.avatar}
-                alt={testimonial.name}
+                src={testimonial.personImage}
+                alt={testimonial.personName}
                 width={64}
                 height={64}
                 className="w-full h-full object-cover"
               />
             </div>
-            {/* Online indicator */}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white dark:border-slate-800" />
-          </div>
-
-          {/* Name and Title */}
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-bold text-slate-900 dark:text-white text-base md:text-lg">
-                {testimonial.name}
-              </h4>
-              {testimonial.isVerified && (
-                <BadgeCheck className="w-5 h-5 text-orange-500 fill-orange-100 dark:fill-orange-950" />
-              )}
+          ) : (
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 ring-4 ring-orange-100 dark:ring-orange-950/50 flex items-center justify-center">
+              <User className="w-8 h-8 text-white" />
             </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {testimonial.title}
-            </p>
-          </div>
+          )}
         </div>
 
-        {/* Date and Verified Badge */}
-        <div className="hidden sm:flex flex-col items-end gap-1">
-          <span className="text-xs text-slate-400 dark:text-slate-500">
-            {testimonial.date}
-          </span>
-          {testimonial.isVerified && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/50 px-2 py-1 rounded-full">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              Verified Purchase
-            </span>
+        {/* Name and Role */}
+        <div className="flex-1">
+          <h4 className="font-bold text-slate-900 dark:text-white text-base md:text-lg">
+            {testimonial.personName}
+          </h4>
+          {testimonial.personTagRole && (
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              {testimonial.personTagRole}
+            </p>
           )}
         </div>
       </div>

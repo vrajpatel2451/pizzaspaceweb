@@ -31,7 +31,7 @@ export function OrderPagination({
 
     const half = Math.floor(maxPageButtons / 2);
     let start = Math.max(1, currentPage - half);
-    let end = Math.min(totalPages, start + maxPageButtons - 1);
+    const end = Math.min(totalPages, start + maxPageButtons - 1);
 
     if (end - start + 1 < maxPageButtons) {
       start = Math.max(1, end - maxPageButtons + 1);

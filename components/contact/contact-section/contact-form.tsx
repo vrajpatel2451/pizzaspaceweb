@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { User, Mail, Phone, MessageSquare, Send, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,32 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { isValidUKPhone } from "@/lib/validators/phone";
 import { submitContactFormDirect } from "@/lib/actions/contact";
-
-// Validation schema
-const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().min(1, "Phone number is required").refine((val) => isValidUKPhone(val), {
-    message: "Please enter a valid UK phone number",
-  }),
-  subject: z.string().min(1, "Please select a subject"),
-  message: z.string().min(10, "Message must be at least 10 characters").max(500, "Message must not exceed 500 characters"),
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
-
-// Subject options
-const subjects = [
-  { value: "general", label: "General Inquiry" },
-  { value: "reservation", label: "Reservation" },
-  { value: "feedback", label: "Feedback" },
-  { value: "catering", label: "Catering" },
-  { value: "careers", label: "Careers" },
-  { value: "complaint", label: "Complaint" },
-  { value: "other", label: "Other" },
-];
+import { contactQuerySchema, contactSubjectOptions } from "@/lib/schemas";
+import type { ContactQueryFormData } from "@/lib/schemas";
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,13 +35,13 @@ export function ContactForm() {
     formState: { errors },
     reset,
     setError,
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
+  } = useForm<ContactQueryFormData>({
+    resolver: zodResolver(contactQuerySchema),
     defaultValues: {
       name: "",
       email: "",
       phone: "",
-      subject: "",
+      subject: "general inquiry",
       message: "",
     },
   });
@@ -77,7 +53,7 @@ export function ContactForm() {
     }
   }, [errors]);
 
-  const onSubmit = async (data: ContactFormData) => {
+  const onSubmit = async (data: ContactQueryFormData) => {
     setIsSubmitting(true);
 
     try {
@@ -103,7 +79,7 @@ export function ContactForm() {
           // Set field-level errors
           Object.entries(result.errors).forEach(([field, messages]) => {
             if (field !== "_form" && messages) {
-              setError(field as keyof ContactFormData, {
+              setError(field as keyof ContactQueryFormData, {
                 type: "server",
                 message: messages[0],
               });
@@ -217,8 +193,7 @@ export function ContactForm() {
             <Label htmlFor="phone" className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-orange-500 dark:text-orange-400" aria-hidden="true" />
               Phone Number
-              <span className="text-red-500 dark:text-red-400" aria-hidden="true">*</span>
-              <span className="sr-only">(required)</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">(optional)</span>
             </Label>
             <Input
               id="phone"
@@ -228,7 +203,6 @@ export function ContactForm() {
               className={cn(errors.phone && "border-red-500 focus:ring-red-500")}
               aria-invalid={errors.phone ? "true" : "false"}
               aria-describedby={errors.phone ? "phone-error" : undefined}
-              aria-required="true"
               {...register("phone")}
             />
             {errors.phone && (
@@ -265,7 +239,7 @@ export function ContactForm() {
                   <SelectValue placeholder="Select a subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((subject) => (
+                  {contactSubjectOptions.map((subject) => (
                     <SelectItem key={subject.value} value={subject.value}>
                       {subject.label}
                     </SelectItem>
@@ -293,7 +267,7 @@ export function ContactForm() {
             id="message"
             placeholder="Tell us how we can help you..."
             rows={5}
-            maxLength={500}
+            maxLength={2000}
             showCharCount={true}
             className={cn(
               "resize-none",
@@ -305,7 +279,7 @@ export function ContactForm() {
             {...register("message")}
           />
           <p id="message-hint" className="sr-only">
-            Enter a message between 10 and 500 characters
+            Enter a message between 10 and 2000 characters
           </p>
           {errors.message && (
             <p id="message-error" role="alert" className="text-sm text-red-500">

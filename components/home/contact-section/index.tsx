@@ -2,8 +2,11 @@ import Link from 'next/link';
 import { ContactInfo } from './contact-info';
 import { ContactForm } from './contact-form';
 import { Mail } from 'lucide-react';
+import { fetchContactInfo } from '@/lib/api/server-fetchers';
 
-export function ContactSection() {
+export async function ContactSection() {
+  // Fetch contact info from API
+  const contactInfo = await fetchContactInfo();
   return (
     <section
       id="contact"
@@ -59,7 +62,7 @@ export function ContactSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 max-w-7xl mx-auto">
           {/* Left Column - Contact Info & Map */}
           <div className="order-2 lg:order-1">
-            <ContactInfo />
+            <ContactInfo contactInfo={contactInfo} />
           </div>
 
           {/* Right Column - Contact Form */}
@@ -70,26 +73,36 @@ export function ContactSection() {
 
         {/* Additional Information */}
         <div className="mt-12 sm:mt-16 text-center space-y-6">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 bg-orange-50 dark:bg-orange-500/10 px-6 py-4 rounded-full border border-orange-200 dark:border-orange-500/20">
-            <p className="text-sm font-medium text-slate-900 dark:text-white">
-              Need immediate assistance?
-            </p>
-            <div className="flex items-center gap-4">
-              <a
-                href="tel:+15551234567"
-                className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
-              >
-                Call: +1 (555) 123-4567
-              </a>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <a
-                href="mailto:hello@pizzaspace.com"
-                className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
-              >
-                Email Us
-              </a>
+          {(contactInfo?.immediatePhoneNo || contactInfo?.immediateEmail) && (
+            <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-8 bg-orange-50 dark:bg-orange-500/10 px-6 py-4 rounded-full border border-orange-200 dark:border-orange-500/20">
+              <p className="text-sm font-medium text-slate-900 dark:text-white">
+                Need immediate assistance?
+              </p>
+              <div className="flex items-center gap-4">
+                {contactInfo?.immediatePhoneNo && (
+                  <>
+                    <a
+                      href={`tel:${contactInfo.immediatePhoneNo}`}
+                      className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                    >
+                      Call: {contactInfo.immediatePhoneNo}
+                    </a>
+                    {contactInfo?.immediateEmail && (
+                      <span className="text-slate-300 dark:text-slate-600">|</span>
+                    )}
+                  </>
+                )}
+                {contactInfo?.immediateEmail && (
+                  <a
+                    href={`mailto:${contactInfo.immediateEmail}`}
+                    className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                  >
+                    Email Us
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Visit Contact Page Link */}
           <div>

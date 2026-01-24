@@ -1,6 +1,7 @@
 'use client';
 
 import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import type { ContactInfo as ContactInfoType } from '@/types';
 
 interface InfoCardProps {
   icon: React.ElementType;
@@ -8,60 +9,119 @@ interface InfoCardProps {
   primary: string;
   secondary: string;
   action?: string;
+  href?: string;
 }
 
-function InfoCard({ icon: Icon, title, primary, secondary, action }: InfoCardProps) {
+function InfoCard({ icon: Icon, title, primary, secondary, action, href }: InfoCardProps) {
+  const CardContent = (
+    <div className="flex items-start gap-4">
+      {/* Icon */}
+      <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center shrink-0">
+        <Icon className="w-6 h-6 text-orange-500" />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
+          {title}
+        </h3>
+        <p className="text-slate-700 dark:text-slate-300 mb-0.5">
+          {primary}
+        </p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          {secondary}
+        </p>
+        {action && (
+          <p className="text-sm text-orange-500 font-medium mt-2">
+            {action}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        className="block bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200 dark:border-slate-700"
+      >
+        {CardContent}
+      </a>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200 dark:border-slate-700">
-      <div className="flex items-start gap-4">
-        {/* Icon */}
-        <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center shrink-0">
-          <Icon className="w-6 h-6 text-orange-500" />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-slate-900 dark:text-white mb-1">
-            {title}
-          </h3>
-          <p className="text-slate-700 dark:text-slate-300 mb-0.5">
-            {primary}
-          </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {secondary}
-          </p>
-          {action && (
-            <p className="text-sm text-orange-500 font-medium mt-2">
-              {action}
-            </p>
-          )}
-        </div>
-      </div>
+      {CardContent}
     </div>
   );
 }
 
-export function ContactInfo() {
+interface ContactInfoProps {
+  contactInfo: ContactInfoType | null;
+}
+
+export function ContactInfo({ contactInfo }: ContactInfoProps) {
+  // Format address from contact info
+  const formatAddress = () => {
+    if (!contactInfo) return 'Address not available';
+
+    const parts = [
+      contactInfo.addressLine1,
+      contactInfo.addressLine2,
+      contactInfo.area,
+    ].filter(Boolean);
+
+    return parts.join(', ');
+  };
+
+  const formatLocation = () => {
+    if (!contactInfo) return 'Location not available';
+
+    const parts = [
+      contactInfo.city,
+      contactInfo.county,
+      contactInfo.zip,
+    ].filter(Boolean);
+
+    return parts.join(', ');
+  };
+
+  // Google Maps URL with coordinates or address
+  const getMapUrl = () => {
+    if (!contactInfo) return '';
+
+    if (contactInfo.lat && contactInfo.lng) {
+      return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${contactInfo.lat},${contactInfo.lng}`;
+    }
+
+    const address = `${formatAddress()}, ${formatLocation()}`;
+    return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(address)}`;
+  };
+
   const contactMethods = [
     {
       icon: Phone,
       title: 'Phone',
-      primary: '+44 20 1234 5678',
-      secondary: 'Mon-Sun, 10:00 - 23:00',
+      primary: contactInfo?.phone || '+44 20 1234 5678',
+      secondary: 'Available for orders and inquiries',
       action: 'Call us',
+      href: contactInfo?.phone ? `tel:${contactInfo.phone}` : undefined,
     },
     {
       icon: Mail,
       title: 'Email',
-      primary: 'hello@pizzaspace.com',
+      primary: contactInfo?.email || 'hello@pizzaspace.com',
       secondary: 'We reply within 24 hours',
       action: 'Email us',
+      href: contactInfo?.email ? `mailto:${contactInfo.email}` : undefined,
     },
     {
       icon: MapPin,
       title: 'Location',
-      primary: '123 Pizza Street, London',
-      secondary: 'SW1A 1AA',
+      primary: formatAddress(),
+      secondary: formatLocation(),
       action: 'Visit us',
     },
     {
@@ -94,23 +154,30 @@ export function ContactInfo() {
             primary={method.primary}
             secondary={method.secondary}
             action={method.action}
+            href={method.href}
           />
         ))}
       </div>
 
       {/* Map Embed (Optional) */}
-      <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm h-64 bg-slate-100 dark:bg-slate-800">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          title="PizzaSpace Location"
-        />
-      </div>
+      {contactInfo?.lat && contactInfo?.lng ? (
+        <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm h-64 bg-slate-100 dark:bg-slate-800">
+          <iframe
+            src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1000!2d${contactInfo.lng}!3d${contactInfo.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1234567890123!5m2!1sen!2s`}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="PizzaSpace Location"
+          />
+        </div>
+      ) : (
+        <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm h-64 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <p className="text-slate-500 dark:text-slate-400">Map location not available</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -13,3 +13,13 @@ export * from "./discount";
 export * from "./order";
 export * from "./orderTicket";
 export * from "./orderReview";
+
+// Website Meta Info APIs
+export { getOpeningHours } from "./opening-hours";
+export { getSocialMedia } from "./social-media";
+export { getPublishedContactInfo } from "./contact-info";
+export { getLogos, getLogoDetails } from "./logos";
+export { getPolicies, getPolicyBySlug } from "./policies";
+export { getGeneralRatings, createRating } from "./general-ratings";
+export { createContactQuery } from "./contact-queries";
+export { createReservation } from "./reservation-form";

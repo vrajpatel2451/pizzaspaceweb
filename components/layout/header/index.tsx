@@ -1,7 +1,18 @@
 import { TopInfoBar } from "./top-info-bar";
 import { HeaderClient } from "./header-client";
+import { fetchHeaderLogo } from "@/lib/api/server-fetchers";
 
-export function Header() {
+export async function Header() {
+  // Fetch both light and dark logos from API in parallel
+  const [lightLogoUrl, darkLogoUrl] = await Promise.all([
+    fetchHeaderLogo("light"),
+    fetchHeaderLogo("dark"),
+  ]);
+
+  // Use API logos with fallback to static logo
+  const finalLightLogo = lightLogoUrl || "/logo.png";
+  const finalDarkLogo = darkLogoUrl || "/logo.png";
+
   return (
     <>
       {/* Skip to main content link for keyboard users */}
@@ -16,7 +27,10 @@ export function Header() {
       {/* <TopInfoBar /> */}
 
       {/* Main Header - Logo, Navigation, Actions */}
-      <HeaderClient />
+      <HeaderClient
+        lightLogoUrl={finalLightLogo}
+        darkLogoUrl={finalDarkLogo}
+      />
     </>
   );
 }

@@ -46,3 +46,13 @@ export * from "./address";
 export * from "./order";
 export * from "./orderTicket";
 export * from "./orderReview";
+
+// Website Meta Info Types
+export * from "./opening-hours";
+export * from "./social-media";
+export * from "./contact-info";
+export * from "./logo";
+export * from "./policy";
+export * from "./general-rating";
+export * from "./contact-query";
+export * from "./reservation";

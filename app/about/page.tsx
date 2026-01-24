@@ -2,10 +2,19 @@ import { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { AboutHeroSection } from "@/components/about/hero-section";
 import { StorySection } from "@/components/about/story-section";
+import { AboutHours } from "@/components/about/about-hours";
+import { AboutContact } from "@/components/about/about-contact";
+import { AboutTestimonials } from "@/components/about/about-testimonials";
 import { AboutPageJsonLd } from "@/components/seo/json-ld";
 import { getStores } from "@/lib/api/stores";
-import { StoreResponse } from "@/types";
+import { StoreResponse, APIResponse, PaginatedResponse, OpeningHours, ContactInfo } from "@/types";
 import { BookOpen } from "lucide-react";
+import {
+  fetchOpeningHours,
+  fetchContactInfo,
+  fetchTestimonials,
+  type TestimonialsResult,
+} from "@/lib/api/server-fetchers";
 
 // Lazy load below-the-fold sections with loading skeletons
 const AboutMissionVisionSection = dynamic(
@@ -100,17 +109,15 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  // Fetch stores data server-side with cache revalidation
-  let stores: StoreResponse[] = [];
-  try {
-    const storesResponse = await getStores({ limit: 3, isActive: true });
-    stores = storesResponse?.data?.data || [];
-  } catch (error) {
-    // Log error in development only
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Error fetching stores:", error);
-    }
-  }
+  // Fetch all data server-side in parallel with cache revalidation
+  const [storesData, openingHours, contactInfo, testimonialsData] = await Promise.all([
+    getStores({ limit: 3, isActive: true }).catch((): APIResponse<PaginatedResponse<StoreResponse>> | null => null),
+    fetchOpeningHours().catch((): OpeningHours[] => []),
+    fetchContactInfo().catch((): ContactInfo | null => null),
+    fetchTestimonials(1, 3).catch((): TestimonialsResult => ({ testimonials: [], pagination: { page: 1, limit: 3, total: 0, totalPages: 0 } })),
+  ]);
+
+  const stores: StoreResponse[] = storesData?.data?.data || [];
 
   return (
     <>
@@ -184,6 +191,61 @@ export default async function AboutPage() {
       {/* Below-the-fold sections - Lazy loaded for better initial page load */}
       {/* Mission & Vision Section - Expanded with values grid */}
       <AboutMissionVisionSection />
+
+      {/* Information Section - Opening Hours, Contact, Testimonials */}
+      <section
+        className="relative bg-slate-50 dark:bg-navy-950 py-16 md:py-24 lg:py-32"
+        aria-label="Restaurant information"
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section header */}
+          <div className="text-center mb-12 md:mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 mb-4">
+              Visit Us
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+              Plan Your{" "}
+              <span className="text-orange-500 relative">
+                Visit
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-3 text-orange-300 dark:text-orange-500/50"
+                  viewBox="0 0 100 12"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M0 8 Q 25 0, 50 8 T 100 8"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+              Find everything you need to know about visiting Pizza Space
+            </p>
+          </div>
+
+          {/* Responsive grid - adapts to available content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+            {/* Opening Hours */}
+            {openingHours.length > 0 && (
+              <AboutHours hours={openingHours} />
+            )}
+
+            {/* Contact Info */}
+            {contactInfo && (
+              <AboutContact contactInfo={contactInfo} />
+            )}
+
+            {/* Testimonials */}
+            {testimonialsData?.testimonials?.length > 0 && (
+              <AboutTestimonials testimonials={testimonialsData.testimonials} />
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* Team Section - Meet the people behind Pizza Space */}
       <TeamSection />

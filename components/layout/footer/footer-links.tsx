@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { PolicyListItem } from "@/types";
 
 interface FooterLink {
   label: string;
@@ -9,16 +10,30 @@ interface FooterLink {
 interface FooterLinksColumnProps {
   title: string;
   links: FooterLink[];
+  policies?: PolicyListItem[];
 }
 
-export function FooterLinksColumn({ title, links }: FooterLinksColumnProps) {
+export function FooterLinksColumn({
+  title,
+  links,
+  policies = [],
+}: FooterLinksColumnProps) {
+  // Convert policies to FooterLink format
+  const policyLinks: FooterLink[] = policies.map((policy) => ({
+    label: policy.name,
+    href: `/policies/${policy.slug}`,
+  }));
+
+  // Combine static links with policy links
+  const allLinks = [...links, ...policyLinks];
+
   return (
     <div>
       <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-5">
         {title}
       </h3>
       <ul className="space-y-3">
-        {links.map((link) => (
+        {allLinks.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}

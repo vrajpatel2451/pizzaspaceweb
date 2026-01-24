@@ -1,26 +1,8 @@
 "use server";
 
-import { z } from "zod";
-import { isValidUKPhone } from "@/lib/validators/phone";
-
-// Contact form schema (server-side validation)
-const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z
-    .string()
-    .min(1, "Phone number is required")
-    .refine((val) => isValidUKPhone(val), {
-      message: "Please enter a valid UK phone number",
-    }),
-  subject: z.string().min(1, "Please select a subject"),
-  message: z
-    .string()
-    .min(10, "Message must be at least 10 characters")
-    .max(500, "Message must not exceed 500 characters"),
-});
-
-export type ContactFormData = z.infer<typeof contactSchema>;
+import { contactQuerySchema } from "@/lib/schemas";
+import { createContactQuery } from "@/lib/api";
+import type { ContactQueryFormData } from "@/lib/schemas";
 
 export type ContactState = {
   errors?: {
@@ -37,17 +19,18 @@ export type ContactState = {
 
 /**
  * Server Action for contact form submission
- * Validates form data and processes the contact request
+ * Validates form data and submits to the contact queries API
+ * Rate limit: 10 requests/hour
  */
 export async function submitContactForm(
   prevState: ContactState,
   formData: FormData
 ): Promise<ContactState> {
   // Validate form data
-  const validatedFields = contactSchema.safeParse({
+  const validatedFields = contactQuerySchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
-    phone: formData.get("phone"),
+    phone: formData.get("phone") || undefined,
     subject: formData.get("subject"),
     message: formData.get("message"),
   });
@@ -61,26 +44,45 @@ export async function submitContactForm(
   }
 
   try {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Submit to API
+    const response = await createContactQuery(validatedFields.data);
 
-    // TODO: Implement actual email sending logic here
-    // Example: await sendEmail(validatedFields.data);
+    // Handle rate limiting
+    if (response.statusCode === 429) {
+      return {
+        errors: {
+          _form: [
+            "You've reached the maximum number of submissions. Please try again later.",
+          ],
+        },
+        success: false,
+      };
+    }
 
-    // Mock implementation - log the data
-    console.log("Contact form submission:", {
-      ...validatedFields.data,
-      timestamp: new Date().toISOString(),
-    });
+    // Handle validation errors
+    if (response.statusCode === 400) {
+      return {
+        errors: {
+          _form: ["Invalid form data. Please check your input and try again."],
+        },
+        success: false,
+      };
+    }
 
-    // For demo purposes, simulate occasional errors (5% chance)
-    if (Math.random() < 0.05) {
-      throw new Error("Failed to send message");
+    // Handle other errors
+    if (response.statusCode !== 201) {
+      return {
+        errors: {
+          _form: ["Unable to send your message. Please try again later."],
+        },
+        success: false,
+      };
     }
 
     return {
       success: true,
-      message: "Message sent successfully! We'll get back to you soon.",
+      message:
+        "Message sent successfully! We've received your inquiry and will get back to you soon.",
     };
   } catch (error) {
     console.error("Contact form submission error:", error);
@@ -99,10 +101,10 @@ export async function submitContactForm(
  * This bypasses the FormData approach and accepts typed data directly
  */
 export async function submitContactFormDirect(
-  data: ContactFormData
+  data: ContactQueryFormData
 ): Promise<ContactState> {
   // Validate the data
-  const validatedFields = contactSchema.safeParse(data);
+  const validatedFields = contactQuerySchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
@@ -112,25 +114,45 @@ export async function submitContactFormDirect(
   }
 
   try {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Submit to API
+    const response = await createContactQuery(validatedFields.data);
 
-    // TODO: Implement actual email sending logic here
-    // Example: await sendEmail(validatedFields.data);
+    // Handle rate limiting
+    if (response.statusCode === 429) {
+      return {
+        errors: {
+          _form: [
+            "You've reached the maximum number of submissions (10 per hour). Please try again later.",
+          ],
+        },
+        success: false,
+      };
+    }
 
-    console.log("Contact form submission:", {
-      ...validatedFields.data,
-      timestamp: new Date().toISOString(),
-    });
+    // Handle validation errors
+    if (response.statusCode === 400) {
+      return {
+        errors: {
+          _form: ["Invalid form data. Please check your input and try again."],
+        },
+        success: false,
+      };
+    }
 
-    // For demo purposes, simulate occasional errors (5% chance)
-    if (Math.random() < 0.05) {
-      throw new Error("Failed to send message");
+    // Handle other errors
+    if (response.statusCode !== 201) {
+      return {
+        errors: {
+          _form: ["Unable to send your message. Please try again later."],
+        },
+        success: false,
+      };
     }
 
     return {
       success: true,
-      message: "Message sent successfully! We'll get back to you soon.",
+      message:
+        "Message sent successfully! We've received your inquiry and will get back to you soon.",
     };
   } catch (error) {
     console.error("Contact form submission error:", error);

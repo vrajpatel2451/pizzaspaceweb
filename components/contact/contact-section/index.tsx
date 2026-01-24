@@ -1,7 +1,13 @@
 import { ContactInfo } from "./contact-info";
 import { ContactForm } from "./contact-form";
+import type { ContactInfo as ContactInfoType, OpeningHours } from "@/types";
 
-export function ContactSection() {
+interface ContactSectionProps {
+  contactInfo: ContactInfoType | null;
+  openingHours: OpeningHours[];
+}
+
+export function ContactSection({ contactInfo, openingHours }: ContactSectionProps) {
   return (
     <section
       className="relative w-full py-10 sm:py-12 md:py-16 lg:py-20"
@@ -24,7 +30,7 @@ export function ContactSection() {
                 Get in touch with us through any of these channels
               </p>
             </div>
-            <ContactInfo />
+            <ContactInfo contactInfo={contactInfo} openingHours={openingHours} />
           </div>
         </div>
       </div>

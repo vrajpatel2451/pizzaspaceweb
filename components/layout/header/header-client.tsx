@@ -9,7 +9,7 @@ import { useDeviceId, useIsDeviceHydrated } from "@/store/device-store";
 import { useStore } from "@/lib/contexts/store-context";
 import { useCart } from "@/lib/hooks/use-cart";
 import { cn } from "@/lib/utils";
-import { Logo } from "./logo";
+import { LogoClient } from "./logo-client";
 import { SearchCommand } from "./search-command";
 import { ThemeToggle } from "./theme-toggle";
 import { UserDropdown } from "./user-dropdown";
@@ -32,10 +32,16 @@ const navLinks: NavLink[] = [
 ];
 
 interface HeaderClientProps {
+  lightLogoUrl: string;
+  darkLogoUrl: string;
   className?: string;
 }
 
-export function HeaderClient({ className }: HeaderClientProps) {
+export function HeaderClient({
+  lightLogoUrl,
+  darkLogoUrl,
+  className,
+}: HeaderClientProps) {
   const pathname = usePathname();
   const scrolled = useScroll(50);
   const { isAuthenticated, user } = useAuthStore();
@@ -118,7 +124,11 @@ export function HeaderClient({ className }: HeaderClientProps) {
         <div className="flex h-16 lg:h-18 items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Logo variant={scrolled || !isHomePage ? "default" : "light"} />
+            <LogoClient
+              lightLogoUrl={lightLogoUrl}
+              darkLogoUrl={darkLogoUrl}
+              variant={scrolled || !isHomePage ? "default" : "light"}
+            />
           </div>
 
           {/* Desktop Navigation - Centered */}

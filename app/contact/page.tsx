@@ -4,6 +4,7 @@ import { ContactHeroSection } from "@/components/contact/hero-section";
 import { ContactSection } from "@/components/contact/contact-section";
 import { ContactPageJsonLd } from "@/components/seo/json-ld";
 import { Mail } from "lucide-react";
+import { fetchContactInfo, fetchOpeningHours } from "@/lib/api/server-fetchers";
 
 // Lazy load map section (below the fold)
 const MapSection = dynamic(
@@ -64,7 +65,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  // Fetch contact info and opening hours server-side
+  const [contactInfo, openingHours] = await Promise.all([
+    fetchContactInfo(),
+    fetchOpeningHours(),
+  ]);
+
   return (
     <>
       {/* Page-specific JSON-LD structured data */}
@@ -129,7 +136,7 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Section - Two-column layout with info and form - Above/at fold */}
-      <ContactSection />
+      <ContactSection contactInfo={contactInfo} openingHours={openingHours} />
 
       {/* Map Section - Full-width map with store location - Below the fold, lazy loaded */}
       <MapSection />

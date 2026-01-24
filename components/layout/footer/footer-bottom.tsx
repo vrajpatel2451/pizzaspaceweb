@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+// Keep static legal links as fallback
 const legalLinks = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
