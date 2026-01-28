@@ -41,6 +41,7 @@ export const metadata: Metadata = {
     "Italian pizza",
     "authentic pizza",
     "pizza takeaway",
+    "pizza collection",
     "pizza restaurant",
     "food delivery",
     "pizza near me",

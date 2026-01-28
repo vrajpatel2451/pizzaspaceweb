@@ -1,6 +1,6 @@
 "use client";
 
-import { UtensilsCrossed, ShoppingBag, Truck } from "lucide-react";
+import { ShoppingBag, Truck } from "lucide-react";
 import { OrderDeliveryType } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -15,17 +15,8 @@ interface DeliveryTypeSelectorProps {
 
 const deliveryTypes = [
   {
-    value: "dineIn" as const,
-    label: "Dine In",
-    icon: UtensilsCrossed,
-    description: "Enjoy at our restaurant",
-    gradient: "from-amber-500 to-orange-600",
-    shadowColor: "shadow-orange-500/25",
-    bgGlow: "bg-gradient-to-br from-amber-500/10 to-orange-500/10",
-  },
-  {
     value: "pickup" as const,
-    label: "Takeaway",
+    label: "Collection",
     icon: ShoppingBag,
     description: "Pick up your order",
     gradient: "from-emerald-500 to-teal-600",
@@ -63,10 +54,12 @@ export function DeliveryTypeSelector({
       )}
 
       {/* Premium Card Selection Grid */}
-      <div className={cn(
-        "grid gap-4",
-        compact ? "grid-cols-3" : "grid-cols-1 sm:grid-cols-3"
-      )}>
+      <div
+        className={cn(
+          "grid gap-4",
+          compact ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-2",
+        )}
+      >
         {deliveryTypes.map((type, index) => {
           const isSelected = value === type.value;
           const Icon = type.icon;
@@ -104,7 +97,7 @@ export function DeliveryTypeSelector({
                   type.bgGlow,
                 ],
                 // Disabled state
-                disabled && "opacity-50 cursor-not-allowed pointer-events-none"
+                disabled && "opacity-50 cursor-not-allowed pointer-events-none",
               )}
               aria-pressed={isSelected}
               aria-label={`${type.label}: ${type.description}`}
@@ -119,14 +112,14 @@ export function DeliveryTypeSelector({
                 className={cn(
                   "absolute top-0 right-0 w-16 h-16 overflow-hidden rounded-tr-2xl",
                   "opacity-0 transition-opacity duration-300",
-                  isSelected && "opacity-100"
+                  isSelected && "opacity-100",
                 )}
               >
                 <div
                   className={cn(
                     "absolute top-0 right-0 w-8 h-8 translate-x-4 -translate-y-4 rotate-45",
                     "bg-gradient-to-br",
-                    type.gradient
+                    type.gradient,
                   )}
                 />
               </div>
@@ -139,7 +132,7 @@ export function DeliveryTypeSelector({
                       "w-5 h-5 rounded-full flex items-center justify-center",
                       "bg-gradient-to-br shadow-lg",
                       type.gradient,
-                      type.shadowColor
+                      type.shadowColor,
                     )}
                   >
                     <svg
@@ -175,7 +168,7 @@ export function DeliveryTypeSelector({
                     type.gradient,
                     type.shadowColor,
                     "scale-110",
-                  ]
+                  ],
                 )}
               >
                 <Icon
@@ -184,7 +177,7 @@ export function DeliveryTypeSelector({
                     compact ? "size-6 sm:size-7" : "size-7 sm:size-9",
                     isSelected
                       ? "text-white"
-                      : "text-muted-foreground group-hover:text-foreground"
+                      : "text-muted-foreground group-hover:text-foreground",
                   )}
                   strokeWidth={1.5}
                 />
@@ -202,7 +195,7 @@ export function DeliveryTypeSelector({
                   compact ? "text-sm" : "text-base sm:text-lg",
                   isSelected
                     ? "text-foreground"
-                    : "text-foreground/80 group-hover:text-foreground"
+                    : "text-foreground/80 group-hover:text-foreground",
                 )}
               >
                 {type.label}
@@ -213,7 +206,7 @@ export function DeliveryTypeSelector({
                 className={cn(
                   "text-xs text-muted-foreground mt-1 text-center leading-tight",
                   "transition-colors duration-300",
-                  isSelected && "text-muted-foreground/80"
+                  isSelected && "text-muted-foreground/80",
                 )}
               >
                 {type.description}
@@ -226,7 +219,7 @@ export function DeliveryTypeSelector({
                   "transition-all duration-300 ease-out",
                   isSelected
                     ? `w-12 bg-gradient-to-r ${type.gradient}`
-                    : "w-0 bg-primary"
+                    : "w-0 bg-primary",
                 )}
               />
             </button>

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     "Italian pizza",
     "authentic pizza",
     "pizza takeaway",
+    "pizza collection",
     "best pizza London",
     "pizza near me",
     "handcrafted pizza",
@@ -75,7 +76,7 @@ const MenuSection = dynamic(
     })),
   {
     loading: () => <MenuSkeleton />,
-  }
+  },
 );
 
 const StoresSection = dynamic(
@@ -85,31 +86,31 @@ const StoresSection = dynamic(
     })),
   {
     loading: () => <StoresSkeleton />,
-  }
+  },
 );
 
 const AboutSection = dynamic(() =>
   import("@/components/home/about-section").then((mod) => ({
     default: mod.AboutSection,
-  }))
+  })),
 );
 
 const MissionVisionSection = dynamic(() =>
   import("@/components/home/mission-vision-section").then((mod) => ({
     default: mod.MissionVisionSection,
-  }))
+  })),
 );
 
 const TestimonialsSection = dynamic(() =>
   import("@/components/home/testimonials-section").then((mod) => ({
     default: mod.TestimonialsSection,
-  }))
+  })),
 );
 
 const ContactSection = dynamic(() =>
   import("@/components/home/contact-section").then((mod) => ({
     default: mod.ContactSection,
-  }))
+  })),
 );
 
 export default function Home() {

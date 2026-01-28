@@ -81,7 +81,7 @@ export function MenuGrid({
 
   const deliveryTypeLabels: Record<OrderDeliveryType, string> = {
     delivery: "Delivery",
-    pickup: "Pickup",
+    pickup: "Collection",
     dineIn: "Dine In",
   };
 
@@ -123,7 +123,7 @@ export function MenuGrid({
 export function useAvailableProducts(
   products: ProductResponse[],
   deliveryType: OrderDeliveryType,
-  showUnavailable: boolean = true
+  showUnavailable: boolean = true,
 ) {
   if (showUnavailable) {
     // Show all products with badges
@@ -135,9 +135,7 @@ export function useAvailableProducts(
 
   // Filter to show only available products
   return products
-    .filter((product) =>
-      product.availableDeliveryTypes.includes(deliveryType)
-    )
+    .filter((product) => product.availableDeliveryTypes.includes(deliveryType))
     .map((product) => ({
       ...product,
       isAvailable: true,

@@ -12,7 +12,7 @@ interface AvailabilityBadgeProps {
 
 const DELIVERY_TYPE_LABELS: Record<OrderDeliveryType, string> = {
   delivery: "Delivery",
-  pickup: "Pickup",
+  pickup: "Collection",
   dineIn: "Dine In",
 };
 
@@ -33,10 +33,7 @@ export function AvailabilityBadge({
     <Badge
       variant="destructive"
       size="sm"
-      className={cn(
-        "gap-1 absolute top-2 right-2 shadow-md z-10",
-        className
-      )}
+      className={cn("gap-1 absolute top-2 right-2 shadow-md z-10", className)}
       aria-label={badgeText}
       role="status"
     >

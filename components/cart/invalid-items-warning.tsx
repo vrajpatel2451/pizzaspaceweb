@@ -27,7 +27,7 @@ const COLLAPSE_THRESHOLD = 3;
 
 const deliveryTypeLabels: Record<OrderDeliveryType, string> = {
   dineIn: "Dine In",
-  pickup: "Takeaway",
+  pickup: "Collection",
   delivery: "Delivery",
 };
 
@@ -45,9 +45,10 @@ export function InvalidItemsWarning({
   }
 
   const shouldCollapse = invalidItems.length > COLLAPSE_THRESHOLD;
-  const visibleItems = shouldCollapse && !isOpen
-    ? invalidItems.slice(0, COLLAPSE_THRESHOLD)
-    : invalidItems;
+  const visibleItems =
+    shouldCollapse && !isOpen
+      ? invalidItems.slice(0, COLLAPSE_THRESHOLD)
+      : invalidItems;
   const remainingCount = invalidItems.length - COLLAPSE_THRESHOLD;
 
   return (
@@ -65,8 +66,12 @@ export function InvalidItemsWarning({
         <div className="space-y-3">
           {/* Warning Message */}
           <p className="text-sm">
-            The following {invalidItems.length === 1 ? "item is" : "items are"} not available for{" "}
-            <span className="font-semibold">{deliveryTypeLabels[deliveryType]}</span>:
+            The following {invalidItems.length === 1 ? "item is" : "items are"}{" "}
+            not available for{" "}
+            <span className="font-semibold">
+              {deliveryTypeLabels[deliveryType]}
+            </span>
+            :
           </p>
 
           {/* Items List */}
@@ -89,19 +94,30 @@ export function InvalidItemsWarning({
                       "inline-flex items-center gap-1 text-sm font-medium",
                       "text-destructive hover:text-destructive/80 transition-all duration-200",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40 rounded-sm px-1",
-                      "active:scale-95"
+                      "active:scale-95",
                     )}
-                    aria-label={isOpen ? "Show fewer items" : `Show ${remainingCount} more items`}
+                    aria-label={
+                      isOpen
+                        ? "Show fewer items"
+                        : `Show ${remainingCount} more items`
+                    }
                   >
                     {isOpen ? (
                       <>
                         Show less
-                        <ChevronUp className="size-3.5 transition-transform duration-200" aria-hidden="true" />
+                        <ChevronUp
+                          className="size-3.5 transition-transform duration-200"
+                          aria-hidden="true"
+                        />
                       </>
                     ) : (
                       <>
-                        Show {remainingCount} more {remainingCount === 1 ? "item" : "items"}
-                        <ChevronDown className="size-3.5 transition-transform duration-200" aria-hidden="true" />
+                        Show {remainingCount} more{" "}
+                        {remainingCount === 1 ? "item" : "items"}
+                        <ChevronDown
+                          className="size-3.5 transition-transform duration-200"
+                          aria-hidden="true"
+                        />
                       </>
                     )}
                   </button>

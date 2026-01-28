@@ -10,13 +10,13 @@ import {
 } from "@/types/user";
 
 export async function loginUser(
-  payload: LoginUserPayload
+  payload: LoginUserPayload,
 ): Promise<APIResponse<UserResponseWithToken | null>> {
   try {
     const response: AxiosResponse<APIResponse<UserResponseWithToken>> =
       await apiClient.post<APIResponse<UserResponseWithToken>>(
         "/user/login",
-        payload
+        payload,
       );
     console.log("Response data:", response.data);
 
@@ -35,13 +35,13 @@ export async function loginUser(
 }
 
 export async function registerUser(
-  payload: RegisterUserPayload
+  payload: RegisterUserPayload,
 ): Promise<APIResponse<UserResponseWithToken | null>> {
   try {
     const response: AxiosResponse<APIResponse<UserResponseWithToken>> =
       await apiClient.post<APIResponse<UserResponseWithToken>>(
         "/user/register",
-        payload
+        payload,
       );
     return response.data;
   } catch (error) {
@@ -76,11 +76,11 @@ export async function getProfile(): Promise<APIResponse<UserResponse | null>> {
 }
 
 export async function updateUser(
-  payload: UpdateUserPayload
+  payload: UpdateUserPayload,
 ): Promise<APIResponse<UserResponse | null>> {
   try {
     const response: AxiosResponse<APIResponse<UserResponse>> =
-      await apiClient.put<APIResponse<UserResponse>>("/user/update", payload);
+      await apiClient.patch<APIResponse<UserResponse>>("/user/update", payload);
     return response.data;
   } catch (error) {
     console.error("Failed to update user:", error);

@@ -60,7 +60,7 @@ export interface DeliveryTypeChangeDialogProps {
 function formatDeliveryType(type: OrderDeliveryType): string {
   const displayNames: Record<OrderDeliveryType, string> = {
     dineIn: "Dine In",
-    pickup: "Pickup",
+    pickup: "Collection",
     delivery: "Delivery",
   };
   return displayNames[type];
@@ -185,8 +185,8 @@ export function DeliveryTypeChangeDialog({
           {/* Informational Text */}
           <p className="text-sm text-gray-600">
             You can continue browsing and add new items available for{" "}
-            {formatDeliveryType(newDeliveryType).toLowerCase()} after
-            confirming this change.
+            {formatDeliveryType(newDeliveryType).toLowerCase()} after confirming
+            this change.
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export function DeliveryTypeChangeDialog({
             onClick={handleConfirm}
             className="bg-amber-600 hover:bg-amber-700 focus:ring-amber-500"
             aria-label={`Change delivery type to ${formatDeliveryType(
-              newDeliveryType
+              newDeliveryType,
             )}`}
           >
             Change Delivery Type

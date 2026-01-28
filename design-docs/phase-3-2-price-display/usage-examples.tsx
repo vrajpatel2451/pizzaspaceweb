@@ -14,10 +14,7 @@ export function BasicPickupExample() {
   return (
     <div className="p-4">
       <h3>Margherita Pizza</h3>
-      <PriceDisplay
-        basePrice={12.50}
-        deliveryType="pickup"
-      />
+      <PriceDisplay basePrice={12.5} deliveryType="pickup" />
     </div>
   );
 }
@@ -30,8 +27,8 @@ export function DeliveryWithBreakdownExample() {
     <div className="p-4">
       <h3>Pepperoni Pizza</h3>
       <PriceDisplay
-        basePrice={15.00}
-        packagingCharges={0.50}
+        basePrice={15.0}
+        packagingCharges={0.5}
         deliveryType="delivery"
         showBreakdown
       />
@@ -42,7 +39,10 @@ export function DeliveryWithBreakdownExample() {
 // ============================================================================
 // Example 3: Product Card with Small Size
 // ============================================================================
-export function ProductCardExample({ product, deliveryType }: {
+export function ProductCardExample({
+  product,
+  deliveryType,
+}: {
   product: {
     name: string;
     basePrice: number;
@@ -52,7 +52,11 @@ export function ProductCardExample({ product, deliveryType }: {
 }) {
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
-      <img src="/pizza.jpg" alt={product.name} className="w-full h-48 object-cover rounded" />
+      <img
+        src="/pizza.jpg"
+        alt={product.name}
+        className="w-full h-48 object-cover rounded"
+      />
       <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
       <PriceDisplay
         basePrice={product.basePrice}
@@ -135,7 +139,10 @@ export function CheckoutItemExample({
 // ============================================================================
 // Example 6: Compact Price Display in List
 // ============================================================================
-export function CompactListExample({ items, deliveryType }: {
+export function CompactListExample({
+  items,
+  deliveryType,
+}: {
   items: Array<{
     id: string;
     name: string;
@@ -146,8 +153,11 @@ export function CompactListExample({ items, deliveryType }: {
 }) {
   return (
     <ul className="space-y-2">
-      {items.map(item => (
-        <li key={item.id} className="flex justify-between items-center p-2 hover:bg-gray-50">
+      {items.map((item) => (
+        <li
+          key={item.id}
+          className="flex justify-between items-center p-2 hover:bg-gray-50"
+        >
           <span className="font-medium">{item.name}</span>
           <CompactPriceDisplay
             basePrice={item.basePrice}
@@ -164,8 +174,10 @@ export function CompactListExample({ items, deliveryType }: {
 // Example 7: Dynamic Delivery Type Switching
 // ============================================================================
 export function DynamicDeliveryExample() {
-  const [deliveryType, setDeliveryType] = React.useState<"delivery" | "pickup" | "dineIn">("delivery");
-  const basePrice = 18.00;
+  const [deliveryType, setDeliveryType] = React.useState<
+    "delivery" | "pickup" | "dineIn"
+  >("delivery");
+  const basePrice = 18.0;
   const packagingCharges = 0.75;
 
   return (
@@ -184,7 +196,7 @@ export function DynamicDeliveryExample() {
           onClick={() => setDeliveryType("pickup")}
           className={`px-4 py-2 rounded ${deliveryType === "pickup" ? "bg-orange-500 text-white" : "bg-gray-200"}`}
         >
-          Pickup
+          Collection
         </button>
         <button
           onClick={() => setDeliveryType("dineIn")}
@@ -230,11 +242,7 @@ export function CustomStyledExample() {
 export function ServerComponentExample({ price }: { price: number }) {
   return (
     <div>
-      <PriceDisplay
-        basePrice={price}
-        deliveryType="dineIn"
-        animate={false}
-      />
+      <PriceDisplay basePrice={price} deliveryType="dineIn" animate={false} />
     </div>
   );
 }
@@ -242,7 +250,10 @@ export function ServerComponentExample({ price }: { price: number }) {
 // ============================================================================
 // Example 10: Responsive Grid Layout
 // ============================================================================
-export function ResponsiveGridExample({ products, deliveryType }: {
+export function ResponsiveGridExample({
+  products,
+  deliveryType,
+}: {
   products: Array<{
     id: string;
     name: string;
@@ -254,7 +265,7 @@ export function ResponsiveGridExample({ products, deliveryType }: {
 }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {products.map(product => (
+      {products.map((product) => (
         <div key={product.id} className="bg-white rounded-lg shadow p-4">
           <img
             src={product.image}

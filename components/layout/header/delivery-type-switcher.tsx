@@ -28,9 +28,9 @@ const deliveryTypeConfig: Record<
     ariaLabel: "Delivery - Click to change delivery type",
   },
   pickup: {
-    label: "Takeaway",
+    label: "Collection",
     icon: ShoppingBag,
-    ariaLabel: "Takeaway - Click to change delivery type",
+    ariaLabel: "Collection - Click to change delivery type",
   },
   dineIn: {
     label: "Dine In",
@@ -54,7 +54,7 @@ export function DeliveryTypeSwitcher({ className }: DeliveryTypeSwitcherProps) {
         "relative gap-2 transition-all",
         "hover:bg-accent/50",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        className
+        className,
       )}
       aria-label={config.ariaLabel}
     >

@@ -27,7 +27,7 @@ export interface UnavailableNoticeProps {
  */
 const DELIVERY_TYPE_LABELS: Record<OrderDeliveryType, string> = {
   delivery: "Delivery",
-  pickup: "Pickup",
+  pickup: "Collection",
   dineIn: "Dine In",
 };
 
