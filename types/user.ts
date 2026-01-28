@@ -26,3 +26,9 @@ export interface UserResponseWithToken {
   user: UserResponse;
   token: string;
 }
+
+export interface UpdateUserPayload {
+  name: string;
+  email: string;
+  phone: string;
+}

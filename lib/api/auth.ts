@@ -4,6 +4,7 @@ import { APIResponse } from "@/types/api";
 import {
   LoginUserPayload,
   RegisterUserPayload,
+  UpdateUserPayload,
   UserResponse,
   UserResponseWithToken,
 } from "@/types/user";
@@ -63,6 +64,26 @@ export async function getProfile(): Promise<APIResponse<UserResponse | null>> {
     return response.data;
   } catch (error) {
     console.error("Failed to fetch profile:", error);
+    if (isAxiosError(error) && error.response) {
+      return error.response.data;
+    }
+    return {
+      statusCode: 500,
+      data: null,
+      errorMessage: "An unexpected error occurred",
+    };
+  }
+}
+
+export async function updateUser(
+  payload: UpdateUserPayload
+): Promise<APIResponse<UserResponse | null>> {
+  try {
+    const response: AxiosResponse<APIResponse<UserResponse>> =
+      await apiClient.put<APIResponse<UserResponse>>("/user/update", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update user:", error);
     if (isAxiosError(error) && error.response) {
       return error.response.data;
     }

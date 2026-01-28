@@ -14,13 +14,24 @@ import {
   ChevronRight,
   Edit3,
   Crown,
+  Loader2,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useUser, useAuthStore } from "@/store";
 import { clearAuthCookie } from "@/lib/actions/auth";
+import { updateUser } from "@/lib/api";
 
 interface QuickAction {
   label: string;
@@ -47,9 +58,21 @@ const quickActions: QuickAction[] = [
 export default function ProfilePage() {
   const router = useRouter();
   const user = useUser();
-  const { logout } = useAuthStore();
+  const { logout, setUser } = useAuthStore();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -79,6 +102,77 @@ export default function ProfilePage() {
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  const handleEditOpen = () => {
+    if (user) {
+      setFormData({
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+      });
+      setFormErrors({ name: "", email: "", phone: "" });
+    }
+    setIsEditOpen(true);
+  };
+
+  const validateForm = () => {
+    const errors = { name: "", email: "", phone: "" };
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      errors.name = "Name is required";
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Invalid email format";
+      isValid = false;
+    }
+
+    if (!formData.phone.trim()) {
+      errors.phone = "Phone is required";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await updateUser({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+      });
+
+      if (response.statusCode === 200 && response.data) {
+        setUser(response.data);
+        setIsEditOpen(false);
+      } else {
+        setFormErrors((prev) => ({
+          ...prev,
+          email: response.errorMessage || "Failed to update profile",
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      setFormErrors((prev) => ({
+        ...prev,
+        email: "An unexpected error occurred",
+      }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -228,6 +322,7 @@ export default function ProfilePage() {
                       variant="secondary"
                       size="sm"
                       className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm"
+                      onClick={handleEditOpen}
                     >
                       <Edit3 className="w-4 h-4 mr-2" />
                       Edit Profile
@@ -359,6 +454,73 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information below.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Full Name"
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              error={formErrors.name}
+              leftIcon={<User className="w-4 h-4" />}
+              placeholder="Enter your full name"
+            />
+            <Input
+              label="Email Address"
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
+              error={formErrors.email}
+              leftIcon={<Mail className="w-4 h-4" />}
+              placeholder="Enter your email"
+            />
+            <Input
+              label="Phone Number"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, phone: e.target.value }))
+              }
+              error={formErrors.phone}
+              leftIcon={<Phone className="w-4 h-4" />}
+              placeholder="Enter your phone number"
+            />
+            <DialogFooter className="pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
