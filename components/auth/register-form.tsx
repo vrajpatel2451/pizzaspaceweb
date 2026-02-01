@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { registerSchema, type RegisterFormData } from "@/lib/validators/auth";
 import { registerUser } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
+import { useCartStore } from "@/store/cart-store";
 import { setAuthCookie } from "@/lib/actions/auth-actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,7 @@ export function RegisterForm({
   const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
+  const getCartIds = useCartStore((state) => state.getCartIds);
 
   const {
     register,
@@ -145,12 +147,14 @@ export function RegisterForm({
     try {
       setApiError(null);
 
-      // Call the register API
+      // Call the register API with cart IDs for cart merge
+      const cartIds = getCartIds();
       const response = await registerUser({
         name: data.name,
         email: data.email,
         phone: data.phone,
         password: data.password,
+        ...(cartIds.length > 0 ? { cartIds } : {}),
       });
 
       // Check if the response is successful

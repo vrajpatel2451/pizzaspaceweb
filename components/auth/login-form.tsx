@@ -10,6 +10,7 @@ import Link from "next/link";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { loginUser } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
+import { useCartStore } from "@/store/cart-store";
 import { setAuthCookie } from "@/lib/actions/auth-actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export function LoginForm({ redirectTo = "/", onSuccess }: LoginFormProps) {
   const [apiError, setApiError] = useState<string | null>(null);
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
+  const getCartIds = useCartStore((state) => state.getCartIds);
 
   const {
     register,
@@ -71,10 +73,12 @@ export function LoginForm({ redirectTo = "/", onSuccess }: LoginFormProps) {
     try {
       setApiError(null);
 
-      // Call the login API
+      // Call the login API with cart IDs for cart merge
+      const cartIds = getCartIds();
       const response = await loginUser({
         email: data.email,
         password: data.password,
+        ...(cartIds.length > 0 ? { cartIds } : {}),
       });
 
       // Check if the response is successful
