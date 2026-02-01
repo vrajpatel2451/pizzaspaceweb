@@ -8,8 +8,6 @@ import { useDeliveryType } from "@/store/cart-store";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/formatters";
 import { CustomImage } from "@/components/ui/custom-image";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 interface DealCardProps {
   product: ProductResponse;
@@ -26,7 +24,7 @@ export function DealCard({
 }: DealCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLElement>(null);
   const deliveryType = useDeliveryType();
 
   const imageUrl = product.photoList[0] || "/placeholder.jpg";
@@ -55,37 +53,38 @@ export function DealCard({
   }, [index]);
 
   const cardContent = (
-    <Card
+    <article
       ref={cardRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "group relative overflow-hidden cursor-pointer transition-all duration-500 border-slate-800 bg-slate-900 text-white",
-        "hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-500/30",
+        "group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-slate-900/50 transition-all duration-500 border border-slate-100 dark:border-slate-800 cursor-pointer",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5",
-        isHovered && "-translate-y-1"
+        isHovered && "-translate-y-2"
       )}
       style={{ transitionDelay: isVisible ? `${index * 60}ms` : "0ms" }}
     >
       {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
         {/* Deal Badge */}
-        <Badge
+        <div
           className={cn(
-            "absolute top-3 left-3 z-10 bg-gradient-to-r from-red-600 to-orange-500 text-white border-0 shadow-lg shadow-red-500/20",
-            "transition-all duration-300",
-            isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+            "absolute top-3 left-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg transition-all duration-300",
+            "bg-red-500 text-white",
+            isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2.5"
           )}
+          role="status"
+          aria-label="Hot Deal item"
         >
-          <Zap className="w-3 h-3 mr-1 fill-white" />
-          Hot Deal
-        </Badge>
+          <Zap className="w-3 h-3 fill-white" aria-hidden="true" />
+          <span>Hot Deal</span>
+        </div>
 
         {/* Product Image */}
         <div
           className={cn(
             "relative w-full h-full transition-transform duration-600 ease-out",
-            isHovered && "scale-105"
+            isHovered && "scale-108"
           )}
         >
           <CustomImage
@@ -99,64 +98,60 @@ export function DealCard({
           />
         </div>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent pointer-events-none" />
-
-        {/* Price Overlay */}
-        <div className="absolute bottom-3 left-3 z-10">
-          <span className="text-2xl font-bold text-white drop-shadow-md">
-            {formatPrice(displayPrice)}
-          </span>
-        </div>
-
-        {/* Quick Add on Hover */}
+        {/* Gradient Overlay on Hover */}
         <div
           className={cn(
-            "absolute bottom-3 right-3 w-9 h-9 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg transition-all duration-300",
-            isHovered ? "opacity-100 scale-100" : "opacity-0 scale-75"
+            "absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none transition-opacity duration-300",
+            isHovered ? "opacity-100" : "opacity-0"
           )}
-        >
-          <Plus className="w-4 h-4" />
-        </div>
+          aria-hidden="true"
+        />
       </div>
 
-      <CardContent className="p-4 pb-2">
+      {/* Content */}
+      <div className="p-4 sm:p-5">
         {/* Product Name */}
-        <h3 className="font-bold text-base text-white mb-1 line-clamp-1 group-hover:text-orange-400 transition-colors duration-300">
+        <h3 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white mb-1.5 line-clamp-1 group-hover:text-orange-500 transition-colors duration-300">
           {product.name}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-slate-400 line-clamp-2 min-h-[2.5rem]">
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3 min-h-[2.5rem]">
           {product.description}
         </p>
-      </CardContent>
 
-      <CardFooter className="px-4 pb-4 pt-2">
+        {/* Price */}
+        <div className="mb-4">
+          <span className="text-xl sm:text-2xl font-bold text-orange-500">
+            {formatPrice(displayPrice)}
+          </span>
+        </div>
+
+        {/* Add To Cart Button */}
         <button
           className={cn(
-            "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300",
+            "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300",
             "bg-orange-500 text-white",
-            "hover:bg-orange-400 hover:shadow-md hover:shadow-orange-500/20",
+            "hover:bg-orange-600 hover:shadow-md hover:shadow-orange-500/20",
             "active:scale-[0.98]"
           )}
         >
           <Plus className="w-4 h-4" />
-          Order Now
+          Add To Cart
         </button>
-      </CardFooter>
+      </div>
 
-      {/* Hover border glow */}
+      {/* Subtle border glow on hover */}
       <div
         className={cn(
-          "absolute inset-0 rounded-xl pointer-events-none transition-opacity duration-300",
+          "absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300",
           isHovered ? "opacity-100" : "opacity-0"
         )}
         style={{
           boxShadow: "inset 0 0 0 2px rgba(249, 115, 22, 0.3)",
         }}
       />
-    </Card>
+    </article>
   );
 
   return (

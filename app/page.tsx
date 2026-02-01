@@ -133,13 +133,13 @@ export default function Home() {
       {/* Section 1: Hero Section - Critical above-the-fold content */}
       <HeroSection />
 
-      {/* Section 2: Popular Categories (API) - Above the fold with Suspense */}
+      {/* Section 2: Crazy Deals - Lazy loaded */}
+      <DealsSection />
+
+      {/* Section 3: Popular Categories (API) - Above the fold with Suspense */}
       <Suspense fallback={<CategoriesContentSkeleton />}>
         <CategoriesSection />
       </Suspense>
-
-      {/* Section 3: Crazy Deals - Lazy loaded */}
-      <DealsSection />
 
       {/* Section 4: Our Special Menu (API) - Lazy loaded below the fold */}
       <MenuSection />

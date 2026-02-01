@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Star, Flame, Sparkles, TrendingUp, Plus } from "lucide-react";
+import { Star, Flame, Sparkles, TrendingUp } from "lucide-react";
 import { ProductResponse } from "@/types";
 import { ProductDetailsContainer } from "@/components/product-details";
 import { useDeliveryType } from "@/store/cart-store";
@@ -206,15 +206,6 @@ export function ProductCard({
           aria-hidden="true"
         />
 
-        {/* Quick Add Indicator - Shows + on hover */}
-        <div
-          className={cn(
-            "absolute bottom-3 right-3 w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg transition-all duration-300",
-            isHovered ? "opacity-100 scale-100" : "opacity-0 scale-80"
-          )}
-        >
-          <Plus className="w-5 h-5" />
-        </div>
       </div>
 
       {/* Content */}
@@ -249,15 +240,6 @@ export function ProductCard({
             </span>
           </div>
 
-          {/* Add Indicator on Mobile */}
-          <div className="sm:hidden w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md">
-            <Plus className="w-5 h-5" />
-          </div>
-
-          {/* Desktop Add Indicator */}
-          <div className="hidden sm:flex w-10 h-10 rounded-full bg-orange-500 text-white items-center justify-center shadow-md">
-            <Plus className="w-5 h-5" />
-          </div>
         </div>
       </div>
 
