@@ -24,8 +24,10 @@ import {
   useCartSummary as useCartSummaryHook,
 } from "@/lib/hooks/use-cart";
 import { useCartStore } from "@/store/cart-store";
+import { useAuthStore } from "@/store/auth-store";
+import { useGuestAddressStore } from "@/store/guest-address-store";
 import { useStore } from "@/lib/contexts/store-context";
-import { getAddresses } from "@/lib/api/address";
+import { getAddresses, getAddressDetails } from "@/lib/api/address";
 import { useDeviceId } from "@/store/device-store";
 import { useCartValidation } from "@/hooks/use-cart-validation";
 import { InvalidItemsWarning } from "@/components/cart/invalid-items-warning";
@@ -116,6 +118,10 @@ export default function CartPage() {
     clearCart,
   } = useCartStore();
 
+  // Auth and guest address state
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { guestAddressId, setGuestAddressId } = useGuestAddressStore();
+
   // Get delivery type from context
   const { deliveryType, openModal, setDeliveryType } = useDeliveryTypeContext();
 
@@ -152,20 +158,32 @@ export default function CartPage() {
     300 // 300ms debounce
   );
 
-  // Fetch addresses
+  // Fetch addresses - split by auth status
   const fetchAddresses = useCallback(async () => {
     setIsLoadingAddresses(true);
     try {
-      const response = await getAddresses();
-      if (response.statusCode === 200 && response.data) {
-        setAddresses(response.data);
-        // Auto-select default or first address if none selected
-        if (!selectedAddressId) {
-          const defaultAddr = response.data.find((addr) => addr.isDefault);
-          if (defaultAddr) {
-            setSelectedAddress(defaultAddr._id);
-          } else if (response.data.length > 0) {
-            setSelectedAddress(response.data[0]._id);
+      if (isAuthenticated) {
+        // Authenticated: fetch all user addresses
+        const response = await getAddresses();
+        if (response.statusCode === 200 && response.data) {
+          setAddresses(response.data);
+          // Auto-select default or first address if none selected
+          if (!selectedAddressId) {
+            const defaultAddr = response.data.find((addr) => addr.isDefault);
+            if (defaultAddr) {
+              setSelectedAddress(defaultAddr._id);
+            } else if (response.data.length > 0) {
+              setSelectedAddress(response.data[0]._id);
+            }
+          }
+        }
+      } else if (guestAddressId) {
+        // Guest with saved address: fetch that single address
+        const response = await getAddressDetails(guestAddressId);
+        if ((response.statusCode === 200 || response.statusCode === 201) && response.data) {
+          setAddresses([response.data]);
+          if (!selectedAddressId) {
+            setSelectedAddress(response.data._id);
           }
         }
       }
@@ -174,7 +192,7 @@ export default function CartPage() {
     } finally {
       setIsLoadingAddresses(false);
     }
-  }, [selectedAddressId, setSelectedAddress]);
+  }, [selectedAddressId, setSelectedAddress, isAuthenticated, guestAddressId]);
 
   // Load addresses when delivery type is delivery
   useEffect(() => {
@@ -230,11 +248,22 @@ export default function CartPage() {
 
   // Handle add new address
   const handleAddNewAddress = () => {
+    // Guest users can only add one address
+    if (!isAuthenticated && guestAddressId) {
+      toast.info("Please log in to add more addresses");
+      return;
+    }
     setShowAddAddressModal(true);
   };
 
   // Handle checkout
   const handleCheckout = async () => {
+    // Require authentication to place an order
+    if (!isAuthenticated) {
+      router.push("/login?returnUrl=/cart");
+      return;
+    }
+
     if (deliveryType === "delivery" && !selectedAddressId) {
       toast.error("Please select a delivery address");
       return;
@@ -452,10 +481,17 @@ export default function CartPage() {
       <AddAddressModal
         open={showAddAddressModal}
         onOpenChange={setShowAddAddressModal}
-        onSuccess={() => {
-          fetchAddresses();
+        onSuccess={(address) => {
+          if (!isAuthenticated) {
+            // Guest: store address ID and show it directly
+            setGuestAddressId(address._id);
+            setAddresses([address]);
+            setSelectedAddress(address._id);
+          } else {
+            // Authenticated: refetch all addresses
+            fetchAddresses();
+          }
           setShowAddAddressModal(false);
-          toast.success("Address added successfully!");
         }}
       />
     </section>

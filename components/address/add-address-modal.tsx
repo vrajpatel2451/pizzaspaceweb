@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { AddressForm } from "./address-form";
 import { createAddress } from "@/lib/api/address";
-import { AddAddressData } from "@/types/address";
+import { AddAddressData, AddressResponse } from "@/types/address";
 import { toast } from "sonner";
 import { AddressFormData } from "@/lib/schemas/address-schema";
 
 interface AddAddressModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess?: (address: AddressResponse) => void;
 }
 
 export function AddAddressModal({
@@ -50,10 +50,10 @@ export function AddAddressModal({
 
       const response = await createAddress(addressData);
 
-      if (response.statusCode === 200 || response.statusCode === 201) {
+      if ((response.statusCode === 200 || response.statusCode === 201) && response.data) {
         toast.success("Address added successfully");
         onOpenChange(false);
-        onSuccess?.();
+        onSuccess?.(response.data);
       } else {
         toast.error(response.errorMessage || "Failed to add address");
       }

@@ -17,6 +17,7 @@ import {
 } from "@/lib/schemas/address-schema";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/store";
+import { useIsAuthenticated } from "@/store/auth-store";
 import { MapWithSearchStep } from "./map-with-search-step";
 import type { ParsedAddress } from "./utils";
 
@@ -65,10 +66,11 @@ export function AddressForm({
           lat: defaultValues.lat,
           long: defaultValues.long,
         }
-      : null
+      : null,
   );
 
   const user = useUser();
+  const isLoggedIn = useIsAuthenticated();
 
   const {
     register,
@@ -101,8 +103,9 @@ export function AddressForm({
   const isDefault = useWatch({ control, name: "isDefault" });
   const isForMe = useWatch({ control, name: "isForMe" });
 
-  // Auto-populate name and phone when isForMe changes
+  // Auto-populate name and phone when isForMe changes (logged-in users only)
   useEffect(() => {
+    if (!isLoggedIn) return;
     if (isForMe && user) {
       setValue("name", user.name || "");
       setValue("phone", user.phone || "");
@@ -110,7 +113,7 @@ export function AddressForm({
       setValue("name", "");
       setValue("phone", "");
     }
-  }, [isForMe, user, setValue]);
+  }, [isForMe, user, setValue, isLoggedIn]);
 
   // Handle location confirmation from map step
   const handleLocationConfirm = useCallback(
@@ -126,7 +129,7 @@ export function AddressForm({
       setValue("zip", address.zip || "");
       setStep("form");
     },
-    [setValue]
+    [setValue],
   );
 
   // Go back to map step
@@ -141,7 +144,7 @@ export function AddressForm({
       const value = locationData[field];
       return !value || (typeof value === "string" && value.trim() === "");
     },
-    [locationData]
+    [locationData],
   );
 
   const onFormSubmit = async (data: AddressFormData) => {
@@ -161,6 +164,8 @@ export function AddressForm({
       console.error("Form submission error:", error);
     }
   };
+
+  console.log("Errors", errors);
 
   return (
     <APIProvider
@@ -209,27 +214,29 @@ export function AddressForm({
               </Button>
             </div>
 
-            {/* For Me / For Other Toggle */}
-            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
-              <div className="flex-1">
-                <Label htmlFor="forMe" className="text-base font-medium">
-                  For Me
-                </Label>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Use my profile contact details
-                </p>
+            {/* For Me / For Other Toggle - only shown for logged-in users */}
+            {isLoggedIn && (
+              <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
+                <div className="flex-1">
+                  <Label htmlFor="forMe" className="text-base font-medium">
+                    For Me
+                  </Label>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Use my profile contact details
+                  </p>
+                </div>
+                <Switch
+                  id="forMe"
+                  checked={isForMe}
+                  onCheckedChange={(checked) => setValue("isForMe", checked)}
+                  disabled={isLoading}
+                  aria-label="Toggle address recipient"
+                />
               </div>
-              <Switch
-                id="forMe"
-                checked={isForMe}
-                onCheckedChange={(checked) => setValue("isForMe", checked)}
-                disabled={isLoading}
-                aria-label="Toggle address recipient"
-              />
-            </div>
+            )}
 
-            {/* Recipient Details (shown when isForMe is false) */}
-            {!isForMe && (
+            {/* Recipient Details (shown when isForMe is false and user is logged in) */}
+            {isLoggedIn && !isForMe && (
               <div className="space-y-4 rounded-lg border bg-card p-4">
                 <h4 className="text-sm font-medium">Recipient Details</h4>
                 <Input
@@ -253,18 +260,18 @@ export function AddressForm({
               </div>
             )}
 
-            {/* Name Field (auto-populated when For Me) */}
+            {/* Name Field (auto-populated when For Me and logged in) */}
             <Input
               label="Full Name"
               placeholder="Enter recipient name"
               error={errors.name?.message}
               {...register("name")}
-              disabled={isLoading || isForMe}
+              disabled={isLoading || (isLoggedIn && isForMe)}
               aria-required="true"
-              className={isForMe ? "bg-muted/30" : ""}
+              className={isLoggedIn && isForMe ? "bg-muted/30" : ""}
             />
 
-            {/* Phone Field (auto-populated when For Me) */}
+            {/* Phone Field (auto-populated when For Me and logged in) */}
             <Input
               label="Phone Number"
               type="tel"
@@ -272,9 +279,9 @@ export function AddressForm({
               placeholder="07123 456789"
               error={errors.phone?.message}
               {...register("phone")}
-              disabled={isLoading || isForMe}
+              disabled={isLoading || (isLoggedIn && isForMe)}
               aria-required="true"
-              className={isForMe ? "bg-muted/30" : ""}
+              className={isLoggedIn && isForMe ? "bg-muted/30" : ""}
             />
 
             {/* Address Line 1 */}
@@ -361,7 +368,7 @@ export function AddressForm({
                   className={cn(
                     "flex h-auto items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 transition-all",
                     "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
-                    "data-[state=off]:border-input data-[state=off]:hover:border-primary/50"
+                    "data-[state=off]:border-input data-[state=off]:hover:border-primary/50",
                   )}
                   aria-label="Set address type to Home"
                 >
@@ -374,7 +381,7 @@ export function AddressForm({
                   className={cn(
                     "flex h-auto items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 transition-all",
                     "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
-                    "data-[state=off]:border-input data-[state=off]:hover:border-primary/50"
+                    "data-[state=off]:border-input data-[state=off]:hover:border-primary/50",
                   )}
                   aria-label="Set address type to Work"
                 >
@@ -387,7 +394,7 @@ export function AddressForm({
                   className={cn(
                     "flex h-auto items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 transition-all",
                     "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
-                    "data-[state=off]:border-input data-[state=off]:hover:border-primary/50"
+                    "data-[state=off]:border-input data-[state=off]:hover:border-primary/50",
                   )}
                   aria-label="Set address type to Other"
                 >

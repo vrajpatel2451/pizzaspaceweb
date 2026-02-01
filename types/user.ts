@@ -4,11 +4,13 @@ export interface RegisterUserPayload {
   email: string;
   password: string;
   cartIds?: string[];
+  addressId?: string;
 }
 export interface LoginUserPayload {
   email: string;
   password: string;
   cartIds?: string[];
+  addressId?: string;
 }
 
 export interface UserResponse {

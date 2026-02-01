@@ -21,6 +21,7 @@ import { registerSchema, type RegisterFormData } from "@/lib/validators/auth";
 import { registerUser } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
+import { useGuestAddressStore } from "@/store/guest-address-store";
 import { setAuthCookie } from "@/lib/actions/auth-actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,7 @@ export function RegisterForm({
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const getCartIds = useCartStore((state) => state.getCartIds);
+  const { guestAddressId, clearGuestAddressId } = useGuestAddressStore();
 
   const {
     register,
@@ -147,7 +149,7 @@ export function RegisterForm({
     try {
       setApiError(null);
 
-      // Call the register API with cart IDs for cart merge
+      // Call the register API with cart IDs and guest address for merge
       const cartIds = getCartIds();
       const response = await registerUser({
         name: data.name,
@@ -155,12 +157,16 @@ export function RegisterForm({
         phone: data.phone,
         password: data.password,
         ...(cartIds.length > 0 ? { cartIds } : {}),
+        ...(guestAddressId ? { addressId: guestAddressId } : {}),
       });
 
       // Check if the response is successful
       if (response.statusCode === 201 && response.data) {
         // Auto-login: Store user and token in auth store
         login(response.data.user, response.data.token);
+
+        // Clear guest address after successful registration
+        clearGuestAddressId();
 
         // Set the auth cookie for server-side authentication
         await setAuthCookie(response.data.token, false);

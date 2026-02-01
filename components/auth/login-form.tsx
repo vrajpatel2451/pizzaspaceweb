@@ -11,6 +11,7 @@ import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { loginUser } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
+import { useGuestAddressStore } from "@/store/guest-address-store";
 import { setAuthCookie } from "@/lib/actions/auth-actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export function LoginForm({ redirectTo = "/", onSuccess }: LoginFormProps) {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const getCartIds = useCartStore((state) => state.getCartIds);
+  const { guestAddressId, clearGuestAddressId } = useGuestAddressStore();
 
   const {
     register,
@@ -73,18 +75,22 @@ export function LoginForm({ redirectTo = "/", onSuccess }: LoginFormProps) {
     try {
       setApiError(null);
 
-      // Call the login API with cart IDs for cart merge
+      // Call the login API with cart IDs and guest address for merge
       const cartIds = getCartIds();
       const response = await loginUser({
         email: data.email,
         password: data.password,
         ...(cartIds.length > 0 ? { cartIds } : {}),
+        ...(guestAddressId ? { addressId: guestAddressId } : {}),
       });
 
       // Check if the response is successful
       if (response.statusCode === 201 && response.data) {
         // Store user and token in auth store
         login(response.data.user, response.data.token);
+
+        // Clear guest address after successful login
+        clearGuestAddressId();
 
         // Set the auth cookie for server-side authentication
         await setAuthCookie(response.data.token, true);

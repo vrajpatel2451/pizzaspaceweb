@@ -24,7 +24,7 @@ export const getAddresses = async (): Promise<
 
 // Create a new address
 export const createAddress = async (
-  data: AddAddressData
+  data: AddAddressData,
 ): Promise<APIResponse<AddressResponse>> => {
   const url = "/user/address/create";
   try {
@@ -46,7 +46,7 @@ export const createAddress = async (
 // Update an address (full update)
 export const updateAddress = async (
   addressId: string,
-  data: AddAddressData
+  data: AddAddressData,
 ): Promise<APIResponse<AddressResponse>> => {
   const url = `/user/address/${addressId}`;
   try {
@@ -64,11 +64,30 @@ export const updateAddress = async (
     };
   }
 };
+export const getAddressDetails = async (
+  addressId: string,
+): Promise<APIResponse<AddressResponse>> => {
+  const url = `/user/address/${addressId}`;
+  try {
+    const response: AxiosResponse<APIResponse<AddressResponse>> =
+      await apiClient.get<APIResponse<AddressResponse>>(url);
+    return response.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response) {
+      return error.response.data;
+    }
+    return {
+      statusCode: 500,
+      data: null,
+      errorMessage: "An unexpected error occurred",
+    };
+  }
+};
 
 // Partially update an address (one or two fields)
 export const patchAddress = async (
   addressId: string,
-  data: Partial<AddAddressData>
+  data: Partial<AddAddressData>,
 ): Promise<APIResponse<AddressResponse>> => {
   const url = `/user/address/${addressId}`;
   try {
@@ -89,7 +108,7 @@ export const patchAddress = async (
 
 // Delete an address
 export const deleteAddress = async (
-  addressId: string
+  addressId: string,
 ): Promise<APIResponse<boolean>> => {
   const url = `/user/address/${addressId}`;
   try {
