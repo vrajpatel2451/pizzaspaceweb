@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -29,11 +30,9 @@ interface MobileFilterSheetProps {
  * MobileFilterSheet - Client Component
  *
  * Purpose: Mobile bottom drawer for category/subcategory filters
- * - Uses shadcn Sheet component (bottom side)
- * - Contains CategoryAccordion inside ScrollArea
- * - Footer with Clear All and Apply buttons
- * - Auto-closes on filter selection (optional)
- * - Rounded top corners with backdrop blur
+ * - Uses local temp state for selections
+ * - Only applies filters to URL when "Apply Filters" is clicked
+ * - "Clear All" resets temp state and applies clear
  */
 export function MobileFilterSheet({
   categories,
@@ -46,33 +45,93 @@ export function MobileFilterSheet({
   startTransition,
   isPending,
 }: MobileFilterSheetProps) {
-  // Group subcategories by category ID for the accordion
-  const subcategoriesByCategory = new Map<string, SubCategoryResponse[]>();
-  subcategories.forEach((sub) => {
-    const existing = subcategoriesByCategory.get(sub.categoryId) || [];
-    subcategoriesByCategory.set(sub.categoryId, [...existing, sub]);
-  });
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // Handle clear all filters and close sheet
+  // Temporary local state for selections (only applied on "Apply Filters")
+  const [tempCategory, setTempCategory] = useState<string | undefined>(activeCategory);
+  const [tempSubcategory, setTempSubcategory] = useState<string | undefined>(activeSubcategory);
+
+  // Sync temp state when sheet opens via wrapped onOpenChange
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen) {
+      // Sheet is opening - sync temp state from current URL filters
+      setTempCategory(activeCategory);
+      setTempSubcategory(activeSubcategory);
+    }
+    onOpenChange(nextOpen);
+  }, [activeCategory, activeSubcategory, onOpenChange]);
+
+  // Group subcategories by category ID for the accordion
+  const subcategoriesByCategory = useMemo(() => {
+    const map = new Map<string, SubCategoryResponse[]>();
+    subcategories.forEach((sub) => {
+      const existing = map.get(sub.categoryId) || [];
+      map.set(sub.categoryId, [...existing, sub]);
+    });
+    return map;
+  }, [subcategories]);
+
+  // Handle local category change (temp state only)
+  const handleCategoryChange = useCallback((categoryId: string | undefined) => {
+    setTempCategory(categoryId);
+    setTempSubcategory(undefined);
+  }, []);
+
+  // Handle local subcategory change (temp state only)
+  const handleSubcategoryChange = useCallback((categoryId: string, subcategoryId: string) => {
+    setTempCategory(categoryId);
+    setTempSubcategory(subcategoryId);
+  }, []);
+
+  // Apply filters to URL and close sheet
+  const handleApply = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (tempCategory) {
+      params.set("category", tempCategory);
+    } else {
+      params.delete("category");
+    }
+
+    if (tempSubcategory) {
+      params.set("subcategory", tempSubcategory);
+    } else {
+      params.delete("subcategory");
+    }
+
+    params.delete("page");
+
+    const queryString = params.toString();
+    const url = queryString ? `${pathname}?${queryString}` : pathname;
+
+    if (startTransition) {
+      startTransition(() => {
+        router.push(url, { scroll: false });
+      });
+    } else {
+      router.push(url, { scroll: false });
+    }
+
+    onOpenChange(false);
+  }, [tempCategory, tempSubcategory, searchParams, pathname, router, startTransition, onOpenChange]);
+
+  // Clear all filters and close sheet
   const handleClearAll = useCallback(() => {
+    setTempCategory(undefined);
+    setTempSubcategory(undefined);
     onClearFilters();
     onOpenChange(false);
   }, [onClearFilters, onOpenChange]);
 
-  // Handle apply filters (just close the sheet)
-  const handleApply = useCallback(() => {
-    onOpenChange(false);
-  }, [onOpenChange]);
-
-  // Focus management - save previous focus and restore on close
+  // Focus management
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (open) {
-      // Save currently focused element
       previousFocusRef.current = document.activeElement as HTMLElement;
     } else if (previousFocusRef.current) {
-      // Restore focus when sheet closes
       previousFocusRef.current.focus();
       previousFocusRef.current = null;
     }
@@ -93,7 +152,7 @@ export function MobileFilterSheet({
   }, [open, onOpenChange]);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
         className="h-[80vh] max-h-[90vh] rounded-t-3xl border-t border-border p-0"
@@ -128,14 +187,15 @@ export function MobileFilterSheet({
           <CategoryAccordion
             categories={categories}
             subcategoriesByCategory={subcategoriesByCategory}
-            activeCategory={activeCategory}
-            activeSubcategory={activeSubcategory}
-            startTransition={startTransition}
+            activeCategory={tempCategory}
+            activeSubcategory={tempSubcategory}
             isPending={isPending}
+            onCategoryChange={handleCategoryChange}
+            onSubcategoryChange={handleSubcategoryChange}
           />
         </ScrollArea>
 
-        {/* Footer with Action Buttons - Safe area aware */}
+        {/* Footer with Action Buttons */}
         <SheetFooter
           className="px-4 sm:px-6 py-4 border-t border-border flex-row gap-2 sm:gap-3"
           style={{
@@ -145,15 +205,15 @@ export function MobileFilterSheet({
           <Button
             variant="outline"
             onClick={handleClearAll}
-            className="flex-1 min-h-[44px]"
-            disabled={isPending || (!activeCategory && !activeSubcategory)}
+            className="flex-1 min-h-11"
+            disabled={isPending || (!tempCategory && !tempSubcategory)}
             aria-label="Clear all active filters"
           >
             Clear All
           </Button>
           <Button
             onClick={handleApply}
-            className="flex-1 min-h-[44px] bg-orange-500 hover:bg-orange-600 text-white"
+            className="flex-1 min-h-11 bg-orange-500 hover:bg-orange-600 text-white"
             aria-label="Apply selected filters and close dialog"
             disabled={isPending}
           >

@@ -63,12 +63,23 @@ import { CategoriesSection } from "@/components/home/categories-section";
 // Skeletons for loading states
 import { CategoriesContentSkeleton } from "@/components/home/categories-section/categories-content";
 import { MenuSkeleton } from "@/components/home/menu-section/menu-skeleton";
+import { DealsSkeleton } from "@/components/home/deals-section/deals-skeleton";
 import { StoresSkeleton } from "@/components/home/stores-section/stores-skeleton";
 
 // Page-specific JSON-LD
 import { HomePageJsonLd } from "@/components/seo/json-ld";
 
 // Below-the-fold sections (lazy loaded for better initial performance)
+const DealsSection = dynamic(
+  () =>
+    import("@/components/home/deals-section").then((mod) => ({
+      default: mod.DealsSection,
+    })),
+  {
+    loading: () => <DealsSkeleton />,
+  },
+);
+
 const MenuSection = dynamic(
   () =>
     import("@/components/home/menu-section").then((mod) => ({
@@ -126,6 +137,9 @@ export default function Home() {
       <Suspense fallback={<CategoriesContentSkeleton />}>
         <CategoriesSection />
       </Suspense>
+
+      {/* Section 3: Crazy Deals - Lazy loaded */}
+      <DealsSection />
 
       {/* Section 4: Our Special Menu (API) - Lazy loaded below the fold */}
       <MenuSection />
