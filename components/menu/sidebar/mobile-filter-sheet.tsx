@@ -155,22 +155,19 @@ export function MobileFilterSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
-        className="h-[80vh] max-h-[90vh] rounded-t-3xl border-t border-border p-0"
-        style={{
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        }}
+        className="h-[70vh] max-h-[80vh] rounded-t-3xl border-t border-border p-0 flex flex-col"
         aria-modal="true"
         role="dialog"
         aria-labelledby="filter-sheet-title"
         aria-describedby="filter-sheet-description"
       >
         {/* Drag Handle */}
-        <div className="flex justify-center pt-3 pb-2" aria-hidden="true">
+        <div className="flex justify-center pt-3 pb-2 shrink-0" aria-hidden="true">
           <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
         </div>
 
         {/* Header */}
-        <SheetHeader className="px-4 sm:px-6 py-3 border-b border-border">
+        <SheetHeader className="px-4 sm:px-6 py-3 border-b border-border shrink-0">
           <SheetTitle
             id="filter-sheet-title"
             className="text-lg sm:text-xl font-semibold"
@@ -182,8 +179,8 @@ export function MobileFilterSheet({
           </p>
         </SheetHeader>
 
-        {/* Scrollable Content Area */}
-        <ScrollArea className="h-[calc(80vh-160px)] px-4 sm:px-6 py-4">
+        {/* Scrollable Content Area - flex-1 fills remaining space */}
+        <ScrollArea className="flex-1 min-h-0 px-4 sm:px-6 py-4">
           <CategoryAccordion
             categories={categories}
             subcategoriesByCategory={subcategoriesByCategory}
@@ -195,9 +192,9 @@ export function MobileFilterSheet({
           />
         </ScrollArea>
 
-        {/* Footer with Action Buttons */}
+        {/* Footer - shrink-0 ensures it never gets cut off */}
         <SheetFooter
-          className="px-4 sm:px-6 py-4 border-t border-border flex-row gap-2 sm:gap-3"
+          className="px-4 sm:px-6 py-4 border-t border-border flex-row gap-2 sm:gap-3 shrink-0"
           style={{
             paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
           }}
