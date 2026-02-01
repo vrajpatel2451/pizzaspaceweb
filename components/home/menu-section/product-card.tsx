@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Star, Flame, Sparkles, TrendingUp } from "lucide-react";
+import { Star, Flame, Sparkles, TrendingUp, Plus } from "lucide-react";
 import { ProductResponse } from "@/types";
 import { ProductDetailsContainer } from "@/components/product-details";
 import { useDeliveryType } from "@/store/cart-store";
@@ -34,7 +34,13 @@ function getBadgeType(product: ProductResponse): BadgeType {
   return null;
 }
 
-function ProductBadge({ type, isVisible }: { type: BadgeType; isVisible: boolean }) {
+function ProductBadge({
+  type,
+  isVisible,
+}: {
+  type: BadgeType;
+  isVisible: boolean;
+}) {
   if (!type) return null;
 
   const badgeConfig = {
@@ -63,7 +69,7 @@ function ProductBadge({ type, isVisible }: { type: BadgeType; isVisible: boolean
       className={cn(
         "absolute top-3 left-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg transition-all duration-300",
         config.className,
-        isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2.5"
+        isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2.5",
       )}
       role="status"
       aria-label={`${config.label} item`}
@@ -95,8 +101,8 @@ function StarRating({ rating = 4.5 }: { rating?: number }) {
             i < fullStars
               ? "fill-amber-400 text-amber-400"
               : i === fullStars && hasHalfStar
-              ? "fill-amber-400/50 text-amber-400"
-              : "fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700"
+                ? "fill-amber-400/50 text-amber-400"
+                : "fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700",
           )}
           aria-hidden="true"
         />
@@ -115,7 +121,7 @@ export function ProductCard({
   product,
   index = 0,
   priority = false,
-  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
 }: ProductCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -127,9 +133,10 @@ export function ProductCard({
 
   // Show base price + product's packaging charges for delivery
   // (This is before variant selection, so we use product-level packaging)
-  const displayPrice = deliveryType === "delivery"
-    ? product.basePrice + (product.packagingCharges || 0)
-    : product.basePrice;
+  const displayPrice =
+    deliveryType === "delivery"
+      ? product.basePrice + (product.packagingCharges || 0)
+      : product.basePrice;
 
   // Generate a pseudo-random rating based on product id for consistency
   const rating = 4 + (parseInt(product._id.slice(-2), 16) % 10) / 10;
@@ -138,8 +145,8 @@ export function ProductCard({
   const sizeInfo = product.dishSize
     ? `${product.dishSize.count} ${product.dishSize.unit}`
     : product.weight
-    ? `${product.weight}g`
-    : null;
+      ? `${product.weight}g`
+      : null;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -152,7 +159,7 @@ export function ProductCard({
           observer.disconnect();
         }
       },
-      { rootMargin: "50px" }
+      { rootMargin: "50px" },
     );
 
     if (cardRef.current) {
@@ -171,7 +178,7 @@ export function ProductCard({
       className={cn(
         "group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-slate-900/50 transition-all duration-500 border border-slate-100 dark:border-slate-800 cursor-pointer",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5",
-        isHovered && "-translate-y-2"
+        isHovered && "-translate-y-2",
       )}
       style={{ transitionDelay: isVisible ? `${index * 50}ms` : "0ms" }}
     >
@@ -183,7 +190,7 @@ export function ProductCard({
         <div
           className={cn(
             "relative w-full h-full transition-transform duration-600 ease-out",
-            isHovered && "scale-108"
+            isHovered && "scale-108",
           )}
         >
           <CustomImage
@@ -201,11 +208,10 @@ export function ProductCard({
         <div
           className={cn(
             "absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none transition-opacity duration-300",
-            isHovered ? "opacity-100" : "opacity-0"
+            isHovered ? "opacity-100" : "opacity-0",
           )}
           aria-hidden="true"
         />
-
       </div>
 
       {/* Content */}
@@ -239,7 +245,15 @@ export function ProductCard({
               {formatPrice(displayPrice)}
             </span>
           </div>
+          {/* Add Indicator on Mobile */}
+          <div className="sm:hidden w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md">
+            <Plus className="w-5 h-5" />
+          </div>
 
+          {/* Desktop Add Indicator */}
+          <div className="hidden sm:flex w-10 h-10 rounded-full bg-orange-500 text-white items-center justify-center shadow-md">
+            <Plus className="w-5 h-5" />
+          </div>
         </div>
       </div>
 
@@ -247,7 +261,7 @@ export function ProductCard({
       <div
         className={cn(
           "absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300",
-          isHovered ? "opacity-100" : "opacity-0"
+          isHovered ? "opacity-100" : "opacity-0",
         )}
         style={{
           boxShadow: "inset 0 0 0 2px rgba(249, 115, 22, 0.3)",
@@ -257,9 +271,6 @@ export function ProductCard({
   );
 
   return (
-    <ProductDetailsContainer
-      productId={product._id}
-      trigger={cardContent}
-    />
+    <ProductDetailsContainer productId={product._id} trigger={cardContent} />
   );
 }
